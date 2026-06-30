@@ -1,15 +1,20 @@
-import pandas as pd
-import numpy as np
 import os
+import pandas as pd
 
-from src.elo_engine import win_prob, update_elo
+from src.elo_engine import (
+    INITIAL_ELO,
+    win_prob,
+    update_elo
+)
+
 from src.models.mov import mov_multiplier
 from src.models.hfa import HFA
-from src.elo_engine import INITIAL_ELO
 
 # =========================
 # LOAD DATA
 # =========================
+
+os.makedirs("outputs", exist_ok=True)
 
 df = pd.read_csv("data/nfl_games.csv")
 df = df.sort_values(["season", "week"]).reset_index(drop=True)
@@ -36,11 +41,37 @@ results = []
 # MODEL SELECTOR
 # =========================
 
-MODEL = "HFA"
+MODEL = "BASE"
 # MODEL = "MOV"
-# MODEL = "BASE"
-# MODEL = os.getenv("MODEL", "BASE")
-  # BASE | MOV | HFA
+# MODEL = "HFA"
+
+# =========================
+# MODEL CONFIGURATION
+# =========================
+
+MODEL_CONFIG = {
+
+    "BASE": {
+        "use_hfa": False,
+        "use_mov": False
+    },
+
+    "MOV": {
+        "use_hfa": False,
+        "use_mov": True
+    },
+
+    "HFA": {
+        "use_hfa": True,
+        "use_mov": False
+    }
+
+}
+
+if MODEL not in MODEL_CONFIG:
+    raise ValueError(f"Unknown model: {MODEL}")
+
+config = MODEL_CONFIG[MODEL]
 
 # =========================
 # BACKTEST LOOP
@@ -54,63 +85,64 @@ for _, row in df.iterrows():
     home_score = row["home_score"]
     away_score = row["away_score"]
 
+    actual = int(home_score > away_score)
+
     home_elo = get_elo(home)
     away_elo = get_elo(away)
 
-    # =========================
-    # PREDICTION STEP
-    # =========================
+    # -------------------------
+    # Apply Home Field Advantage
+    # -------------------------
 
-    if MODEL == "BASE":
+    adjusted_home = home_elo
 
-        p_home = win_prob(home_elo, away_elo)
+    if config["use_hfa"]:
+        adjusted_home += HFA
 
-        error = (1 if home_score > away_score else 0) - p_home
+    # -------------------------
+    # Compute Win Probability
+    # -------------------------
 
-        home_elo_new = home_elo + 20 * error
-        away_elo_new = away_elo - 20 * error
+    p_home = win_prob(
+        adjusted_home,
+        away_elo
+    )
 
-        mov_factor = 1.0
+    # -------------------------
+    # Margin of Victory
+    # -------------------------
 
-    elif MODEL == "MOV":
+    multiplier = 1.0
 
-        margin = abs(home_score - away_score)
-        mov_factor = np.log(margin + 1)
+    if config["use_mov"]:
+        multiplier = mov_multiplier(
+            home_score,
+            away_score
+        )
 
-        p_home = win_prob(home_elo, away_elo)
+    # -------------------------
+    # Elo Update
+    # -------------------------
 
-        error = (1 if home_score > away_score else 0) - p_home
+    home_elo_new, away_elo_new = update_elo(
+        home_elo,
+        away_elo,
+        actual,
+        p_home,
+        multiplier
+    )
 
-        home_elo_new = home_elo + 20 * error * mov_factor
-        away_elo_new = away_elo - 20 * error * mov_factor
-
-    elif MODEL == "HFA":
-
-        adjusted_home = home_elo + HFA
-
-        p_home = win_prob(adjusted_home, away_elo)
-
-        error = (1 if home_score > away_score else 0) - p_home
-
-        home_elo_new = home_elo + 20 * error
-        away_elo_new = away_elo - 20 * error
-
-        mov_factor = 1.0
-
-    else:
-        raise ValueError("Invalid MODEL")
-
-    # =========================
-    # STORE RESULTS
-    # =========================
-
-    actual = 1 if home_score > away_score else 0
+    # -------------------------
+    # Store Results
+    # -------------------------
 
     results.append({
+
+        "season": row["season"],
+        "week": row["week"],
+
         "home_team": home,
         "away_team": away,
-        "week": row["week"],
-        "season": row["season"],
 
         "home_elo_pre": home_elo,
         "away_elo_pre": away_elo,
@@ -122,11 +154,8 @@ for _, row in df.iterrows():
         "away_elo_post": away_elo_new,
 
         "model": MODEL
-    })
 
-    # =========================
-    # UPDATE STATE
-    # =========================
+    })
 
     set_elo(home, home_elo_new)
     set_elo(away, away_elo_new)
@@ -136,6 +165,10 @@ for _, row in df.iterrows():
 # =========================
 
 results_df = pd.DataFrame(results)
-results_df.to_csv(f"outputs/backtest_{MODEL}.csv", index=False)
+
+results_df.to_csv(
+    f"outputs/backtest_{MODEL}.csv",
+    index=False
+)
 
 print("Backtest complete:", MODEL)

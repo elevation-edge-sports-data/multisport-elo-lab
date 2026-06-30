@@ -1,6 +1,4 @@
 INITIAL_ELO = 1500
-K = 20
-HFA = 55
 SEED = 42
 
 
@@ -20,6 +18,7 @@ def update_elo(home_elo,
                away_elo,
                actual,
                p_home,
+               k,
                multiplier=1.0):
     """
     Updates Elo ratings using an observed result and
@@ -39,8 +38,11 @@ def update_elo(home_elo,
     p_home : float
         Pregame home win probability.
 
+    k : float
+        Elo K-factor.
+
     multiplier : float
-        Elo update multiplier (used for MOV).
+        Elo update multiplier.
 
     Returns
     -------
@@ -49,7 +51,7 @@ def update_elo(home_elo,
 
     error = actual - p_home
 
-    home_elo_new = home_elo + K * error * multiplier
-    away_elo_new = away_elo - K * error * multiplier
+    home_elo_new = home_elo + k * error * multiplier
+    away_elo_new = away_elo - k * error * multiplier
 
     return home_elo_new, away_elo_new

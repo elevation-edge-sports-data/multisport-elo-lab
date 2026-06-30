@@ -2,4 +2,5 @@
 # Home Field Advantage
 # =========================
 
-HFA = 55
+
+DEFAULT_HFA = 55

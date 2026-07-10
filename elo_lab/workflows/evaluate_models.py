@@ -10,50 +10,84 @@ import pandas as pd
 
 from elo_lab.evaluation.metrics import accuracy, log_loss, brier
 
-os.makedirs("outputs", exist_ok=True)
 
-# =========================
-# FIND BACKTEST FILES
-# =========================
+def evaluate_models(output_dir="outputs"):
+    """
+    Evaluate every backtest contained in the output directory.
 
-files = sorted(os.listdir("outputs"))
+    Parameters
+    ----------
+    output_dir : str
+        Directory containing backtest CSV files.
 
-backtest_files = [
-    f for f in files
-    if f.startswith("backtest_") and f.endswith(".csv")
-]
+    Returns
+    -------
+    pandas.DataFrame
+        Summary metrics for every available model.
+    """
 
-# =========================
-# EVALUATE MODELS
-# =========================
+    os.makedirs(output_dir, exist_ok=True)
 
-model_summary = []
+    files = sorted(os.listdir(output_dir))
 
-for filename in backtest_files:
+    backtest_files = [
+        f for f in files
+        if f.startswith("backtest_") and f.endswith(".csv")
+    ]
 
-    model = filename.replace("backtest_", "").replace(".csv", "")
+    model_summary = []
 
-    df = pd.read_csv(os.path.join("outputs", filename))
+    for filename in backtest_files:
 
-    df["log_loss"] = df.apply(lambda r: log_loss(r.p_home, r.actual), axis=1)
-    df["brier"] = df.apply(lambda r: brier(r.p_home, r.actual), axis=1)
+        model = (
+            filename
+            .replace("backtest_", "")
+            .replace(".csv", "")
+        )
 
-    model_summary.append({
-        "model": model,
-        "accuracy": accuracy(df.p_home.values, df.actual.values),
-        "log_loss": df["log_loss"].mean(),
-        "brier": df["brier"].mean(),
-    })
+        df = pd.read_csv(os.path.join(output_dir, filename))
 
-# =========================
-# SAVE MODEL COMPARISON
-# =========================
+        df["log_loss"] = df.apply(
+            lambda r: log_loss(r.p_home, r.actual),
+            axis=1,
+        )
 
-comparison = pd.DataFrame(model_summary)
+        df["brier"] = df.apply(
+            lambda r: brier(r.p_home, r.actual),
+            axis=1,
+        )
 
-# Present results in a consistent model order.
-comparison = comparison.sort_values("model").reset_index(drop=True)
+        model_summary.append(
+            {
+                "model": model,
+                "accuracy": accuracy(
+                    df.p_home.values,
+                    df.actual.values,
+                ),
+                "log_loss": df["log_loss"].mean(),
+                "brier": df["brier"].mean(),
+            }
+        )
 
-comparison.to_csv("outputs/model_comparison.csv", index=False)
+    comparison = pd.DataFrame(model_summary)
 
-print(comparison)
+    if not comparison.empty:
+        comparison = (
+            comparison
+            .sort_values("model")
+            .reset_index(drop=True)
+        )
+
+    comparison.to_csv(
+        os.path.join(output_dir, "model_comparison.csv"),
+        index=False,
+    )
+
+    return comparison
+
+
+if __name__ == "__main__":
+
+    comparison = evaluate_models()
+
+    print(comparison)

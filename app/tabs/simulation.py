@@ -23,11 +23,9 @@ def render_simulation_tab():
         return
 
     results = st.session_state["simulation_results"]
-
-    simulation_count = st.session_state.get(
-        "simulation_count",
-        None,
-    )
+    simulation_count = st.session_state.get("simulation_count")
+    best_params = st.session_state.get("best_optimized_params")
+    optimize_for = st.session_state.get("optimize_for", [])
 
     st.metric(
         "Simulation Status",
@@ -35,10 +33,19 @@ def render_simulation_tab():
     )
 
     if simulation_count:
-
         st.caption(
             f"{simulation_count:,} Monte Carlo simulations completed"
         )
+
+    # === Show which configuration was used ===
+    if best_params:
+        st.success("**Using optimized parameters**")
+        param_text = " | ".join([f"{k}: {v}" for k, v in best_params.items()])
+        st.caption(f"Optimized parameters: {param_text}")
+        if optimize_for:
+            st.caption(f"Optimizations applied to: {', '.join(optimize_for)}")
+    else:
+        st.info("Using default/fixed parameters (no optimization)")
 
     st.divider()
 

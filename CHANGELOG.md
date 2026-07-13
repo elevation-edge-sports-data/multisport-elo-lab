@@ -1,27 +1,31 @@
 # Changelog
 
-## Version 5.0 — Engine Refactor
+## Version 7.0 — Parameter Optimization & Elevation Edge
 
 ### Added
-- Canonical engine package (`elo_lab/engine`)
-- Unified `run_game()` execution API
-- Configuration-driven transformation pipeline
-- Stateless adjustment framework
-- Sport configuration system
-- Canonical state schema and validation layer
+- Full implementation of **Elevation Edge** adjustment (signature feature)
+  - Binning system to avoid overfitting to raw elevation values
+  - Home-team elevation advantage based on bin difference
+  - Integrated into configuration system and parameter optimization
+- Generalized parameter optimization system
+  - Users can now select any subset of active adjustments to optimize
+  - `optimize_parameters_for_config()` supports dynamic grids per adjustment
+- Improved runtime feedback
+  - Replaced static runtime estimates with `st.status()` + progress bar in sidebar
+  - Clearer messaging during optimization and simulation phases
 
 ### Changed
-- Refactored all workflows to use engine API exclusively
-- Eliminated duplicated Elo logic across workflows
-- Replaced procedural adjustment logic with declarative pipeline
+- Adjustment checkboxes are now fully wired and functional
+- `build_model_config()` properly includes `elevation_edge` when enabled
+- Optimization grid now includes `elevation_edge` parameter
+- Default simulation count changed from 1000 → 100
+- Added Broncos orange theming for checkboxes and progress bars
+- Model Configuration tab now shows optimized parameters when used
+- Season Simulation and Elo Evolution tabs now display active configuration context
 
-### Removed
-- Legacy adjustment pipeline (`adjustments/pipeline.py`)
-- Legacy core adjustment logic (`adjustments/core.py`)
-
-### Notes
-- Game outcomes may be provided either through `context["actual"]` or inferred from `home_score` and `away_score`.
-- All game execution is routed through the canonical `run_game()` engine API.
+### Improved
+- Overall dashboard UX during long-running simulations (especially with optimization enabled)
+- Visibility into which model configuration produced the displayed results
 
 ## Version 6.0 — Interactive Streamlit Dashboard
 
@@ -50,3 +54,26 @@
 ### Notes
 - Version 6 extends the existing Elo Lab engine architecture without replacing the underlying modeling workflows.
 - Dashboard controls currently support simulation execution and output exploration; full interactive model parameter configuration is planned for a future version.
+
+## Version 5.0 — Engine Refactor
+
+### Added
+- Canonical engine package (`elo_lab/engine`)
+- Unified `run_game()` execution API
+- Configuration-driven transformation pipeline
+- Stateless adjustment framework
+- Sport configuration system
+- Canonical state schema and validation layer
+
+### Changed
+- Refactored all workflows to use engine API exclusively
+- Eliminated duplicated Elo logic across workflows
+- Replaced procedural adjustment logic with declarative pipeline
+
+### Removed
+- Legacy adjustment pipeline (`adjustments/pipeline.py`)
+- Legacy core adjustment logic (`adjustments/core.py`)
+
+### Notes
+- Game outcomes may be provided either through `context["actual"]` or inferred from `home_score` and `away_score`.
+- All game execution is routed through the canonical `run_game()` engine API.

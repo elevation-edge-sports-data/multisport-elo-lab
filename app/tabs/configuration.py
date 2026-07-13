@@ -43,25 +43,38 @@ def render_configuration_tab(
     }
 
     for name, enabled in components.items():
-
         st.write(
             f"**{name}:** {'Enabled' if enabled else 'Disabled'}"
         )
 
     st.divider()
 
-    st.subheader("Current Model Configuration")
+    # Show last run configuration + optimization scope
+    last_config = st.session_state.get("last_config")
+    optimize_for = st.session_state.get("optimize_for", [])
 
-    configuration = {
-        "Model": "MOV_HFA",
-        "K Factor": 20,
-        "Home Field Advantage": "55 Elo",
-        "Margin of Victory": "Enabled" if margin_of_victory else "Disabled",
-        "Elevation Edge": "Enabled" if elevation else "Disabled",
-    }
+    if last_config:
+        st.subheader("Last Run Configuration")
 
-    for parameter, value in configuration.items():
-        st.write(f"**{parameter}:** {value}")
+        st.write(f"**K Factor:** {last_config.get('k', 'N/A')}")
+
+        adjustments = last_config.get("adjustments", {})
+        if adjustments:
+            st.write("**Enabled Adjustments:**")
+            for adj_name in adjustments:
+                st.write(f"  - **{adj_name}**")
+
+        if optimize_for:
+            st.write("**Parameters optimized for:**")
+            for adj in optimize_for:
+                st.write(f"  - **{adj}**")
+        else:
+            st.write("**Parameter optimization:** Not enabled for this run")
+
+        st.caption("This reflects the exact settings used in the last simulation.")
+    else:
+        st.subheader("Current Model Configuration")
+        st.info("Run a simulation from the sidebar to see the configuration that was used.")
 
     st.caption(
         "Interactive parameter controls will be introduced in a future version."

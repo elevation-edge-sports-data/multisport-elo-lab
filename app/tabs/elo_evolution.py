@@ -1,345 +1,117 @@
-import plotly.graph_objects as go
 import streamlit as st
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
 
 from metadata.nfl_teams import NFL_TEAMS
-from services.elo_evolution_service import get_elo_evolution
+from metadata.nhl_teams import NHL_TEAMS
 
 
-DEFAULT_TEAMS = [
-    "DEN",
-    "KC",
-    "NE",
-    "BUF",
-    "BAL",
-    "JAX",
-]
+def get_team_color_map(sport):
+    teams = NHL_TEAMS if sport == "NHL" else NFL_TEAMS
+    color_map = {}
+    for abbr, data in teams.items():
+        color = data["primary_color"]
+        color_map[abbr] = color
+        color_map[data["name"]] = color
+    return color_map
 
 
-def _add_team_line(
-    fig,
-    team_data,
-    team,
-    y_column,
-    label,
-):
-    fig.add_trace(
-        go.Scatter(
-            x=team_data["week"],
-            y=team_data[y_column],
-            mode="lines",
-            name=team,
-            line=dict(
-                width=3,
-                color=NFL_TEAMS[team]["primary_color"],
-            ),
-            hovertemplate=(
-                "<b>%{fullData.name}</b><br>"
-                "Week: %{x}<br>"
-                f"{label}: %{{y:.0f}}"
-                "<extra></extra>"
-            ),
-        )
-    )
+def hex_to_rgba(hex_color: str, alpha: float = 0.13) -> str:
+    hex_color = hex_color.lstrip('#')
+    rgb = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+    return f"rgba({rgb[0]}, {rgb[1]}, {rgb[2]}, {alpha})"
 
 
-def _build_layout(
-    fig,
-    title,
-    y_title,
-):
-
-    fig.update_layout(
-
-        title=title,
-
-        height=650,
-
-        hovermode="x unified",
-
-        legend_title_text="Team",
-
-        plot_bgcolor="white",
-
-        margin=dict(
-            l=30,
-            r=30,
-            t=60,
-            b=40,
-        ),
-
-    )
-
-
-    fig.update_xaxes(
-        title="Week",
-        showgrid=False,
-        tickmode="linear",
-        dtick=1,
-    )
-
-
-    fig.update_yaxes(
-        title=y_title,
-        gridcolor="#DDDDDD",
-    )
-
-
-def render_elo_evolution_tab():
-
-    st.header("Elo Evolution")
-
-
-    # ======================================================
-    # HISTORICAL EVOLUTION
-    # ======================================================
-
-    st.subheader(
-        "Historical Elo Evolution"
-    )
-
-
-    historical = get_elo_evolution()
-
-
-    if historical.empty:
-
-        st.info(
-            "Historical Elo data unavailable."
-        )
-
-    else:
-
-        available_teams = sorted(
-            historical["team"].unique()
-        )
-
-
-        default_selection = [
-            team
-            for team in DEFAULT_TEAMS
-            if team in available_teams
-        ]
-
-
-        selected_teams = st.multiselect(
-
-            "Select teams",
-
-            available_teams,
-
-            default=default_selection,
-
-            key="historical_elo_teams",
-
-        )
-
-
-        if selected_teams:
-
-            fig = go.Figure()
-
-
-            for team in selected_teams:
-
-                team_data = (
-                    historical[
-                        historical["team"] == team
-                    ]
-                    .sort_values("week_index")
-                )
-
-
-                fig.add_trace(
-                    go.Scatter(
-                        x=team_data["week"],
-                        y=team_data["elo"],
-                        mode="lines",
-                        name=team,
-                        line=dict(
-                            width=3,
-                            color=NFL_TEAMS[team]["primary_color"],
-                        ),
-                        hovertemplate=(
-                            "<b>%{fullData.name}</b><br>"
-                            "Week: %{x}<br>"
-                            "Historical Elo: %{y:.0f}"
-                            "<extra></extra>"
-                        ),
-                    )
-                )
-
-
-            _build_layout(
-                fig,
-                "Historical Elo Rating Evolution",
-                "Elo Rating",
-            )
-
-
-            st.plotly_chart(
-                fig,
-                use_container_width=True,
-            )
-
-
-    st.divider()
-
-
-    # ======================================================
-    # SIMULATED EVOLUTION
-    # ======================================================
-
-    st.subheader(
-        "Simulated Elo Evolution"
-    )
-
-    best_params = st.session_state.get("best_optimized_params")
-    optimize_for = st.session_state.get("optimize_for", [])
-
-    if best_params:
-        st.success("**Using optimized parameters**")
-        param_text = " | ".join([f"{k}: {v}" for k, v in best_params.items()])
-        st.caption(f"Optimized parameters: {param_text}")
-        if optimize_for:
-            st.caption(f"Optimizations applied to: {', '.join(optimize_for)}")
-    else:
-        st.caption("Using default/fixed parameters (no optimization this run)")
+def render_elo_evolution_tab(sport="NFL"):
+    st.header(f"{sport} Elo Trajectory")
 
     if "simulation_results" not in st.session_state:
-
-        st.info(
-            "Run a season simulation first to view simulated Elo evolution."
-        )
-
+        st.info("Run a simulation from the sidebar to see Elo trajectories.")
         return
 
+    results = st.session_state.get("simulation_results", {})
+    elo_evolution = results.get("elo_evolution", pd.DataFrame())
 
-    results = st.session_state["simulation_results"]
-
-
-    if "elo_evolution" not in results:
-
-        st.info(
-            "Simulated Elo evolution data is unavailable."
-        )
-
+    if elo_evolution.empty:
+        st.warning("No Elo trajectory data available.")
         return
 
+    color_map = get_team_color_map(sport)
+    all_teams = sorted(elo_evolution["team"].unique())
 
-    evolution = results["elo_evolution"].copy()
+    # Default team selection
+    if sport == "NHL":
+        preferred = ["COL", "VGK", "DAL", "MIN", "CAR", "FLA"]
+        name_to_abbr = {data["name"]: abbr for abbr, data in NHL_TEAMS.items()}
+        default_teams = []
+        for team in all_teams:
+            if team in preferred:
+                default_teams.append(team)
+            elif team in name_to_abbr and name_to_abbr[team] in preferred:
+                default_teams.append(team)
+    else:
+        preferred = ["JAX", "BAL", "KC", "DEN", "NE", "BUF"]
+        default_teams = [t for t in all_teams if t in preferred]
 
-
-    if evolution.empty:
-
-        st.warning(
-            "No simulated Elo evolution data available."
-        )
-
-        return
-
-
-    available_teams = sorted(
-        evolution["team"].unique()
-    )
-
-
-    default_selection = [
-        team
-        for team in DEFAULT_TEAMS
-        if team in available_teams
-    ]
-
+    default_teams = list(dict.fromkeys(default_teams))
 
     selected_teams = st.multiselect(
-
-        "Select teams",
-
-        available_teams,
-
-        default=default_selection,
-
-        key="simulation_elo_teams",
-
+        "Select teams to display",
+        options=all_teams,
+        default=default_teams
     )
-
 
     if not selected_teams:
-
-        st.info(
-            "Select at least one team to display simulated Elo evolution."
-        )
-
+        st.info("Please select at least one team.")
         return
 
+    filtered = elo_evolution[elo_evolution["team"].isin(selected_teams)]
 
-    fig = go.Figure()
+    # ====================== ELO TRAJECTORY ======================
+    st.subheader("Elo Rating Over Time")
 
+    fig_elo = px.line(
+        filtered,
+        x="games_played",
+        y="mean_elo",
+        color="team",
+        color_discrete_map=color_map,
+        title="Elo Trajectory (Mean)",
+        labels={"mean_elo": "Elo Rating", "games_played": "Games Played"}
+    )
+    fig_elo.update_traces(line=dict(width=2.8))
 
+    # Transparent team-colored confidence bands
     for team in selected_teams:
+        team_data = filtered[filtered["team"] == team].sort_values("games_played")
+        if team_data.empty:
+            continue
 
-        team_data = (
-            evolution[
-                evolution["team"] == team
-            ]
-            .sort_values("week")
-        )
+        team_color = color_map.get(team, "#666666")
+        fill_color = hex_to_rgba(team_color, alpha=0.13)
 
+        fig_elo.add_trace(go.Scatter(
+            x=team_data["games_played"],
+            y=team_data["p95_elo"],
+            mode="lines",
+            line=dict(width=0),
+            showlegend=False,
+            hoverinfo="skip"
+        ))
 
-        # uncertainty band
+        fig_elo.add_trace(go.Scatter(
+            x=team_data["games_played"],
+            y=team_data["p05_elo"],
+            mode="lines",
+            fill="tonexty",
+            fillcolor=fill_color,
+            line=dict(width=0),
+            showlegend=False,
+            hoverinfo="skip"
+        ))
 
-        fig.add_trace(
+    fig_elo.update_layout(hovermode="x unified")
+    st.plotly_chart(fig_elo, use_container_width=True)
 
-            go.Scatter(
-
-                x=list(team_data["week"])
-                +
-                list(team_data["week"][::-1]),
-
-                y=list(team_data["p95_elo"])
-                +
-                list(team_data["p05_elo"][::-1]),
-
-                fill="toself",
-
-                fillcolor=NFL_TEAMS[team]["primary_color"],
-
-                opacity=0.15,
-
-                line=dict(
-                    color="rgba(0,0,0,0)"
-                ),
-
-                showlegend=False,
-
-                hoverinfo="skip",
-
-            )
-
-        )
-
-
-        _add_team_line(
-            fig,
-            team_data,
-            team,
-            "mean_elo",
-            "Mean Elo",
-        )
-
-
-    _build_layout(
-        fig,
-        "Simulated Elo Evolution Across Monte Carlo Simulations",
-        "Mean Elo Rating",
-    )
-
-
-    st.plotly_chart(
-        fig,
-        use_container_width=True,
-    )
-
-
-    st.caption(
-        "Mean postgame Elo across Monte Carlo simulations with 5th-95th percentile uncertainty bands."
-    )
+    st.caption("Shaded areas represent the 5th–95th percentile range across simulations.")

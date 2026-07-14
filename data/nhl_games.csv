@@ -1,0 +1,1313 @@
+date,season,home_team,away_team,home_score,away_score,is_playoff
+2025-10-07,2025-26,Florida Panthers,Chicago Blackhawks,3,2,False
+2025-10-07,2025-26,Los Angeles Kings,Colorado Avalanche,1,4,False
+2025-10-07,2025-26,New York Rangers,Pittsburgh Penguins,0,3,False
+2025-10-08,2025-26,Edmonton Oilers,Calgary Flames,3,4,False
+2025-10-08,2025-26,Toronto Maple Leafs,Montreal Canadiens,5,2,False
+2025-10-08,2025-26,Vegas Golden Knights,Los Angeles Kings,5,6,False
+2025-10-08,2025-26,Washington Capitals,Boston Bruins,1,3,False
+2025-10-09,2025-26,Boston Bruins,Chicago Blackhawks,4,3,False
+2025-10-09,2025-26,Buffalo Sabres,New York Rangers,0,4,False
+2025-10-09,2025-26,Carolina Hurricanes,New Jersey Devils,6,3,False
+2025-10-09,2025-26,Colorado Avalanche,Utah Mammoth,2,1,False
+2025-10-09,2025-26,Detroit Red Wings,Montreal Canadiens,1,5,False
+2025-10-09,2025-26,Florida Panthers,Philadelphia Flyers,2,1,False
+2025-10-09,2025-26,Nashville Predators,Columbus Blue Jackets,2,1,False
+2025-10-09,2025-26,Pittsburgh Penguins,New York Islanders,4,3,False
+2025-10-09,2025-26,Seattle Kraken,Anaheim Ducks,3,1,False
+2025-10-09,2025-26,San Jose Sharks,Vegas Golden Knights,3,4,False
+2025-10-09,2025-26,St. Louis Blues,Minnesota Wild,0,5,False
+2025-10-09,2025-26,Tampa Bay Lightning,Ottawa Senators,4,5,False
+2025-10-09,2025-26,Vancouver Canucks,Calgary Flames,5,1,False
+2025-10-09,2025-26,Winnipeg Jets,Dallas Stars,4,5,False
+2025-10-11,2025-26,Boston Bruins,Buffalo Sabres,3,1,False
+2025-10-11,2025-26,Carolina Hurricanes,Philadelphia Flyers,4,3,False
+2025-10-11,2025-26,Calgary Flames,St. Louis Blues,2,4,False
+2025-10-11,2025-26,Chicago Blackhawks,Montreal Canadiens,2,3,False
+2025-10-11,2025-26,Colorado Avalanche,Dallas Stars,4,5,False
+2025-10-11,2025-26,Detroit Red Wings,Toronto Maple Leafs,6,3,False
+2025-10-11,2025-26,Edmonton Oilers,Vancouver Canucks,3,1,False
+2025-10-11,2025-26,Florida Panthers,Ottawa Senators,6,2,False
+2025-10-11,2025-26,Minnesota Wild,Columbus Blue Jackets,4,7,False
+2025-10-11,2025-26,Nashville Predators,Utah Mammoth,2,3,False
+2025-10-11,2025-26,New York Islanders,Washington Capitals,2,4,False
+2025-10-11,2025-26,Pittsburgh Penguins,New York Rangers,1,6,False
+2025-10-11,2025-26,Seattle Kraken,Vegas Golden Knights,2,1,False
+2025-10-11,2025-26,San Jose Sharks,Anaheim Ducks,6,7,False
+2025-10-11,2025-26,Tampa Bay Lightning,New Jersey Devils,3,5,False
+2025-10-11,2025-26,Winnipeg Jets,Los Angeles Kings,3,2,False
+2025-10-12,2025-26,New York Rangers,Washington Capitals,0,1,False
+2025-10-13,2025-26,Boston Bruins,Tampa Bay Lightning,3,4,False
+2025-10-13,2025-26,Buffalo Sabres,Colorado Avalanche,1,3,False
+2025-10-13,2025-26,Columbus Blue Jackets,New Jersey Devils,2,3,False
+2025-10-13,2025-26,Chicago Blackhawks,Utah Mammoth,3,1,False
+2025-10-13,2025-26,Minnesota Wild,Los Angeles Kings,4,3,False
+2025-10-13,2025-26,New York Islanders,Winnipeg Jets,2,5,False
+2025-10-13,2025-26,Ottawa Senators,Nashville Predators,1,4,False
+2025-10-13,2025-26,Philadelphia Flyers,Florida Panthers,5,2,False
+2025-10-13,2025-26,Toronto Maple Leafs,Detroit Red Wings,2,3,False
+2025-10-13,2025-26,Vancouver Canucks,St. Louis Blues,2,5,False
+2025-10-14,2025-26,Anaheim Ducks,Pittsburgh Penguins,4,3,False
+2025-10-14,2025-26,Calgary Flames,Vegas Golden Knights,2,4,False
+2025-10-14,2025-26,Dallas Stars,Minnesota Wild,5,2,False
+2025-10-14,2025-26,Montreal Canadiens,Seattle Kraken,5,4,False
+2025-10-14,2025-26,New York Rangers,Edmonton Oilers,0,2,False
+2025-10-14,2025-26,San Jose Sharks,Carolina Hurricanes,1,5,False
+2025-10-14,2025-26,Toronto Maple Leafs,Nashville Predators,7,4,False
+2025-10-14,2025-26,Washington Capitals,Tampa Bay Lightning,3,2,False
+2025-10-15,2025-26,Buffalo Sabres,Ottawa Senators,8,4,False
+2025-10-15,2025-26,Detroit Red Wings,Florida Panthers,4,1,False
+2025-10-15,2025-26,St. Louis Blues,Chicago Blackhawks,3,8,False
+2025-10-15,2025-26,Utah Mammoth,Calgary Flames,3,1,False
+2025-10-16,2025-26,Anaheim Ducks,Carolina Hurricanes,1,4,False
+2025-10-16,2025-26,Columbus Blue Jackets,Colorado Avalanche,1,4,False
+2025-10-16,2025-26,Dallas Stars,Vancouver Canucks,3,5,False
+2025-10-16,2025-26,Los Angeles Kings,Pittsburgh Penguins,2,4,False
+2025-10-16,2025-26,Montreal Canadiens,Nashville Predators,3,2,False
+2025-10-16,2025-26,New Jersey Devils,Florida Panthers,3,1,False
+2025-10-16,2025-26,New York Islanders,Edmonton Oilers,4,2,False
+2025-10-16,2025-26,Ottawa Senators,Seattle Kraken,4,3,False
+2025-10-16,2025-26,Philadelphia Flyers,Winnipeg Jets,2,5,False
+2025-10-16,2025-26,Toronto Maple Leafs,New York Rangers,2,1,False
+2025-10-16,2025-26,Vegas Golden Knights,Boston Bruins,6,5,False
+2025-10-17,2025-26,Chicago Blackhawks,Vancouver Canucks,2,3,False
+2025-10-17,2025-26,Detroit Red Wings,Tampa Bay Lightning,2,1,False
+2025-10-17,2025-26,Utah Mammoth,San Jose Sharks,6,3,False
+2025-10-17,2025-26,Washington Capitals,Minnesota Wild,5,1,False
+2025-10-18,2025-26,Buffalo Sabres,Florida Panthers,3,0,False
+2025-10-18,2025-26,Columbus Blue Jackets,Tampa Bay Lightning,3,2,False
+2025-10-18,2025-26,Colorado Avalanche,Boston Bruins,4,1,False
+2025-10-18,2025-26,Los Angeles Kings,Carolina Hurricanes,3,4,False
+2025-10-18,2025-26,Montreal Canadiens,New York Rangers,3,4,False
+2025-10-18,2025-26,New Jersey Devils,Edmonton Oilers,5,3,False
+2025-10-18,2025-26,Ottawa Senators,New York Islanders,4,5,False
+2025-10-18,2025-26,Philadelphia Flyers,Minnesota Wild,2,1,False
+2025-10-18,2025-26,San Jose Sharks,Pittsburgh Penguins,0,3,False
+2025-10-18,2025-26,St. Louis Blues,Dallas Stars,3,1,False
+2025-10-18,2025-26,Toronto Maple Leafs,Seattle Kraken,3,4,False
+2025-10-18,2025-26,Vegas Golden Knights,Calgary Flames,6,1,False
+2025-10-18,2025-26,Winnipeg Jets,Nashville Predators,4,1,False
+2025-10-19,2025-26,Chicago Blackhawks,Anaheim Ducks,2,1,False
+2025-10-19,2025-26,Detroit Red Wings,Edmonton Oilers,4,2,False
+2025-10-19,2025-26,Utah Mammoth,Boston Bruins,3,2,False
+2025-10-19,2025-26,Washington Capitals,Vancouver Canucks,3,4,False
+2025-10-20,2025-26,Calgary Flames,Winnipeg Jets,1,2,False
+2025-10-20,2025-26,Montreal Canadiens,Buffalo Sabres,4,2,False
+2025-10-20,2025-26,New York Rangers,Minnesota Wild,1,3,False
+2025-10-20,2025-26,Philadelphia Flyers,Seattle Kraken,5,2,False
+2025-10-20,2025-26,Vegas Golden Knights,Carolina Hurricanes,4,1,False
+2025-10-21,2025-26,Boston Bruins,Florida Panthers,3,4,False
+2025-10-21,2025-26,Dallas Stars,Columbus Blue Jackets,1,5,False
+2025-10-21,2025-26,Nashville Predators,Anaheim Ducks,2,5,False
+2025-10-21,2025-26,New York Islanders,San Jose Sharks,4,3,False
+2025-10-21,2025-26,Ottawa Senators,Edmonton Oilers,2,3,False
+2025-10-21,2025-26,Pittsburgh Penguins,Vancouver Canucks,5,1,False
+2025-10-21,2025-26,St. Louis Blues,Los Angeles Kings,1,2,False
+2025-10-21,2025-26,Toronto Maple Leafs,New Jersey Devils,2,5,False
+2025-10-21,2025-26,Utah Mammoth,Colorado Avalanche,4,3,False
+2025-10-21,2025-26,Washington Capitals,Seattle Kraken,4,1,False
+2025-10-22,2025-26,Buffalo Sabres,Detroit Red Wings,4,2,False
+2025-10-22,2025-26,Calgary Flames,Montreal Canadiens,1,2,False
+2025-10-22,2025-26,New Jersey Devils,Minnesota Wild,4,1,False
+2025-10-23,2025-26,Boston Bruins,Anaheim Ducks,5,7,False
+2025-10-23,2025-26,Colorado Avalanche,Carolina Hurricanes,4,5,False
+2025-10-23,2025-26,Dallas Stars,Los Angeles Kings,2,3,False
+2025-10-23,2025-26,Edmonton Oilers,Montreal Canadiens,6,5,False
+2025-10-23,2025-26,Florida Panthers,Pittsburgh Penguins,3,5,False
+2025-10-23,2025-26,Nashville Predators,Vancouver Canucks,2,1,False
+2025-10-23,2025-26,New York Islanders,Detroit Red Wings,7,2,False
+2025-10-23,2025-26,New York Rangers,San Jose Sharks,5,6,False
+2025-10-23,2025-26,Ottawa Senators,Philadelphia Flyers,2,1,False
+2025-10-23,2025-26,St. Louis Blues,Utah Mammoth,4,7,False
+2025-10-23,2025-26,Tampa Bay Lightning,Chicago Blackhawks,2,3,False
+2025-10-23,2025-26,Winnipeg Jets,Seattle Kraken,0,3,False
+2025-10-24,2025-26,Buffalo Sabres,Toronto Maple Leafs,5,3,False
+2025-10-24,2025-26,Columbus Blue Jackets,Washington Capitals,1,5,False
+2025-10-24,2025-26,New Jersey Devils,San Jose Sharks,3,1,False
+2025-10-24,2025-26,Winnipeg Jets,Calgary Flames,5,3,False
+2025-10-25,2025-26,Boston Bruins,Colorado Avalanche,3,2,False
+2025-10-25,2025-26,Dallas Stars,Carolina Hurricanes,3,2,False
+2025-10-25,2025-26,Detroit Red Wings,St. Louis Blues,6,4,False
+2025-10-25,2025-26,Florida Panthers,Vegas Golden Knights,3,0,False
+2025-10-25,2025-26,Minnesota Wild,Utah Mammoth,2,6,False
+2025-10-25,2025-26,Nashville Predators,Los Angeles Kings,5,4,False
+2025-10-25,2025-26,Philadelphia Flyers,New York Islanders,4,3,False
+2025-10-25,2025-26,Pittsburgh Penguins,Columbus Blue Jackets,4,5,False
+2025-10-25,2025-26,Seattle Kraken,Edmonton Oilers,3,2,False
+2025-10-25,2025-26,Tampa Bay Lightning,Anaheim Ducks,4,3,False
+2025-10-25,2025-26,Toronto Maple Leafs,Buffalo Sabres,4,3,False
+2025-10-25,2025-26,Vancouver Canucks,Montreal Canadiens,3,4,False
+2025-10-25,2025-26,Washington Capitals,Ottawa Senators,1,7,False
+2025-10-26,2025-26,Calgary Flames,New York Rangers,5,1,False
+2025-10-26,2025-26,Chicago Blackhawks,Los Angeles Kings,1,3,False
+2025-10-26,2025-26,Minnesota Wild,San Jose Sharks,5,6,False
+2025-10-26,2025-26,New Jersey Devils,Colorado Avalanche,4,3,False
+2025-10-26,2025-26,Nashville Predators,Dallas Stars,2,3,False
+2025-10-26,2025-26,Tampa Bay Lightning,Vegas Golden Knights,2,1,False
+2025-10-26,2025-26,Vancouver Canucks,Edmonton Oilers,4,3,False
+2025-10-26,2025-26,Winnipeg Jets,Utah Mammoth,2,3,False
+2025-10-27,2025-26,Ottawa Senators,Boston Bruins,7,2,False
+2025-10-27,2025-26,Pittsburgh Penguins,St. Louis Blues,6,3,False
+2025-10-28,2025-26,Boston Bruins,New York Islanders,5,2,False
+2025-10-28,2025-26,Buffalo Sabres,Columbus Blue Jackets,3,4,False
+2025-10-28,2025-26,Carolina Hurricanes,Vegas Golden Knights,3,6,False
+2025-10-28,2025-26,Chicago Blackhawks,Ottawa Senators,7,3,False
+2025-10-28,2025-26,Colorado Avalanche,New Jersey Devils,8,4,False
+2025-10-28,2025-26,Dallas Stars,Washington Capitals,1,0,False
+2025-10-28,2025-26,Edmonton Oilers,Utah Mammoth,6,3,False
+2025-10-28,2025-26,Florida Panthers,Anaheim Ducks,2,3,False
+2025-10-28,2025-26,Minnesota Wild,Winnipeg Jets,3,4,False
+2025-10-28,2025-26,Nashville Predators,Tampa Bay Lightning,2,5,False
+2025-10-28,2025-26,Philadelphia Flyers,Pittsburgh Penguins,3,2,False
+2025-10-28,2025-26,Seattle Kraken,Montreal Canadiens,3,4,False
+2025-10-28,2025-26,San Jose Sharks,Los Angeles Kings,3,4,False
+2025-10-28,2025-26,St. Louis Blues,Detroit Red Wings,2,5,False
+2025-10-28,2025-26,Toronto Maple Leafs,Calgary Flames,4,3,False
+2025-10-28,2025-26,Vancouver Canucks,New York Rangers,0,2,False
+2025-10-29,2025-26,Columbus Blue Jackets,Toronto Maple Leafs,6,3,False
+2025-10-30,2025-26,Boston Bruins,Buffalo Sabres,4,3,False
+2025-10-30,2025-26,Carolina Hurricanes,New York Islanders,6,2,False
+2025-10-30,2025-26,Edmonton Oilers,New York Rangers,3,4,False
+2025-10-30,2025-26,Los Angeles Kings,Detroit Red Wings,3,4,False
+2025-10-30,2025-26,Minnesota Wild,Pittsburgh Penguins,1,4,False
+2025-10-30,2025-26,Ottawa Senators,Calgary Flames,4,3,False
+2025-10-30,2025-26,Philadelphia Flyers,Nashville Predators,4,1,False
+2025-10-30,2025-26,San Jose Sharks,New Jersey Devils,5,2,False
+2025-10-30,2025-26,St. Louis Blues,Vancouver Canucks,3,4,False
+2025-10-30,2025-26,Tampa Bay Lightning,Dallas Stars,2,1,False
+2025-10-30,2025-26,Winnipeg Jets,Chicago Blackhawks,6,3,False
+2025-10-31,2025-26,Anaheim Ducks,Detroit Red Wings,5,2,False
+2025-10-31,2025-26,Vegas Golden Knights,Colorado Avalanche,2,4,False
+2025-10-31,2025-26,Washington Capitals,New York Islanders,1,3,False
+2025-11-01,2025-26,Boston Bruins,Carolina Hurricanes,2,1,False
+2025-11-01,2025-26,Buffalo Sabres,Washington Capitals,4,3,False
+2025-11-01,2025-26,Columbus Blue Jackets,St. Louis Blues,3,2,False
+2025-11-01,2025-26,Edmonton Oilers,Chicago Blackhawks,3,2,False
+2025-11-01,2025-26,Florida Panthers,Dallas Stars,4,3,False
+2025-11-01,2025-26,Los Angeles Kings,New Jersey Devils,1,4,False
+2025-11-01,2025-26,Minnesota Wild,Vancouver Canucks,5,2,False
+2025-11-01,2025-26,Montreal Canadiens,Ottawa Senators,4,3,False
+2025-11-01,2025-26,Nashville Predators,Calgary Flames,4,2,False
+2025-11-01,2025-26,Philadelphia Flyers,Toronto Maple Leafs,2,5,False
+2025-11-01,2025-26,Seattle Kraken,New York Rangers,2,3,False
+2025-11-01,2025-26,San Jose Sharks,Colorado Avalanche,3,2,False
+2025-11-01,2025-26,Winnipeg Jets,Pittsburgh Penguins,5,2,False
+2025-11-02,2025-26,Anaheim Ducks,New Jersey Devils,4,1,False
+2025-11-02,2025-26,New York Islanders,Columbus Blue Jackets,3,2,False
+2025-11-02,2025-26,Philadelphia Flyers,Calgary Flames,1,2,False
+2025-11-02,2025-26,San Jose Sharks,Detroit Red Wings,2,3,False
+2025-11-02,2025-26,Utah Mammoth,Tampa Bay Lightning,2,4,False
+2025-11-03,2025-26,Nashville Predators,Vancouver Canucks,4,5,False
+2025-11-03,2025-26,Seattle Kraken,Chicago Blackhawks,3,1,False
+2025-11-03,2025-26,St. Louis Blues,Edmonton Oilers,3,2,False
+2025-11-03,2025-26,Toronto Maple Leafs,Pittsburgh Penguins,4,3,False
+2025-11-04,2025-26,Anaheim Ducks,Florida Panthers,7,3,False
+2025-11-04,2025-26,Buffalo Sabres,Utah Mammoth,1,2,False
+2025-11-04,2025-26,Colorado Avalanche,Tampa Bay Lightning,3,2,False
+2025-11-04,2025-26,Dallas Stars,Edmonton Oilers,4,3,False
+2025-11-04,2025-26,Los Angeles Kings,Winnipeg Jets,3,0,False
+2025-11-04,2025-26,Minnesota Wild,Nashville Predators,3,2,False
+2025-11-04,2025-26,Montreal Canadiens,Philadelphia Flyers,4,5,False
+2025-11-04,2025-26,New York Islanders,Boston Bruins,3,4,False
+2025-11-04,2025-26,New York Rangers,Carolina Hurricanes,0,3,False
+2025-11-04,2025-26,Vegas Golden Knights,Detroit Red Wings,1,0,False
+2025-11-05,2025-26,Calgary Flames,Columbus Blue Jackets,5,1,False
+2025-11-05,2025-26,Seattle Kraken,San Jose Sharks,1,6,False
+2025-11-05,2025-26,Toronto Maple Leafs,Utah Mammoth,5,3,False
+2025-11-05,2025-26,Vancouver Canucks,Chicago Blackhawks,2,5,False
+2025-11-05,2025-26,Washington Capitals,St. Louis Blues,6,1,False
+2025-11-06,2025-26,Boston Bruins,Ottawa Senators,3,2,False
+2025-11-06,2025-26,Buffalo Sabres,St. Louis Blues,0,3,False
+2025-11-06,2025-26,Carolina Hurricanes,Minnesota Wild,4,3,False
+2025-11-06,2025-26,Dallas Stars,Anaheim Ducks,5,7,False
+2025-11-06,2025-26,Los Angeles Kings,Florida Panthers,2,5,False
+2025-11-06,2025-26,New Jersey Devils,Montreal Canadiens,4,3,False
+2025-11-06,2025-26,Nashville Predators,Philadelphia Flyers,1,3,False
+2025-11-06,2025-26,Pittsburgh Penguins,Washington Capitals,5,3,False
+2025-11-06,2025-26,Vegas Golden Knights,Tampa Bay Lightning,3,6,False
+2025-11-07,2025-26,Calgary Flames,Chicago Blackhawks,0,4,False
+2025-11-07,2025-26,Detroit Red Wings,New York Rangers,1,4,False
+2025-11-07,2025-26,New York Islanders,Minnesota Wild,2,5,False
+2025-11-07,2025-26,San Jose Sharks,Winnipeg Jets,2,1,False
+2025-11-08,2025-26,Carolina Hurricanes,Buffalo Sabres,6,3,False
+2025-11-08,2025-26,Edmonton Oilers,Colorado Avalanche,1,9,False
+2025-11-08,2025-26,Montreal Canadiens,Utah Mammoth,6,2,False
+2025-11-08,2025-26,New Jersey Devils,Pittsburgh Penguins,2,1,False
+2025-11-08,2025-26,Nashville Predators,Dallas Stars,4,5,False
+2025-11-08,2025-26,New York Rangers,New York Islanders,0,5,False
+2025-11-08,2025-26,Philadelphia Flyers,Ottawa Senators,2,3,False
+2025-11-08,2025-26,San Jose Sharks,Florida Panthers,3,1,False
+2025-11-08,2025-26,St. Louis Blues,Seattle Kraken,3,4,False
+2025-11-08,2025-26,Tampa Bay Lightning,Washington Capitals,3,2,False
+2025-11-08,2025-26,Toronto Maple Leafs,Boston Bruins,3,5,False
+2025-11-08,2025-26,Vancouver Canucks,Columbus Blue Jackets,4,3,False
+2025-11-08,2025-26,Vegas Golden Knights,Anaheim Ducks,3,4,False
+2025-11-09,2025-26,Anaheim Ducks,Winnipeg Jets,4,1,False
+2025-11-09,2025-26,Dallas Stars,Seattle Kraken,2,1,False
+2025-11-09,2025-26,Detroit Red Wings,Chicago Blackhawks,1,5,False
+2025-11-09,2025-26,Minnesota Wild,Calgary Flames,2,0,False
+2025-11-09,2025-26,Ottawa Senators,Utah Mammoth,4,2,False
+2025-11-09,2025-26,Pittsburgh Penguins,Los Angeles Kings,2,3,False
+2025-11-09,2025-26,Toronto Maple Leafs,Carolina Hurricanes,4,5,False
+2025-11-09,2025-26,Vancouver Canucks,Colorado Avalanche,4,5,False
+2025-11-10,2025-26,Edmonton Oilers,Columbus Blue Jackets,5,4,False
+2025-11-10,2025-26,New Jersey Devils,New York Islanders,2,3,False
+2025-11-10,2025-26,New York Rangers,Nashville Predators,6,3,False
+2025-11-10,2025-26,Vegas Golden Knights,Florida Panthers,2,3,False
+2025-11-11,2025-26,Boston Bruins,Toronto Maple Leafs,5,3,False
+2025-11-11,2025-26,Carolina Hurricanes,Washington Capitals,1,4,False
+2025-11-11,2025-26,Colorado Avalanche,Anaheim Ducks,4,1,False
+2025-11-11,2025-26,Minnesota Wild,San Jose Sharks,1,2,False
+2025-11-11,2025-26,Montreal Canadiens,Los Angeles Kings,1,5,False
+2025-11-11,2025-26,Ottawa Senators,Dallas Stars,2,3,False
+2025-11-11,2025-26,Seattle Kraken,Columbus Blue Jackets,1,2,False
+2025-11-11,2025-26,St. Louis Blues,Calgary Flames,3,2,False
+2025-11-11,2025-26,Vancouver Canucks,Winnipeg Jets,3,5,False
+2025-11-12,2025-26,Chicago Blackhawks,New Jersey Devils,3,4,False
+2025-11-12,2025-26,Philadelphia Flyers,Edmonton Oilers,1,2,False
+2025-11-12,2025-26,Tampa Bay Lightning,New York Rangers,3,7,False
+2025-11-12,2025-26,Utah Mammoth,Buffalo Sabres,5,2,False
+2025-11-13,2025-26,Columbus Blue Jackets,Edmonton Oilers,5,4,False
+2025-11-13,2025-26,Calgary Flames,San Jose Sharks,2,0,False
+2025-11-13,2025-26,Colorado Avalanche,Buffalo Sabres,6,3,False
+2025-11-13,2025-26,Detroit Red Wings,Anaheim Ducks,6,3,False
+2025-11-13,2025-26,Florida Panthers,Washington Capitals,6,3,False
+2025-11-13,2025-26,Montreal Canadiens,Dallas Stars,0,7,False
+2025-11-13,2025-26,Ottawa Senators,Boston Bruins,5,3,False
+2025-11-13,2025-26,Seattle Kraken,Winnipeg Jets,5,3,False
+2025-11-13,2025-26,Toronto Maple Leafs,Los Angeles Kings,3,4,False
+2025-11-13,2025-26,Vegas Golden Knights,New York Islanders,3,4,False
+2025-11-14,2025-26,Carolina Hurricanes,Vancouver Canucks,4,3,False
+2025-11-14,2025-26,Nashville Predators,Pittsburgh Penguins,2,1,False
+2025-11-14,2025-26,St. Louis Blues,Philadelphia Flyers,5,6,False
+2025-11-14,2025-26,Utah Mammoth,New York Islanders,2,3,False
+2025-11-15,2025-26,Carolina Hurricanes,Edmonton Oilers,3,4,False
+2025-11-15,2025-26,Columbus Blue Jackets,New York Rangers,1,2,False
+2025-11-15,2025-26,Calgary Flames,Winnipeg Jets,3,4,False
+2025-11-15,2025-26,Chicago Blackhawks,Toronto Maple Leafs,3,2,False
+2025-11-15,2025-26,Dallas Stars,Philadelphia Flyers,5,1,False
+2025-11-15,2025-26,Detroit Red Wings,Buffalo Sabres,4,5,False
+2025-11-15,2025-26,Florida Panthers,Tampa Bay Lightning,1,3,False
+2025-11-15,2025-26,Minnesota Wild,Anaheim Ducks,2,0,False
+2025-11-15,2025-26,Montreal Canadiens,Boston Bruins,2,3,False
+2025-11-15,2025-26,Ottawa Senators,Los Angeles Kings,0,1,False
+2025-11-15,2025-26,Seattle Kraken,San Jose Sharks,4,1,False
+2025-11-15,2025-26,St. Louis Blues,Vegas Golden Knights,1,4,False
+2025-11-15,2025-26,Washington Capitals,New Jersey Devils,2,3,False
+2025-11-16,2025-26,Colorado Avalanche,New York Islanders,4,1,False
+2025-11-16,2025-26,Minnesota Wild,Vegas Golden Knights,3,2,False
+2025-11-16,2025-26,New York Rangers,Detroit Red Wings,1,2,False
+2025-11-16,2025-26,Pittsburgh Penguins,Nashville Predators,4,0,False
+2025-11-16,2025-26,Tampa Bay Lightning,Vancouver Canucks,2,6,False
+2025-11-17,2025-26,Anaheim Ducks,Utah Mammoth,3,2,False
+2025-11-17,2025-26,Boston Bruins,Carolina Hurricanes,1,3,False
+2025-11-17,2025-26,Buffalo Sabres,Edmonton Oilers,5,1,False
+2025-11-17,2025-26,Columbus Blue Jackets,Montreal Canadiens,4,3,False
+2025-11-17,2025-26,Florida Panthers,Vancouver Canucks,8,5,False
+2025-11-17,2025-26,Washington Capitals,Los Angeles Kings,2,1,False
+2025-11-18,2025-26,Chicago Blackhawks,Calgary Flames,5,2,False
+2025-11-18,2025-26,Dallas Stars,New York Islanders,2,3,False
+2025-11-18,2025-26,Detroit Red Wings,Seattle Kraken,4,2,False
+2025-11-18,2025-26,San Jose Sharks,Utah Mammoth,3,2,False
+2025-11-18,2025-26,Tampa Bay Lightning,New Jersey Devils,5,1,False
+2025-11-18,2025-26,Toronto Maple Leafs,St. Louis Blues,3,2,False
+2025-11-18,2025-26,Vegas Golden Knights,New York Rangers,3,2,False
+2025-11-18,2025-26,Winnipeg Jets,Columbus Blue Jackets,5,2,False
+2025-11-19,2025-26,Anaheim Ducks,Boston Bruins,4,3,False
+2025-11-19,2025-26,Buffalo Sabres,Calgary Flames,2,6,False
+2025-11-19,2025-26,Minnesota Wild,Carolina Hurricanes,4,3,False
+2025-11-19,2025-26,Washington Capitals,Edmonton Oilers,7,4,False
+2025-11-20,2025-26,Anaheim Ducks,Ottawa Senators,2,3,False
+2025-11-20,2025-26,Chicago Blackhawks,Seattle Kraken,2,3,False
+2025-11-20,2025-26,Colorado Avalanche,New York Rangers,6,3,False
+2025-11-20,2025-26,Detroit Red Wings,New York Islanders,0,5,False
+2025-11-20,2025-26,Florida Panthers,New Jersey Devils,1,0,False
+2025-11-20,2025-26,Montreal Canadiens,Washington Capitals,4,8,False
+2025-11-20,2025-26,Philadelphia Flyers,St. Louis Blues,3,2,False
+2025-11-20,2025-26,San Jose Sharks,Los Angeles Kings,4,3,False
+2025-11-20,2025-26,Tampa Bay Lightning,Edmonton Oilers,2,1,False
+2025-11-20,2025-26,Toronto Maple Leafs,Columbus Blue Jackets,2,3,False
+2025-11-20,2025-26,Utah Mammoth,Vegas Golden Knights,1,4,False
+2025-11-20,2025-26,Vancouver Canucks,Dallas Stars,2,4,False
+2025-11-21,2025-26,Buffalo Sabres,Chicago Blackhawks,9,3,False
+2025-11-21,2025-26,Los Angeles Kings,Boston Bruins,1,2,False
+2025-11-21,2025-26,Pittsburgh Penguins,Minnesota Wild,0,5,False
+2025-11-21,2025-26,Winnipeg Jets,Carolina Hurricanes,3,4,False
+2025-11-22,2025-26,Anaheim Ducks,Vegas Golden Knights,4,3,False
+2025-11-22,2025-26,Calgary Flames,Dallas Stars,3,2,False
+2025-11-22,2025-26,Detroit Red Wings,Columbus Blue Jackets,4,3,False
+2025-11-22,2025-26,Florida Panthers,Edmonton Oilers,3,6,False
+2025-11-22,2025-26,Montreal Canadiens,Toronto Maple Leafs,5,2,False
+2025-11-22,2025-26,Nashville Predators,Colorado Avalanche,0,3,False
+2025-11-22,2025-26,New York Islanders,St. Louis Blues,1,2,False
+2025-11-22,2025-26,Philadelphia Flyers,New Jersey Devils,6,3,False
+2025-11-22,2025-26,Pittsburgh Penguins,Seattle Kraken,2,3,False
+2025-11-22,2025-26,San Jose Sharks,Ottawa Senators,2,3,False
+2025-11-22,2025-26,Utah Mammoth,New York Rangers,3,2,False
+2025-11-22,2025-26,Washington Capitals,Tampa Bay Lightning,3,5,False
+2025-11-23,2025-26,Buffalo Sabres,Carolina Hurricanes,4,1,False
+2025-11-23,2025-26,Chicago Blackhawks,Colorado Avalanche,0,1,False
+2025-11-23,2025-26,New York Islanders,Seattle Kraken,1,0,False
+2025-11-23,2025-26,San Jose Sharks,Boston Bruins,3,1,False
+2025-11-23,2025-26,Vancouver Canucks,Calgary Flames,2,5,False
+2025-11-23,2025-26,Winnipeg Jets,Minnesota Wild,0,3,False
+2025-11-24,2025-26,Los Angeles Kings,Ottawa Senators,2,1,False
+2025-11-24,2025-26,New Jersey Devils,Detroit Red Wings,4,3,False
+2025-11-24,2025-26,Nashville Predators,Florida Panthers,3,8,False
+2025-11-24,2025-26,New York Rangers,St. Louis Blues,3,2,False
+2025-11-24,2025-26,Tampa Bay Lightning,Philadelphia Flyers,3,0,False
+2025-11-24,2025-26,Utah Mammoth,Vegas Golden Knights,5,1,False
+2025-11-24,2025-26,Washington Capitals,Columbus Blue Jackets,5,1,False
+2025-11-25,2025-26,Edmonton Oilers,Dallas Stars,3,8,False
+2025-11-26,2025-26,Anaheim Ducks,Vancouver Canucks,4,5,False
+2025-11-26,2025-26,Carolina Hurricanes,New York Rangers,2,4,False
+2025-11-26,2025-26,Columbus Blue Jackets,Toronto Maple Leafs,1,2,False
+2025-11-26,2025-26,Chicago Blackhawks,Minnesota Wild,3,4,False
+2025-11-26,2025-26,Colorado Avalanche,San Jose Sharks,6,0,False
+2025-11-26,2025-26,Detroit Red Wings,Nashville Predators,3,6,False
+2025-11-26,2025-26,Florida Panthers,Philadelphia Flyers,2,4,False
+2025-11-26,2025-26,New Jersey Devils,St. Louis Blues,3,2,False
+2025-11-26,2025-26,New York Islanders,Boston Bruins,1,3,False
+2025-11-26,2025-26,Pittsburgh Penguins,Buffalo Sabres,4,2,False
+2025-11-26,2025-26,Seattle Kraken,Dallas Stars,2,3,False
+2025-11-26,2025-26,Tampa Bay Lightning,Calgary Flames,5,1,False
+2025-11-26,2025-26,Utah Mammoth,Montreal Canadiens,3,4,False
+2025-11-26,2025-26,Vegas Golden Knights,Ottawa Senators,3,4,False
+2025-11-26,2025-26,Washington Capitals,Winnipeg Jets,4,3,False
+2025-11-28,2025-26,Anaheim Ducks,Los Angeles Kings,5,4,False
+2025-11-28,2025-26,Boston Bruins,New York Rangers,2,6,False
+2025-11-28,2025-26,Buffalo Sabres,New Jersey Devils,0,5,False
+2025-11-28,2025-26,Carolina Hurricanes,Winnipeg Jets,5,1,False
+2025-11-28,2025-26,Columbus Blue Jackets,Pittsburgh Penguins,3,4,False
+2025-11-28,2025-26,Chicago Blackhawks,Nashville Predators,3,4,False
+2025-11-28,2025-26,Dallas Stars,Utah Mammoth,4,3,False
+2025-11-28,2025-26,Detroit Red Wings,Tampa Bay Lightning,3,6,False
+2025-11-28,2025-26,Florida Panthers,Calgary Flames,3,5,False
+2025-11-28,2025-26,Minnesota Wild,Colorado Avalanche,3,2,False
+2025-11-28,2025-26,New York Islanders,Philadelphia Flyers,3,4,False
+2025-11-28,2025-26,San Jose Sharks,Vancouver Canucks,3,2,False
+2025-11-28,2025-26,St. Louis Blues,Ottawa Senators,4,3,False
+2025-11-28,2025-26,Vegas Golden Knights,Montreal Canadiens,1,4,False
+2025-11-28,2025-26,Washington Capitals,Toronto Maple Leafs,4,2,False
+2025-11-29,2025-26,Boston Bruins,Detroit Red Wings,3,2,False
+2025-11-29,2025-26,Colorado Avalanche,Montreal Canadiens,7,2,False
+2025-11-29,2025-26,Los Angeles Kings,Vancouver Canucks,2,1,False
+2025-11-29,2025-26,Minnesota Wild,Buffalo Sabres,2,3,False
+2025-11-29,2025-26,New Jersey Devils,Philadelphia Flyers,3,5,False
+2025-11-29,2025-26,Nashville Predators,Winnipeg Jets,2,5,False
+2025-11-29,2025-26,New York Rangers,Tampa Bay Lightning,1,4,False
+2025-11-29,2025-26,Pittsburgh Penguins,Toronto Maple Leafs,2,7,False
+2025-11-29,2025-26,Seattle Kraken,Edmonton Oilers,0,4,False
+2025-11-29,2025-26,St. Louis Blues,Utah Mammoth,1,0,False
+2025-11-29,2025-26,Vegas Golden Knights,San Jose Sharks,4,3,False
+2025-11-30,2025-26,Carolina Hurricanes,Calgary Flames,1,0,False
+2025-11-30,2025-26,Chicago Blackhawks,Anaheim Ducks,5,3,False
+2025-11-30,2025-26,Dallas Stars,Ottawa Senators,6,1,False
+2025-11-30,2025-26,New York Islanders,Washington Capitals,1,4,False
+2025-12-01,2025-26,Buffalo Sabres,Winnipeg Jets,5,1,False
+2025-12-01,2025-26,New Jersey Devils,Columbus Blue Jackets,3,5,False
+2025-12-01,2025-26,Philadelphia Flyers,Pittsburgh Penguins,1,5,False
+2025-12-01,2025-26,San Jose Sharks,Utah Mammoth,6,3,False
+2025-12-01,2025-26,St. Louis Blues,Anaheim Ducks,1,4,False
+2025-12-02,2025-26,Colorado Avalanche,Vancouver Canucks,3,1,False
+2025-12-02,2025-26,Detroit Red Wings,Boston Bruins,5,4,False
+2025-12-02,2025-26,Edmonton Oilers,Minnesota Wild,0,1,False
+2025-12-02,2025-26,Florida Panthers,Toronto Maple Leafs,1,4,False
+2025-12-02,2025-26,Los Angeles Kings,Washington Capitals,1,3,False
+2025-12-02,2025-26,Montreal Canadiens,Ottawa Senators,2,5,False
+2025-12-02,2025-26,Nashville Predators,Calgary Flames,5,1,False
+2025-12-02,2025-26,New York Islanders,Tampa Bay Lightning,2,1,False
+2025-12-02,2025-26,New York Rangers,Dallas Stars,3,2,False
+2025-12-02,2025-26,Vegas Golden Knights,Chicago Blackhawks,4,3,False
+2025-12-03,2025-26,Anaheim Ducks,Utah Mammoth,0,7,False
+2025-12-03,2025-26,Montreal Canadiens,Winnipeg Jets,3,2,False
+2025-12-03,2025-26,New Jersey Devils,Dallas Stars,0,3,False
+2025-12-03,2025-26,Philadelphia Flyers,Buffalo Sabres,5,2,False
+2025-12-03,2025-26,San Jose Sharks,Washington Capitals,1,7,False
+2025-12-04,2025-26,Boston Bruins,St. Louis Blues,5,2,False
+2025-12-04,2025-26,Carolina Hurricanes,Toronto Maple Leafs,1,5,False
+2025-12-04,2025-26,Columbus Blue Jackets,Detroit Red Wings,6,5,False
+2025-12-04,2025-26,Calgary Flames,Minnesota Wild,4,1,False
+2025-12-04,2025-26,Edmonton Oilers,Seattle Kraken,9,4,False
+2025-12-04,2025-26,Florida Panthers,Nashville Predators,1,2,False
+2025-12-04,2025-26,Los Angeles Kings,Chicago Blackhawks,1,2,False
+2025-12-04,2025-26,New York Islanders,Colorado Avalanche,6,3,False
+2025-12-04,2025-26,Ottawa Senators,New York Rangers,2,4,False
+2025-12-04,2025-26,Tampa Bay Lightning,Pittsburgh Penguins,3,4,False
+2025-12-05,2025-26,Anaheim Ducks,Washington Capitals,4,3,False
+2025-12-05,2025-26,Dallas Stars,San Jose Sharks,4,1,False
+2025-12-05,2025-26,New Jersey Devils,Vegas Golden Knights,0,3,False
+2025-12-05,2025-26,Vancouver Canucks,Utah Mammoth,1,4,False
+2025-12-05,2025-26,Winnipeg Jets,Buffalo Sabres,4,1,False
+2025-12-06,2025-26,Boston Bruins,New Jersey Devils,4,1,False
+2025-12-06,2025-26,Carolina Hurricanes,Nashville Predators,6,3,False
+2025-12-06,2025-26,Calgary Flames,Utah Mammoth,2,0,False
+2025-12-06,2025-26,Edmonton Oilers,Winnipeg Jets,6,2,False
+2025-12-06,2025-26,Florida Panthers,Columbus Blue Jackets,7,6,False
+2025-12-06,2025-26,Los Angeles Kings,Chicago Blackhawks,6,0,False
+2025-12-06,2025-26,New York Rangers,Colorado Avalanche,2,3,False
+2025-12-06,2025-26,Ottawa Senators,St. Louis Blues,1,2,False
+2025-12-06,2025-26,Seattle Kraken,Detroit Red Wings,3,4,False
+2025-12-06,2025-26,Tampa Bay Lightning,New York Islanders,0,2,False
+2025-12-06,2025-26,Toronto Maple Leafs,Montreal Canadiens,1,2,False
+2025-12-06,2025-26,Vancouver Canucks,Minnesota Wild,4,2,False
+2025-12-07,2025-26,Anaheim Ducks,Chicago Blackhawks,7,1,False
+2025-12-07,2025-26,Carolina Hurricanes,San Jose Sharks,1,4,False
+2025-12-07,2025-26,Dallas Stars,Pittsburgh Penguins,3,2,False
+2025-12-07,2025-26,Florida Panthers,New York Islanders,4,1,False
+2025-12-07,2025-26,Montreal Canadiens,St. Louis Blues,3,4,False
+2025-12-07,2025-26,New York Rangers,Vegas Golden Knights,2,3,False
+2025-12-07,2025-26,Philadelphia Flyers,Colorado Avalanche,2,3,False
+2025-12-07,2025-26,Washington Capitals,Columbus Blue Jackets,2,0,False
+2025-12-08,2025-26,Calgary Flames,Buffalo Sabres,7,4,False
+2025-12-08,2025-26,Seattle Kraken,Minnesota Wild,1,4,False
+2025-12-08,2025-26,Toronto Maple Leafs,Tampa Bay Lightning,2,0,False
+2025-12-08,2025-26,Utah Mammoth,Los Angeles Kings,2,4,False
+2025-12-08,2025-26,Vancouver Canucks,Detroit Red Wings,0,4,False
+2025-12-09,2025-26,Carolina Hurricanes,Columbus Blue Jackets,4,1,False
+2025-12-09,2025-26,Edmonton Oilers,Buffalo Sabres,3,4,False
+2025-12-09,2025-26,Montreal Canadiens,Tampa Bay Lightning,1,6,False
+2025-12-09,2025-26,Nashville Predators,Colorado Avalanche,4,3,False
+2025-12-09,2025-26,New York Islanders,Vegas Golden Knights,5,4,False
+2025-12-09,2025-26,Ottawa Senators,New Jersey Devils,3,4,False
+2025-12-09,2025-26,Philadelphia Flyers,San Jose Sharks,4,1,False
+2025-12-09,2025-26,Pittsburgh Penguins,Anaheim Ducks,3,4,False
+2025-12-09,2025-26,St. Louis Blues,Boston Bruins,2,5,False
+2025-12-09,2025-26,Winnipeg Jets,Dallas Stars,3,4,False
+2025-12-10,2025-26,Calgary Flames,Detroit Red Wings,3,4,False
+2025-12-10,2025-26,Chicago Blackhawks,New York Rangers,3,0,False
+2025-12-10,2025-26,Seattle Kraken,Los Angeles Kings,3,2,False
+2025-12-10,2025-26,Utah Mammoth,Florida Panthers,3,4,False
+2025-12-11,2025-26,Columbus Blue Jackets,Ottawa Senators,3,6,False
+2025-12-11,2025-26,Colorado Avalanche,Florida Panthers,6,2,False
+2025-12-11,2025-26,Edmonton Oilers,Detroit Red Wings,4,1,False
+2025-12-11,2025-26,Minnesota Wild,Dallas Stars,5,2,False
+2025-12-11,2025-26,New Jersey Devils,Tampa Bay Lightning,4,8,False
+2025-12-11,2025-26,Nashville Predators,St. Louis Blues,7,2,False
+2025-12-11,2025-26,New York Islanders,Anaheim Ducks,5,2,False
+2025-12-11,2025-26,Philadelphia Flyers,Vegas Golden Knights,2,3,False
+2025-12-11,2025-26,Pittsburgh Penguins,Montreal Canadiens,2,4,False
+2025-12-11,2025-26,Toronto Maple Leafs,San Jose Sharks,2,3,False
+2025-12-11,2025-26,Vancouver Canucks,Buffalo Sabres,2,3,False
+2025-12-11,2025-26,Winnipeg Jets,Boston Bruins,3,6,False
+2025-12-11,2025-26,Washington Capitals,Carolina Hurricanes,2,3,False
+2025-12-12,2025-26,St. Louis Blues,Chicago Blackhawks,3,2,False
+2025-12-12,2025-26,Utah Mammoth,Seattle Kraken,5,3,False
+2025-12-13,2025-26,Columbus Blue Jackets,Vegas Golden Knights,2,3,False
+2025-12-13,2025-26,Chicago Blackhawks,Detroit Red Wings,0,4,False
+2025-12-13,2025-26,Colorado Avalanche,Nashville Predators,4,2,False
+2025-12-13,2025-26,Dallas Stars,Florida Panthers,0,4,False
+2025-12-13,2025-26,Los Angeles Kings,Calgary Flames,1,2,False
+2025-12-13,2025-26,Minnesota Wild,Ottawa Senators,3,2,False
+2025-12-13,2025-26,New Jersey Devils,Anaheim Ducks,4,1,False
+2025-12-13,2025-26,New York Islanders,Tampa Bay Lightning,3,2,False
+2025-12-13,2025-26,New York Rangers,Montreal Canadiens,5,4,False
+2025-12-13,2025-26,Philadelphia Flyers,Carolina Hurricanes,3,4,False
+2025-12-13,2025-26,Pittsburgh Penguins,San Jose Sharks,5,6,False
+2025-12-13,2025-26,Toronto Maple Leafs,Edmonton Oilers,3,6,False
+2025-12-13,2025-26,Winnipeg Jets,Washington Capitals,5,1,False
+2025-12-14,2025-26,Carolina Hurricanes,Philadelphia Flyers,3,2,False
+2025-12-14,2025-26,Minnesota Wild,Boston Bruins,6,2,False
+2025-12-14,2025-26,Montreal Canadiens,Edmonton Oilers,4,1,False
+2025-12-14,2025-26,New Jersey Devils,Vancouver Canucks,1,2,False
+2025-12-14,2025-26,Pittsburgh Penguins,Utah Mammoth,4,5,False
+2025-12-14,2025-26,Seattle Kraken,Buffalo Sabres,1,3,False
+2025-12-15,2025-26,Dallas Stars,Los Angeles Kings,4,1,False
+2025-12-15,2025-26,New York Rangers,Anaheim Ducks,1,4,False
+2025-12-15,2025-26,St. Louis Blues,Nashville Predators,2,5,False
+2025-12-15,2025-26,Tampa Bay Lightning,Florida Panthers,2,5,False
+2025-12-15,2025-26,Winnipeg Jets,Ottawa Senators,2,3,False
+2025-12-16,2025-26,Boston Bruins,Utah Mammoth,4,1,False
+2025-12-16,2025-26,Columbus Blue Jackets,Anaheim Ducks,4,3,False
+2025-12-16,2025-26,Detroit Red Wings,New York Islanders,3,2,False
+2025-12-16,2025-26,Minnesota Wild,Washington Capitals,5,0,False
+2025-12-16,2025-26,Montreal Canadiens,Philadelphia Flyers,1,4,False
+2025-12-16,2025-26,New York Rangers,Vancouver Canucks,0,3,False
+2025-12-16,2025-26,Pittsburgh Penguins,Edmonton Oilers,4,6,False
+2025-12-16,2025-26,Seattle Kraken,Colorado Avalanche,3,5,False
+2025-12-16,2025-26,San Jose Sharks,Calgary Flames,6,3,False
+2025-12-16,2025-26,Toronto Maple Leafs,Chicago Blackhawks,3,2,False
+2025-12-17,2025-26,Detroit Red Wings,Utah Mammoth,1,4,False
+2025-12-17,2025-26,Florida Panthers,Los Angeles Kings,3,2,False
+2025-12-17,2025-26,Nashville Predators,Carolina Hurricanes,1,4,False
+2025-12-17,2025-26,St. Louis Blues,Winnipeg Jets,1,0,False
+2025-12-17,2025-26,Vegas Golden Knights,New Jersey Devils,1,2,False
+2025-12-18,2025-26,Boston Bruins,Edmonton Oilers,1,3,False
+2025-12-18,2025-26,Buffalo Sabres,Philadelphia Flyers,5,3,False
+2025-12-18,2025-26,Columbus Blue Jackets,Minnesota Wild,2,5,False
+2025-12-18,2025-26,Calgary Flames,Seattle Kraken,4,2,False
+2025-12-18,2025-26,Montreal Canadiens,Chicago Blackhawks,4,1,False
+2025-12-18,2025-26,Ottawa Senators,Pittsburgh Penguins,4,0,False
+2025-12-18,2025-26,San Jose Sharks,Dallas Stars,3,5,False
+2025-12-18,2025-26,St. Louis Blues,New York Rangers,1,2,False
+2025-12-18,2025-26,Tampa Bay Lightning,Los Angeles Kings,1,2,False
+2025-12-18,2025-26,Washington Capitals,Toronto Maple Leafs,4,0,False
+2025-12-19,2025-26,Anaheim Ducks,Dallas Stars,3,8,False
+2025-12-19,2025-26,Colorado Avalanche,Winnipeg Jets,3,2,False
+2025-12-19,2025-26,Florida Panthers,Carolina Hurricanes,4,3,False
+2025-12-19,2025-26,New York Islanders,Vancouver Canucks,1,4,False
+2025-12-19,2025-26,Utah Mammoth,New Jersey Devils,1,2,False
+2025-12-20,2025-26,Anaheim Ducks,Columbus Blue Jackets,4,3,False
+2025-12-20,2025-26,Boston Bruins,Vancouver Canucks,4,5,False
+2025-12-20,2025-26,Buffalo Sabres,New York Islanders,3,2,False
+2025-12-20,2025-26,Calgary Flames,Vegas Golden Knights,6,3,False
+2025-12-20,2025-26,Florida Panthers,St. Louis Blues,2,6,False
+2025-12-20,2025-26,Minnesota Wild,Edmonton Oilers,5,2,False
+2025-12-20,2025-26,Montreal Canadiens,Pittsburgh Penguins,4,0,False
+2025-12-20,2025-26,Nashville Predators,Toronto Maple Leafs,5,3,False
+2025-12-20,2025-26,New York Rangers,Philadelphia Flyers,5,4,False
+2025-12-20,2025-26,Ottawa Senators,Chicago Blackhawks,6,4,False
+2025-12-20,2025-26,San Jose Sharks,Seattle Kraken,2,4,False
+2025-12-20,2025-26,Tampa Bay Lightning,Carolina Hurricanes,6,4,False
+2025-12-20,2025-26,Washington Capitals,Detroit Red Wings,2,5,False
+2025-12-21,2025-26,Boston Bruins,Ottawa Senators,2,6,False
+2025-12-21,2025-26,Dallas Stars,Toronto Maple Leafs,5,1,False
+2025-12-21,2025-26,Detroit Red Wings,Washington Capitals,3,2,False
+2025-12-21,2025-26,Edmonton Oilers,Vegas Golden Knights,4,3,False
+2025-12-21,2025-26,Minnesota Wild,Colorado Avalanche,1,5,False
+2025-12-21,2025-26,New Jersey Devils,Buffalo Sabres,1,3,False
+2025-12-21,2025-26,Nashville Predators,New York Rangers,2,1,False
+2025-12-21,2025-26,Pittsburgh Penguins,Montreal Canadiens,4,3,False
+2025-12-21,2025-26,Utah Mammoth,Winnipeg Jets,4,3,False
+2025-12-22,2025-26,Anaheim Ducks,Seattle Kraken,1,3,False
+2025-12-22,2025-26,Los Angeles Kings,Columbus Blue Jackets,1,3,False
+2025-12-22,2025-26,Philadelphia Flyers,Vancouver Canucks,5,2,False
+2025-12-22,2025-26,Tampa Bay Lightning,St. Louis Blues,4,1,False
+2025-12-23,2025-26,Boston Bruins,Montreal Canadiens,2,6,False
+2025-12-23,2025-26,Carolina Hurricanes,Florida Panthers,2,5,False
+2025-12-23,2025-26,Chicago Blackhawks,Philadelphia Flyers,1,3,False
+2025-12-23,2025-26,Colorado Avalanche,Utah Mammoth,1,0,False
+2025-12-23,2025-26,Detroit Red Wings,Dallas Stars,4,3,False
+2025-12-23,2025-26,Edmonton Oilers,Calgary Flames,5,1,False
+2025-12-23,2025-26,Los Angeles Kings,Seattle Kraken,2,3,False
+2025-12-23,2025-26,Minnesota Wild,Nashville Predators,2,3,False
+2025-12-23,2025-26,New York Islanders,New Jersey Devils,2,1,False
+2025-12-23,2025-26,Ottawa Senators,Buffalo Sabres,2,3,False
+2025-12-23,2025-26,Toronto Maple Leafs,Pittsburgh Penguins,6,3,False
+2025-12-23,2025-26,Vegas Golden Knights,San Jose Sharks,7,2,False
+2025-12-23,2025-26,Washington Capitals,New York Rangers,3,7,False
+2025-12-27,2025-26,Buffalo Sabres,Boston Bruins,4,1,False
+2025-12-27,2025-26,Carolina Hurricanes,Detroit Red Wings,5,2,False
+2025-12-27,2025-26,Calgary Flames,Edmonton Oilers,3,2,False
+2025-12-27,2025-26,Dallas Stars,Chicago Blackhawks,3,4,False
+2025-12-27,2025-26,Florida Panthers,Tampa Bay Lightning,2,4,False
+2025-12-27,2025-26,Los Angeles Kings,Anaheim Ducks,6,1,False
+2025-12-27,2025-26,New Jersey Devils,Washington Capitals,3,4,False
+2025-12-27,2025-26,New York Islanders,New York Rangers,2,0,False
+2025-12-27,2025-26,St. Louis Blues,Nashville Predators,3,2,False
+2025-12-27,2025-26,Toronto Maple Leafs,Ottawa Senators,7,5,False
+2025-12-27,2025-26,Vancouver Canucks,San Jose Sharks,3,6,False
+2025-12-27,2025-26,Vegas Golden Knights,Colorado Avalanche,5,6,False
+2025-12-27,2025-26,Winnipeg Jets,Minnesota Wild,3,4,False
+2025-12-28,2025-26,Columbus Blue Jackets,New York Islanders,4,2,False
+2025-12-28,2025-26,Chicago Blackhawks,Pittsburgh Penguins,3,7,False
+2025-12-28,2025-26,Detroit Red Wings,Toronto Maple Leafs,3,2,False
+2025-12-28,2025-26,Seattle Kraken,Philadelphia Flyers,4,1,False
+2025-12-28,2025-26,Tampa Bay Lightning,Montreal Canadiens,5,4,False
+2025-12-29,2025-26,Anaheim Ducks,San Jose Sharks,4,5,False
+2025-12-29,2025-26,Carolina Hurricanes,New York Rangers,3,2,False
+2025-12-29,2025-26,Calgary Flames,Boston Bruins,2,1,False
+2025-12-29,2025-26,Colorado Avalanche,Los Angeles Kings,5,2,False
+2025-12-29,2025-26,Florida Panthers,Washington Capitals,5,3,False
+2025-12-29,2025-26,Ottawa Senators,Columbus Blue Jackets,1,4,False
+2025-12-29,2025-26,Seattle Kraken,Vancouver Canucks,2,3,False
+2025-12-29,2025-26,St. Louis Blues,Buffalo Sabres,2,4,False
+2025-12-29,2025-26,Utah Mammoth,Nashville Predators,3,4,False
+2025-12-29,2025-26,Vegas Golden Knights,Minnesota Wild,2,5,False
+2025-12-29,2025-26,Winnipeg Jets,Edmonton Oilers,1,3,False
+2025-12-30,2025-26,Chicago Blackhawks,New York Islanders,2,3,False
+2025-12-30,2025-26,Florida Panthers,Montreal Canadiens,2,3,False
+2025-12-30,2025-26,Pittsburgh Penguins,Carolina Hurricanes,5,1,False
+2025-12-30,2025-26,Toronto Maple Leafs,New Jersey Devils,4,0,False
+2025-12-30,2025-26,Vancouver Canucks,Philadelphia Flyers,3,6,False
+2025-12-31,2025-26,Anaheim Ducks,Tampa Bay Lightning,3,4,False
+2025-12-31,2025-26,Columbus Blue Jackets,New Jersey Devils,2,3,False
+2025-12-31,2025-26,Calgary Flames,Philadelphia Flyers,5,1,False
+2025-12-31,2025-26,Colorado Avalanche,St. Louis Blues,6,1,False
+2025-12-31,2025-26,Dallas Stars,Buffalo Sabres,1,4,False
+2025-12-31,2025-26,Detroit Red Wings,Winnipeg Jets,2,1,False
+2025-12-31,2025-26,Edmonton Oilers,Boston Bruins,2,6,False
+2025-12-31,2025-26,San Jose Sharks,Minnesota Wild,4,3,False
+2025-12-31,2025-26,Vegas Golden Knights,Nashville Predators,2,4,False
+2025-12-31,2025-26,Washington Capitals,New York Rangers,6,3,False
+2026-01-01,2025-26,Carolina Hurricanes,Montreal Canadiens,5,7,False
+2026-01-01,2025-26,Chicago Blackhawks,Dallas Stars,4,3,False
+2026-01-01,2025-26,Los Angeles Kings,Tampa Bay Lightning,3,5,False
+2026-01-01,2025-26,New York Islanders,Utah Mammoth,2,7,False
+2026-01-01,2025-26,Ottawa Senators,Washington Capitals,4,3,False
+2026-01-01,2025-26,Pittsburgh Penguins,Detroit Red Wings,4,3,False
+2026-01-01,2025-26,Seattle Kraken,Nashville Predators,4,1,False
+2026-01-01,2025-26,Toronto Maple Leafs,Winnipeg Jets,6,5,False
+2026-01-02,2025-26,Anaheim Ducks,Minnesota Wild,2,5,False
+2026-01-02,2025-26,Florida Panthers,New York Rangers,1,5,False
+2026-01-02,2025-26,St. Louis Blues,Vegas Golden Knights,4,3,False
+2026-01-02,2025-26,Vancouver Canucks,Seattle Kraken,3,4,False
+2026-01-03,2025-26,Carolina Hurricanes,Colorado Avalanche,3,5,False
+2026-01-03,2025-26,Columbus Blue Jackets,Buffalo Sabres,5,1,False
+2026-01-03,2025-26,Calgary Flames,Nashville Predators,3,4,False
+2026-01-03,2025-26,Detroit Red Wings,Pittsburgh Penguins,1,4,False
+2026-01-03,2025-26,Edmonton Oilers,Philadelphia Flyers,2,5,False
+2026-01-03,2025-26,Los Angeles Kings,Minnesota Wild,5,4,False
+2026-01-03,2025-26,New Jersey Devils,Utah Mammoth,4,1,False
+2026-01-03,2025-26,New York Islanders,Toronto Maple Leafs,4,3,False
+2026-01-03,2025-26,Ottawa Senators,Winnipeg Jets,4,2,False
+2026-01-03,2025-26,San Jose Sharks,Tampa Bay Lightning,3,7,False
+2026-01-03,2025-26,St. Louis Blues,Montreal Canadiens,2,0,False
+2026-01-03,2025-26,Vancouver Canucks,Boston Bruins,2,3,False
+2026-01-03,2025-26,Washington Capitals,Chicago Blackhawks,2,3,False
+2026-01-04,2025-26,Columbus Blue Jackets,Pittsburgh Penguins,4,5,False
+2026-01-04,2025-26,Chicago Blackhawks,Vegas Golden Knights,3,2,False
+2026-01-04,2025-26,Dallas Stars,Montreal Canadiens,3,4,False
+2026-01-04,2025-26,Florida Panthers,Colorado Avalanche,2,1,False
+2026-01-04,2025-26,New Jersey Devils,Carolina Hurricanes,1,3,False
+2026-01-05,2025-26,Calgary Flames,Seattle Kraken,1,5,False
+2026-01-05,2025-26,Los Angeles Kings,Minnesota Wild,4,2,False
+2026-01-05,2025-26,New York Rangers,Utah Mammoth,2,3,False
+2026-01-05,2025-26,Ottawa Senators,Detroit Red Wings,3,5,False
+2026-01-05,2025-26,Washington Capitals,Anaheim Ducks,7,4,False
+2026-01-06,2025-26,Buffalo Sabres,Vancouver Canucks,5,3,False
+2026-01-06,2025-26,Carolina Hurricanes,Dallas Stars,6,3,False
+2026-01-06,2025-26,Edmonton Oilers,Nashville Predators,6,2,False
+2026-01-06,2025-26,New York Islanders,New Jersey Devils,9,0,False
+2026-01-06,2025-26,Philadelphia Flyers,Anaheim Ducks,5,2,False
+2026-01-06,2025-26,Seattle Kraken,Boston Bruins,7,4,False
+2026-01-06,2025-26,San Jose Sharks,Columbus Blue Jackets,5,2,False
+2026-01-06,2025-26,Tampa Bay Lightning,Colorado Avalanche,4,2,False
+2026-01-06,2025-26,Toronto Maple Leafs,Florida Panthers,4,1,False
+2026-01-06,2025-26,Winnipeg Jets,Vegas Golden Knights,3,4,False
+2026-01-07,2025-26,Chicago Blackhawks,St. Louis Blues,7,3,False
+2026-01-07,2025-26,Los Angeles Kings,San Jose Sharks,3,4,False
+2026-01-07,2025-26,Montreal Canadiens,Calgary Flames,4,1,False
+2026-01-07,2025-26,Utah Mammoth,Ottawa Senators,3,1,False
+2026-01-07,2025-26,Washington Capitals,Dallas Stars,1,4,False
+2026-01-08,2025-26,Boston Bruins,Calgary Flames,4,1,False
+2026-01-08,2025-26,Carolina Hurricanes,Anaheim Ducks,5,2,False
+2026-01-08,2025-26,Colorado Avalanche,Ottawa Senators,8,2,False
+2026-01-08,2025-26,Detroit Red Wings,Vancouver Canucks,5,1,False
+2026-01-08,2025-26,Montreal Canadiens,Florida Panthers,6,2,False
+2026-01-08,2025-26,Nashville Predators,New York Islanders,2,1,False
+2026-01-08,2025-26,New York Rangers,Buffalo Sabres,2,5,False
+2026-01-08,2025-26,Philadelphia Flyers,Toronto Maple Leafs,1,2,False
+2026-01-08,2025-26,Pittsburgh Penguins,New Jersey Devils,4,1,False
+2026-01-08,2025-26,Seattle Kraken,Minnesota Wild,2,3,False
+2026-01-08,2025-26,Vegas Golden Knights,Columbus Blue Jackets,5,3,False
+2026-01-08,2025-26,Winnipeg Jets,Edmonton Oilers,3,4,False
+2026-01-09,2025-26,Chicago Blackhawks,Washington Capitals,1,5,False
+2026-01-09,2025-26,Utah Mammoth,St. Louis Blues,4,2,False
+2026-01-09,2025-26,Winnipeg Jets,Los Angeles Kings,5,1,False
+2026-01-10,2025-26,Boston Bruins,New York Rangers,10,2,False
+2026-01-10,2025-26,Buffalo Sabres,Anaheim Ducks,5,3,False
+2026-01-10,2025-26,Carolina Hurricanes,Seattle Kraken,3,2,False
+2026-01-10,2025-26,Colorado Avalanche,Columbus Blue Jackets,4,0,False
+2026-01-10,2025-26,Edmonton Oilers,Los Angeles Kings,3,4,False
+2026-01-10,2025-26,Minnesota Wild,New York Islanders,3,4,False
+2026-01-10,2025-26,Montreal Canadiens,Detroit Red Wings,0,4,False
+2026-01-10,2025-26,Nashville Predators,Chicago Blackhawks,0,3,False
+2026-01-10,2025-26,Ottawa Senators,Florida Panthers,2,3,False
+2026-01-10,2025-26,Philadelphia Flyers,Tampa Bay Lightning,2,7,False
+2026-01-10,2025-26,Pittsburgh Penguins,Calgary Flames,1,2,False
+2026-01-10,2025-26,San Jose Sharks,Dallas Stars,5,4,False
+2026-01-10,2025-26,Toronto Maple Leafs,Vancouver Canucks,5,0,False
+2026-01-10,2025-26,Vegas Golden Knights,St. Louis Blues,4,2,False
+2026-01-11,2025-26,Boston Bruins,Pittsburgh Penguins,1,0,False
+2026-01-11,2025-26,Nashville Predators,Washington Capitals,3,2,False
+2026-01-11,2025-26,San Jose Sharks,Vegas Golden Knights,2,7,False
+2026-01-11,2025-26,Utah Mammoth,Columbus Blue Jackets,2,3,False
+2026-01-11,2025-26,Winnipeg Jets,New Jersey Devils,4,3,False
+2026-01-12,2025-26,Buffalo Sabres,Florida Panthers,3,4,False
+2026-01-12,2025-26,Chicago Blackhawks,Edmonton Oilers,1,4,False
+2026-01-12,2025-26,Colorado Avalanche,Toronto Maple Leafs,3,4,False
+2026-01-12,2025-26,Detroit Red Wings,Carolina Hurricanes,4,3,False
+2026-01-12,2025-26,Los Angeles Kings,Dallas Stars,1,3,False
+2026-01-12,2025-26,Minnesota Wild,New Jersey Devils,2,5,False
+2026-01-12,2025-26,Montreal Canadiens,Vancouver Canucks,6,3,False
+2026-01-12,2025-26,New York Rangers,Seattle Kraken,2,4,False
+2026-01-12,2025-26,Philadelphia Flyers,Tampa Bay Lightning,1,5,False
+2026-01-13,2025-26,Anaheim Ducks,Dallas Stars,3,1,False
+2026-01-13,2025-26,Boston Bruins,Detroit Red Wings,3,0,False
+2026-01-13,2025-26,Columbus Blue Jackets,Calgary Flames,5,3,False
+2026-01-13,2025-26,Nashville Predators,Edmonton Oilers,4,3,False
+2026-01-13,2025-26,Ottawa Senators,Vancouver Canucks,2,1,False
+2026-01-13,2025-26,Pittsburgh Penguins,Tampa Bay Lightning,1,2,False
+2026-01-13,2025-26,St. Louis Blues,Carolina Hurricanes,3,0,False
+2026-01-13,2025-26,Utah Mammoth,Toronto Maple Leafs,6,1,False
+2026-01-13,2025-26,Winnipeg Jets,New York Islanders,5,4,False
+2026-01-13,2025-26,Washington Capitals,Montreal Canadiens,3,2,False
+2026-01-14,2025-26,Buffalo Sabres,Philadelphia Flyers,5,2,False
+2026-01-14,2025-26,Los Angeles Kings,Vegas Golden Knights,2,3,False
+2026-01-14,2025-26,New Jersey Devils,Seattle Kraken,3,2,False
+2026-01-14,2025-26,New York Rangers,Ottawa Senators,4,8,False
+2026-01-15,2025-26,Boston Bruins,Seattle Kraken,4,2,False
+2026-01-15,2025-26,Buffalo Sabres,Montreal Canadiens,5,3,False
+2026-01-15,2025-26,Columbus Blue Jackets,Vancouver Canucks,4,1,False
+2026-01-15,2025-26,Chicago Blackhawks,Calgary Flames,1,3,False
+2026-01-15,2025-26,Edmonton Oilers,New York Islanders,0,1,False
+2026-01-15,2025-26,Minnesota Wild,Winnipeg Jets,2,6,False
+2026-01-15,2025-26,Pittsburgh Penguins,Philadelphia Flyers,6,3,False
+2026-01-15,2025-26,Utah Mammoth,Dallas Stars,2,1,False
+2026-01-15,2025-26,Vegas Golden Knights,Toronto Maple Leafs,6,5,False
+2026-01-15,2025-26,Washington Capitals,San Jose Sharks,2,3,False
+2026-01-16,2025-26,Carolina Hurricanes,Florida Panthers,9,1,False
+2026-01-16,2025-26,Colorado Avalanche,Nashville Predators,3,7,False
+2026-01-16,2025-26,Detroit Red Wings,San Jose Sharks,4,2,False
+2026-01-16,2025-26,Los Angeles Kings,Anaheim Ducks,2,3,False
+2026-01-16,2025-26,St. Louis Blues,Tampa Bay Lightning,3,2,False
+2026-01-17,2025-26,Anaheim Ducks,Los Angeles Kings,2,1,False
+2026-01-17,2025-26,Buffalo Sabres,Minnesota Wild,4,5,False
+2026-01-17,2025-26,Calgary Flames,New York Islanders,4,2,False
+2026-01-17,2025-26,Chicago Blackhawks,Boston Bruins,2,5,False
+2026-01-17,2025-26,New Jersey Devils,Carolina Hurricanes,1,4,False
+2026-01-17,2025-26,Ottawa Senators,Montreal Canadiens,5,6,False
+2026-01-17,2025-26,Philadelphia Flyers,New York Rangers,3,6,False
+2026-01-17,2025-26,Pittsburgh Penguins,Columbus Blue Jackets,3,4,False
+2026-01-17,2025-26,Utah Mammoth,Seattle Kraken,6,3,False
+2026-01-17,2025-26,Vancouver Canucks,Edmonton Oilers,0,6,False
+2026-01-17,2025-26,Vegas Golden Knights,Nashville Predators,7,2,False
+2026-01-17,2025-26,Winnipeg Jets,Toronto Maple Leafs,3,4,False
+2026-01-17,2025-26,Washington Capitals,Florida Panthers,2,5,False
+2026-01-18,2025-26,Dallas Stars,Tampa Bay Lightning,1,4,False
+2026-01-18,2025-26,Detroit Red Wings,Ottawa Senators,4,3,False
+2026-01-18,2025-26,Edmonton Oilers,St. Louis Blues,5,0,False
+2026-01-19,2025-26,Anaheim Ducks,New York Rangers,5,3,False
+2026-01-19,2025-26,Carolina Hurricanes,Buffalo Sabres,2,1,False
+2026-01-19,2025-26,Calgary Flames,New Jersey Devils,1,2,False
+2026-01-19,2025-26,Chicago Blackhawks,Winnipeg Jets,2,0,False
+2026-01-19,2025-26,Colorado Avalanche,Washington Capitals,5,2,False
+2026-01-19,2025-26,Florida Panthers,San Jose Sharks,1,4,False
+2026-01-19,2025-26,Seattle Kraken,Pittsburgh Penguins,3,6,False
+2026-01-19,2025-26,Toronto Maple Leafs,Minnesota Wild,3,6,False
+2026-01-19,2025-26,Vancouver Canucks,New York Islanders,3,4,False
+2026-01-19,2025-26,Vegas Golden Knights,Philadelphia Flyers,1,2,False
+2026-01-20,2025-26,Columbus Blue Jackets,Ottawa Senators,1,4,False
+2026-01-20,2025-26,Dallas Stars,Boston Bruins,6,2,False
+2026-01-20,2025-26,Edmonton Oilers,New Jersey Devils,1,2,False
+2026-01-20,2025-26,Los Angeles Kings,New York Rangers,4,3,False
+2026-01-20,2025-26,Montreal Canadiens,Minnesota Wild,4,3,False
+2026-01-20,2025-26,Nashville Predators,Buffalo Sabres,3,5,False
+2026-01-20,2025-26,Tampa Bay Lightning,San Jose Sharks,4,1,False
+2026-01-20,2025-26,Winnipeg Jets,St. Louis Blues,3,1,False
+2026-01-21,2025-26,Calgary Flames,Pittsburgh Penguins,1,4,False
+2026-01-21,2025-26,Colorado Avalanche,Anaheim Ducks,1,2,False
+2026-01-21,2025-26,Seattle Kraken,New York Islanders,4,1,False
+2026-01-21,2025-26,Toronto Maple Leafs,Detroit Red Wings,1,2,False
+2026-01-21,2025-26,Utah Mammoth,Philadelphia Flyers,5,4,False
+2026-01-21,2025-26,Vancouver Canucks,Washington Capitals,4,3,False
+2026-01-22,2025-26,Boston Bruins,Vegas Golden Knights,4,3,False
+2026-01-22,2025-26,Carolina Hurricanes,Chicago Blackhawks,3,4,False
+2026-01-22,2025-26,Columbus Blue Jackets,Dallas Stars,1,0,False
+2026-01-22,2025-26,Edmonton Oilers,Pittsburgh Penguins,2,6,False
+2026-01-22,2025-26,Minnesota Wild,Detroit Red Wings,4,3,False
+2026-01-22,2025-26,Montreal Canadiens,Buffalo Sabres,2,4,False
+2026-01-22,2025-26,Nashville Predators,Ottawa Senators,5,3,False
+2026-01-22,2025-26,Winnipeg Jets,Florida Panthers,1,2,False
+2026-01-23,2025-26,Calgary Flames,Washington Capitals,1,3,False
+2026-01-23,2025-26,Chicago Blackhawks,Tampa Bay Lightning,1,2,False
+2026-01-23,2025-26,Colorado Avalanche,Philadelphia Flyers,3,7,False
+2026-01-23,2025-26,Dallas Stars,St. Louis Blues,3,2,False
+2026-01-23,2025-26,Seattle Kraken,Anaheim Ducks,2,4,False
+2026-01-23,2025-26,San Jose Sharks,New York Rangers,3,1,False
+2026-01-23,2025-26,Toronto Maple Leafs,Vegas Golden Knights,3,6,False
+2026-01-23,2025-26,Vancouver Canucks,New Jersey Devils,4,5,False
+2026-01-24,2025-26,Boston Bruins,Montreal Canadiens,4,3,False
+2026-01-24,2025-26,Columbus Blue Jackets,Tampa Bay Lightning,8,5,False
+2026-01-24,2025-26,Edmonton Oilers,Washington Capitals,6,5,False
+2026-01-24,2025-26,Minnesota Wild,Florida Panthers,3,4,False
+2026-01-24,2025-26,Nashville Predators,Utah Mammoth,2,5,False
+2026-01-24,2025-26,New York Islanders,Buffalo Sabres,0,5,False
+2026-01-24,2025-26,Ottawa Senators,Carolina Hurricanes,1,4,False
+2026-01-24,2025-26,St. Louis Blues,Los Angeles Kings,4,5,False
+2026-01-24,2025-26,Winnipeg Jets,Detroit Red Wings,1,5,False
+2026-01-25,2025-26,Calgary Flames,Anaheim Ducks,3,4,False
+2026-01-25,2025-26,Chicago Blackhawks,Florida Panthers,1,5,False
+2026-01-25,2025-26,Ottawa Senators,Vegas Golden Knights,7,1,False
+2026-01-25,2025-26,Seattle Kraken,New Jersey Devils,4,2,False
+2026-01-25,2025-26,Toronto Maple Leafs,Colorado Avalanche,1,4,False
+2026-01-25,2025-26,Vancouver Canucks,Pittsburgh Penguins,2,3,False
+2026-01-26,2025-26,Edmonton Oilers,Anaheim Ducks,7,4,False
+2026-01-26,2025-26,New York Rangers,Boston Bruins,4,3,False
+2026-01-26,2025-26,Philadelphia Flyers,New York Islanders,0,4,False
+2026-01-26,2025-26,Tampa Bay Lightning,Utah Mammoth,2,0,False
+2026-01-27,2025-26,Boston Bruins,Nashville Predators,3,2,False
+2026-01-27,2025-26,Detroit Red Wings,Los Angeles Kings,1,3,False
+2026-01-27,2025-26,Florida Panthers,Utah Mammoth,3,4,False
+2026-01-27,2025-26,Minnesota Wild,Chicago Blackhawks,4,3,False
+2026-01-27,2025-26,Montreal Canadiens,Vegas Golden Knights,3,2,False
+2026-01-27,2025-26,New Jersey Devils,Winnipeg Jets,3,4,False
+2026-01-27,2025-26,Seattle Kraken,Washington Capitals,5,1,False
+2026-01-27,2025-26,St. Louis Blues,Dallas Stars,3,4,False
+2026-01-27,2025-26,Toronto Maple Leafs,Buffalo Sabres,4,7,False
+2026-01-27,2025-26,Vancouver Canucks,San Jose Sharks,2,5,False
+2026-01-28,2025-26,Columbus Blue Jackets,Philadelphia Flyers,5,3,False
+2026-01-28,2025-26,New York Islanders,New York Rangers,5,2,False
+2026-01-28,2025-26,Ottawa Senators,Colorado Avalanche,5,2,False
+2026-01-29,2025-26,Boston Bruins,Philadelphia Flyers,6,3,False
+2026-01-29,2025-26,Buffalo Sabres,Los Angeles Kings,4,1,False
+2026-01-29,2025-26,Carolina Hurricanes,Utah Mammoth,5,4,False
+2026-01-29,2025-26,Detroit Red Wings,Washington Capitals,3,4,False
+2026-01-29,2025-26,Edmonton Oilers,San Jose Sharks,4,3,False
+2026-01-29,2025-26,Minnesota Wild,Calgary Flames,4,1,False
+2026-01-29,2025-26,Montreal Canadiens,Colorado Avalanche,7,3,False
+2026-01-29,2025-26,New Jersey Devils,Nashville Predators,3,2,False
+2026-01-29,2025-26,New York Rangers,New York Islanders,1,2,False
+2026-01-29,2025-26,Pittsburgh Penguins,Chicago Blackhawks,6,2,False
+2026-01-29,2025-26,Seattle Kraken,Toronto Maple Leafs,5,2,False
+2026-01-29,2025-26,St. Louis Blues,Florida Panthers,5,4,False
+2026-01-29,2025-26,Tampa Bay Lightning,Winnipeg Jets,4,1,False
+2026-01-29,2025-26,Vancouver Canucks,Anaheim Ducks,2,0,False
+2026-01-29,2025-26,Vegas Golden Knights,Dallas Stars,4,5,False
+2026-01-30,2025-26,Chicago Blackhawks,Columbus Blue Jackets,2,4,False
+2026-01-31,2025-26,Buffalo Sabres,Montreal Canadiens,2,4,False
+2026-01-31,2025-26,Calgary Flames,San Jose Sharks,3,2,False
+2026-01-31,2025-26,Detroit Red Wings,Colorado Avalanche,0,5,False
+2026-01-31,2025-26,Edmonton Oilers,Minnesota Wild,3,7,False
+2026-01-31,2025-26,Florida Panthers,Winnipeg Jets,1,2,False
+2026-01-31,2025-26,New York Islanders,Nashville Predators,3,4,False
+2026-01-31,2025-26,Ottawa Senators,New Jersey Devils,4,1,False
+2026-01-31,2025-26,Philadelphia Flyers,Los Angeles Kings,2,3,False
+2026-01-31,2025-26,Pittsburgh Penguins,New York Rangers,6,5,False
+2026-01-31,2025-26,St. Louis Blues,Columbus Blue Jackets,3,5,False
+2026-01-31,2025-26,Utah Mammoth,Dallas Stars,2,3,False
+2026-01-31,2025-26,Vancouver Canucks,Toronto Maple Leafs,2,3,False
+2026-01-31,2025-26,Vegas Golden Knights,Seattle Kraken,2,3,False
+2026-01-31,2025-26,Washington Capitals,Carolina Hurricanes,4,3,False
+2026-02-01,2025-26,Anaheim Ducks,Vegas Golden Knights,4,3,False
+2026-02-01,2025-26,Carolina Hurricanes,Los Angeles Kings,3,2,False
+2026-02-01,2025-26,Tampa Bay Lightning,Boston Bruins,6,5,False
+2026-02-02,2025-26,Calgary Flames,Toronto Maple Leafs,2,4,False
+2026-02-02,2025-26,Chicago Blackhawks,San Jose Sharks,6,3,False
+2026-02-02,2025-26,Colorado Avalanche,Detroit Red Wings,0,2,False
+2026-02-02,2025-26,Dallas Stars,Winnipeg Jets,4,3,False
+2026-02-02,2025-26,Florida Panthers,Buffalo Sabres,3,5,False
+2026-02-02,2025-26,Minnesota Wild,Montreal Canadiens,4,3,False
+2026-02-02,2025-26,Nashville Predators,St. Louis Blues,6,5,False
+2026-02-02,2025-26,Pittsburgh Penguins,Ottawa Senators,2,3,False
+2026-02-02,2025-26,Utah Mammoth,Vancouver Canucks,6,2,False
+2026-02-02,2025-26,Washington Capitals,New York Islanders,4,1,False
+2026-02-03,2025-26,Anaheim Ducks,Seattle Kraken,4,2,False
+2026-02-03,2025-26,Carolina Hurricanes,Ottawa Senators,4,3,False
+2026-02-03,2025-26,Edmonton Oilers,Toronto Maple Leafs,2,5,False
+2026-02-03,2025-26,New Jersey Devils,Columbus Blue Jackets,0,3,False
+2026-02-03,2025-26,New York Islanders,Pittsburgh Penguins,5,4,False
+2026-02-03,2025-26,Philadelphia Flyers,Washington Capitals,4,2,False
+2026-02-03,2025-26,Tampa Bay Lightning,Buffalo Sabres,4,3,False
+2026-02-04,2025-26,Columbus Blue Jackets,Chicago Blackhawks,4,0,False
+2026-02-04,2025-26,Calgary Flames,Edmonton Oilers,4,3,False
+2026-02-04,2025-26,Colorado Avalanche,San Jose Sharks,4,2,False
+2026-02-04,2025-26,Dallas Stars,St. Louis Blues,5,4,False
+2026-02-04,2025-26,Florida Panthers,Boston Bruins,5,4,False
+2026-02-04,2025-26,Los Angeles Kings,Seattle Kraken,2,4,False
+2026-02-04,2025-26,Nashville Predators,Minnesota Wild,5,6,False
+2026-02-04,2025-26,Utah Mammoth,Detroit Red Wings,4,1,False
+2026-02-04,2025-26,Vegas Golden Knights,Vancouver Canucks,5,2,False
+2026-02-04,2025-26,Winnipeg Jets,Montreal Canadiens,1,5,False
+2026-02-05,2025-26,Buffalo Sabres,Pittsburgh Penguins,2,5,False
+2026-02-05,2025-26,New Jersey Devils,New York Islanders,1,3,False
+2026-02-05,2025-26,New York Rangers,Carolina Hurricanes,0,2,False
+2026-02-05,2025-26,Philadelphia Flyers,Ottawa Senators,1,2,False
+2026-02-05,2025-26,Tampa Bay Lightning,Florida Panthers,6,1,False
+2026-02-05,2025-26,Vegas Golden Knights,Los Angeles Kings,4,1,False
+2026-02-05,2025-26,Washington Capitals,Nashville Predators,4,2,False
+2026-02-25,2025-26,Anaheim Ducks,Edmonton Oilers,6,5,False
+2026-02-25,2025-26,Dallas Stars,Seattle Kraken,4,1,False
+2026-02-25,2025-26,Los Angeles Kings,Vegas Golden Knights,4,6,False
+2026-02-25,2025-26,New Jersey Devils,Buffalo Sabres,1,2,False
+2026-02-25,2025-26,Tampa Bay Lightning,Toronto Maple Leafs,4,2,False
+2026-02-25,2025-26,Utah Mammoth,Colorado Avalanche,2,4,False
+2026-02-25,2025-26,Vancouver Canucks,Winnipeg Jets,2,3,False
+2026-02-25,2025-26,Washington Capitals,Philadelphia Flyers,3,1,False
+2026-02-26,2025-26,Boston Bruins,Columbus Blue Jackets,4,2,False
+2026-02-26,2025-26,Carolina Hurricanes,Tampa Bay Lightning,5,4,False
+2026-02-26,2025-26,Colorado Avalanche,Minnesota Wild,2,5,False
+2026-02-26,2025-26,Florida Panthers,Toronto Maple Leafs,5,1,False
+2026-02-26,2025-26,Los Angeles Kings,Edmonton Oilers,1,8,False
+2026-02-26,2025-26,Montreal Canadiens,New York Islanders,3,4,False
+2026-02-26,2025-26,Nashville Predators,Chicago Blackhawks,4,2,False
+2026-02-26,2025-26,New York Rangers,Philadelphia Flyers,2,3,False
+2026-02-26,2025-26,Ottawa Senators,Detroit Red Wings,1,2,False
+2026-02-26,2025-26,Pittsburgh Penguins,New Jersey Devils,4,1,False
+2026-02-26,2025-26,San Jose Sharks,Calgary Flames,1,4,False
+2026-02-26,2025-26,St. Louis Blues,Seattle Kraken,5,1,False
+2026-02-27,2025-26,Anaheim Ducks,Winnipeg Jets,5,4,False
+2026-02-27,2025-26,Florida Panthers,Buffalo Sabres,2,3,False
+2026-02-27,2025-26,Utah Mammoth,Minnesota Wild,5,2,False
+2026-02-27,2025-26,Washington Capitals,Vegas Golden Knights,3,2,False
+2026-02-28,2025-26,Carolina Hurricanes,Detroit Red Wings,5,2,False
+2026-02-28,2025-26,Columbus Blue Jackets,New York Islanders,3,4,False
+2026-02-28,2025-26,Colorado Avalanche,Chicago Blackhawks,3,1,False
+2026-02-28,2025-26,Dallas Stars,Nashville Predators,3,2,False
+2026-02-28,2025-26,Los Angeles Kings,Calgary Flames,2,0,False
+2026-02-28,2025-26,Montreal Canadiens,Washington Capitals,6,2,False
+2026-02-28,2025-26,New York Rangers,Pittsburgh Penguins,3,2,False
+2026-02-28,2025-26,Philadelphia Flyers,Boston Bruins,3,1,False
+2026-02-28,2025-26,Seattle Kraken,Vancouver Canucks,5,1,False
+2026-02-28,2025-26,San Jose Sharks,Edmonton Oilers,5,4,False
+2026-02-28,2025-26,St. Louis Blues,New Jersey Devils,1,3,False
+2026-02-28,2025-26,Tampa Bay Lightning,Buffalo Sabres,2,6,False
+2026-02-28,2025-26,Toronto Maple Leafs,Ottawa Senators,2,5,False
+2026-03-01,2025-26,Anaheim Ducks,Calgary Flames,3,2,False
+2026-03-01,2025-26,Minnesota Wild,St. Louis Blues,1,3,False
+2026-03-01,2025-26,New York Islanders,Florida Panthers,5,4,False
+2026-03-01,2025-26,Pittsburgh Penguins,Vegas Golden Knights,5,0,False
+2026-03-01,2025-26,San Jose Sharks,Winnipeg Jets,2,1,False
+2026-03-01,2025-26,Utah Mammoth,Chicago Blackhawks,0,4,False
+2026-03-02,2025-26,Los Angeles Kings,Colorado Avalanche,2,4,False
+2026-03-02,2025-26,Nashville Predators,Detroit Red Wings,2,4,False
+2026-03-02,2025-26,New York Rangers,Columbus Blue Jackets,4,5,False
+2026-03-02,2025-26,Seattle Kraken,Carolina Hurricanes,2,1,False
+2026-03-02,2025-26,Toronto Maple Leafs,Philadelphia Flyers,2,3,False
+2026-03-02,2025-26,Vancouver Canucks,Dallas Stars,1,6,False
+2026-03-03,2025-26,Anaheim Ducks,Colorado Avalanche,1,5,False
+2026-03-03,2025-26,Boston Bruins,Pittsburgh Penguins,2,1,False
+2026-03-03,2025-26,Buffalo Sabres,Vegas Golden Knights,3,2,False
+2026-03-03,2025-26,Columbus Blue Jackets,Nashville Predators,3,2,False
+2026-03-03,2025-26,Calgary Flames,Dallas Stars,1,6,False
+2026-03-03,2025-26,Edmonton Oilers,Ottawa Senators,5,4,False
+2026-03-03,2025-26,Minnesota Wild,Tampa Bay Lightning,5,1,False
+2026-03-03,2025-26,New Jersey Devils,Florida Panthers,5,1,False
+2026-03-03,2025-26,San Jose Sharks,Montreal Canadiens,7,5,False
+2026-03-03,2025-26,Winnipeg Jets,Chicago Blackhawks,3,2,False
+2026-03-03,2025-26,Washington Capitals,Utah Mammoth,2,3,False
+2026-03-04,2025-26,Anaheim Ducks,New York Islanders,5,1,False
+2026-03-04,2025-26,Detroit Red Wings,Vegas Golden Knights,3,4,False
+2026-03-04,2025-26,New Jersey Devils,Toronto Maple Leafs,4,3,False
+2026-03-04,2025-26,Seattle Kraken,St. Louis Blues,2,3,False
+2026-03-04,2025-26,Vancouver Canucks,Carolina Hurricanes,4,6,False
+2026-03-05,2025-26,Columbus Blue Jackets,Florida Panthers,4,2,False
+2026-03-05,2025-26,Calgary Flames,Ottawa Senators,1,4,False
+2026-03-05,2025-26,Los Angeles Kings,New York Islanders,5,3,False
+2026-03-05,2025-26,Nashville Predators,Boston Bruins,6,3,False
+2026-03-05,2025-26,New York Rangers,Toronto Maple Leafs,6,2,False
+2026-03-05,2025-26,Philadelphia Flyers,Utah Mammoth,0,3,False
+2026-03-05,2025-26,Pittsburgh Penguins,Buffalo Sabres,1,5,False
+2026-03-05,2025-26,Winnipeg Jets,Tampa Bay Lightning,4,1,False
+2026-03-06,2025-26,Anaheim Ducks,Montreal Canadiens,6,5,False
+2026-03-06,2025-26,Chicago Blackhawks,Vancouver Canucks,3,6,False
+2026-03-06,2025-26,Dallas Stars,Colorado Avalanche,4,5,False
+2026-03-06,2025-26,Detroit Red Wings,Florida Panthers,1,3,False
+2026-03-06,2025-26,Edmonton Oilers,Carolina Hurricanes,3,6,False
+2026-03-06,2025-26,San Jose Sharks,St. Louis Blues,2,3,False
+2026-03-06,2025-26,Vegas Golden Knights,Minnesota Wild,2,4,False
+2026-03-07,2025-26,Boston Bruins,Washington Capitals,3,1,False
+2026-03-07,2025-26,Buffalo Sabres,Nashville Predators,3,2,False
+2026-03-07,2025-26,Columbus Blue Jackets,Utah Mammoth,4,5,False
+2026-03-07,2025-26,Calgary Flames,Carolina Hurricanes,5,4,False
+2026-03-07,2025-26,Los Angeles Kings,Montreal Canadiens,3,4,False
+2026-03-07,2025-26,New Jersey Devils,New York Rangers,6,3,False
+2026-03-07,2025-26,Pittsburgh Penguins,Philadelphia Flyers,3,4,False
+2026-03-07,2025-26,Seattle Kraken,Ottawa Senators,4,7,False
+2026-03-07,2025-26,San Jose Sharks,New York Islanders,1,2,False
+2026-03-07,2025-26,Toronto Maple Leafs,Tampa Bay Lightning,2,5,False
+2026-03-07,2025-26,Winnipeg Jets,Vancouver Canucks,3,2,False
+2026-03-08,2025-26,Anaheim Ducks,St. Louis Blues,0,4,False
+2026-03-08,2025-26,Buffalo Sabres,Tampa Bay Lightning,8,7,False
+2026-03-08,2025-26,Colorado Avalanche,Minnesota Wild,3,2,False
+2026-03-08,2025-26,Dallas Stars,Chicago Blackhawks,4,3,False
+2026-03-08,2025-26,New Jersey Devils,Detroit Red Wings,0,3,False
+2026-03-08,2025-26,Pittsburgh Penguins,Boston Bruins,5,4,False
+2026-03-08,2025-26,Vegas Golden Knights,Edmonton Oilers,2,4,False
+2026-03-09,2025-26,Columbus Blue Jackets,Los Angeles Kings,4,5,False
+2026-03-09,2025-26,Chicago Blackhawks,Utah Mammoth,3,2,False
+2026-03-09,2025-26,Philadelphia Flyers,New York Rangers,2,6,False
+2026-03-09,2025-26,Vancouver Canucks,Ottawa Senators,0,2,False
+2026-03-09,2025-26,Washington Capitals,Calgary Flames,7,3,False
+2026-03-10,2025-26,Boston Bruins,Los Angeles Kings,2,1,False
+2026-03-10,2025-26,Buffalo Sabres,San Jose Sharks,6,3,False
+2026-03-10,2025-26,Carolina Hurricanes,Pittsburgh Penguins,5,4,False
+2026-03-10,2025-26,Colorado Avalanche,Edmonton Oilers,3,4,False
+2026-03-10,2025-26,Dallas Stars,Vegas Golden Knights,2,1,False
+2026-03-10,2025-26,Florida Panthers,Detroit Red Wings,4,3,False
+2026-03-10,2025-26,Minnesota Wild,Utah Mammoth,5,0,False
+2026-03-10,2025-26,Montreal Canadiens,Toronto Maple Leafs,3,1,False
+2026-03-10,2025-26,New York Rangers,Calgary Flames,4,0,False
+2026-03-10,2025-26,Seattle Kraken,Nashville Predators,2,4,False
+2026-03-10,2025-26,St. Louis Blues,New York Islanders,3,4,False
+2026-03-10,2025-26,Tampa Bay Lightning,Columbus Blue Jackets,2,5,False
+2026-03-10,2025-26,Winnipeg Jets,Anaheim Ducks,1,4,False
+2026-03-11,2025-26,Ottawa Senators,Montreal Canadiens,2,3,False
+2026-03-11,2025-26,Philadelphia Flyers,Washington Capitals,4,1,False
+2026-03-12,2025-26,Boston Bruins,San Jose Sharks,2,4,False
+2026-03-12,2025-26,Buffalo Sabres,Washington Capitals,1,2,False
+2026-03-12,2025-26,Carolina Hurricanes,St. Louis Blues,1,3,False
+2026-03-12,2025-26,Dallas Stars,Edmonton Oilers,7,2,False
+2026-03-12,2025-26,Florida Panthers,Columbus Blue Jackets,2,1,False
+2026-03-12,2025-26,Minnesota Wild,Philadelphia Flyers,2,3,False
+2026-03-12,2025-26,New Jersey Devils,Calgary Flames,4,5,False
+2026-03-12,2025-26,Seattle Kraken,Colorado Avalanche,1,5,False
+2026-03-12,2025-26,Tampa Bay Lightning,Detroit Red Wings,4,1,False
+2026-03-12,2025-26,Toronto Maple Leafs,Anaheim Ducks,6,4,False
+2026-03-12,2025-26,Utah Mammoth,Chicago Blackhawks,2,3,False
+2026-03-12,2025-26,Vancouver Canucks,Nashville Predators,4,3,False
+2026-03-12,2025-26,Vegas Golden Knights,Pittsburgh Penguins,6,2,False
+2026-03-12,2025-26,Winnipeg Jets,New York Rangers,3,6,False
+2026-03-13,2025-26,New York Islanders,Los Angeles Kings,2,3,False
+2026-03-13,2025-26,St. Louis Blues,Edmonton Oilers,3,2,False
+2026-03-14,2025-26,Buffalo Sabres,Toronto Maple Leafs,3,2,False
+2026-03-14,2025-26,Dallas Stars,Detroit Red Wings,3,2,False
+2026-03-14,2025-26,Minnesota Wild,New York Rangers,2,4,False
+2026-03-14,2025-26,Montreal Canadiens,San Jose Sharks,2,4,False
+2026-03-14,2025-26,New Jersey Devils,Los Angeles Kings,6,4,False
+2026-03-14,2025-26,New York Islanders,Calgary Flames,3,2,False
+2026-03-14,2025-26,Ottawa Senators,Anaheim Ducks,2,0,False
+2026-03-14,2025-26,Philadelphia Flyers,Columbus Blue Jackets,1,2,False
+2026-03-14,2025-26,Tampa Bay Lightning,Carolina Hurricanes,2,4,False
+2026-03-14,2025-26,Utah Mammoth,Pittsburgh Penguins,3,4,False
+2026-03-14,2025-26,Vancouver Canucks,Seattle Kraken,2,5,False
+2026-03-14,2025-26,Vegas Golden Knights,Chicago Blackhawks,4,0,False
+2026-03-14,2025-26,Winnipeg Jets,Colorado Avalanche,3,1,False
+2026-03-14,2025-26,Washington Capitals,Boston Bruins,2,3,False
+2026-03-15,2025-26,Edmonton Oilers,Nashville Predators,3,1,False
+2026-03-15,2025-26,Minnesota Wild,Toronto Maple Leafs,2,4,False
+2026-03-15,2025-26,Montreal Canadiens,Anaheim Ducks,3,4,False
+2026-03-15,2025-26,Ottawa Senators,San Jose Sharks,7,4,False
+2026-03-15,2025-26,Seattle Kraken,Florida Panthers,6,2,False
+2026-03-15,2025-26,Winnipeg Jets,St. Louis Blues,3,2,False
+2026-03-16,2025-26,Colorado Avalanche,Pittsburgh Penguins,2,7,False
+2026-03-16,2025-26,Dallas Stars,Utah Mammoth,3,6,False
+2026-03-16,2025-26,Detroit Red Wings,Calgary Flames,5,2,False
+2026-03-16,2025-26,New Jersey Devils,Boston Bruins,4,3,False
+2026-03-16,2025-26,New York Rangers,Los Angeles Kings,1,4,False
+2026-03-17,2025-26,Columbus Blue Jackets,Carolina Hurricanes,5,1,False
+2026-03-17,2025-26,Chicago Blackhawks,Minnesota Wild,3,4,False
+2026-03-17,2025-26,Edmonton Oilers,San Jose Sharks,5,3,False
+2026-03-17,2025-26,Montreal Canadiens,Boston Bruins,3,2,False
+2026-03-17,2025-26,Seattle Kraken,Tampa Bay Lightning,2,6,False
+2026-03-17,2025-26,Toronto Maple Leafs,New York Islanders,1,3,False
+2026-03-17,2025-26,Vancouver Canucks,Florida Panthers,5,2,False
+2026-03-17,2025-26,Vegas Golden Knights,Buffalo Sabres,0,2,False
+2026-03-17,2025-26,Winnipeg Jets,Nashville Predators,3,4,False
+2026-03-18,2025-26,Anaheim Ducks,Philadelphia Flyers,2,3,False
+2026-03-18,2025-26,Carolina Hurricanes,Pittsburgh Penguins,6,5,False
+2026-03-18,2025-26,Calgary Flames,St. Louis Blues,2,1,False
+2026-03-18,2025-26,Colorado Avalanche,Dallas Stars,1,2,False
+2026-03-18,2025-26,New York Rangers,New Jersey Devils,3,6,False
+2026-03-18,2025-26,Washington Capitals,Ottawa Senators,4,1,False
+2026-03-19,2025-26,Boston Bruins,Winnipeg Jets,6,1,False
+2026-03-19,2025-26,Columbus Blue Jackets,New York Rangers,6,3,False
+2026-03-19,2025-26,Detroit Red Wings,Montreal Canadiens,3,1,False
+2026-03-19,2025-26,Edmonton Oilers,Florida Panthers,0,4,False
+2026-03-19,2025-26,Los Angeles Kings,Philadelphia Flyers,3,4,False
+2026-03-19,2025-26,Minnesota Wild,Chicago Blackhawks,1,2,False
+2026-03-19,2025-26,Nashville Predators,Seattle Kraken,3,1,False
+2026-03-19,2025-26,Ottawa Senators,New York Islanders,3,2,False
+2026-03-19,2025-26,San Jose Sharks,Buffalo Sabres,0,5,False
+2026-03-19,2025-26,Vancouver Canucks,Tampa Bay Lightning,2,6,False
+2026-03-19,2025-26,Vegas Golden Knights,Utah Mammoth,0,4,False
+2026-03-20,2025-26,Calgary Flames,Florida Panthers,4,1,False
+2026-03-20,2025-26,Chicago Blackhawks,Colorado Avalanche,1,4,False
+2026-03-20,2025-26,Toronto Maple Leafs,Carolina Hurricanes,3,4,False
+2026-03-20,2025-26,Utah Mammoth,Anaheim Ducks,1,4,False
+2026-03-20,2025-26,Washington Capitals,New Jersey Devils,2,1,False
+2026-03-21,2025-26,Columbus Blue Jackets,Seattle Kraken,5,2,False
+2026-03-21,2025-26,Detroit Red Wings,Boston Bruins,2,4,False
+2026-03-21,2025-26,Edmonton Oilers,Tampa Bay Lightning,2,5,False
+2026-03-21,2025-26,Los Angeles Kings,Buffalo Sabres,1,4,False
+2026-03-21,2025-26,Minnesota Wild,Dallas Stars,2,1,False
+2026-03-21,2025-26,Montreal Canadiens,New York Islanders,7,3,False
+2026-03-21,2025-26,Nashville Predators,Vegas Golden Knights,4,1,False
+2026-03-21,2025-26,Ottawa Senators,Toronto Maple Leafs,5,2,False
+2026-03-21,2025-26,Pittsburgh Penguins,Winnipeg Jets,5,4,False
+2026-03-21,2025-26,San Jose Sharks,Philadelphia Flyers,1,4,False
+2026-03-21,2025-26,Vancouver Canucks,St. Louis Blues,1,3,False
+2026-03-22,2025-26,Anaheim Ducks,Buffalo Sabres,6,5,False
+2026-03-22,2025-26,Calgary Flames,Tampa Bay Lightning,4,3,False
+2026-03-22,2025-26,Chicago Blackhawks,Nashville Predators,2,3,False
+2026-03-22,2025-26,Dallas Stars,Vegas Golden Knights,2,3,False
+2026-03-22,2025-26,New York Islanders,Columbus Blue Jackets,1,0,False
+2026-03-22,2025-26,New York Rangers,Winnipeg Jets,2,3,False
+2026-03-22,2025-26,Pittsburgh Penguins,Carolina Hurricanes,1,5,False
+2026-03-22,2025-26,Utah Mammoth,Los Angeles Kings,4,3,False
+2026-03-22,2025-26,Washington Capitals,Colorado Avalanche,2,3,False
+2026-03-23,2025-26,New York Rangers,Ottawa Senators,1,2,False
+2026-03-24,2025-26,Boston Bruins,Toronto Maple Leafs,2,4,False
+2026-03-24,2025-26,Calgary Flames,Los Angeles Kings,3,2,False
+2026-03-24,2025-26,Dallas Stars,New Jersey Devils,4,6,False
+2026-03-24,2025-26,Detroit Red Wings,Ottawa Senators,2,3,False
+2026-03-24,2025-26,Florida Panthers,Seattle Kraken,5,4,False
+2026-03-24,2025-26,Montreal Canadiens,Carolina Hurricanes,5,2,False
+2026-03-24,2025-26,Nashville Predators,San Jose Sharks,6,3,False
+2026-03-24,2025-26,New York Islanders,Chicago Blackhawks,3,4,False
+2026-03-24,2025-26,Philadelphia Flyers,Columbus Blue Jackets,2,3,False
+2026-03-24,2025-26,Pittsburgh Penguins,Colorado Avalanche,2,6,False
+2026-03-24,2025-26,St. Louis Blues,Washington Capitals,3,0,False
+2026-03-24,2025-26,Tampa Bay Lightning,Minnesota Wild,6,3,False
+2026-03-24,2025-26,Utah Mammoth,Edmonton Oilers,2,5,False
+2026-03-24,2025-26,Vancouver Canucks,Anaheim Ducks,3,5,False
+2026-03-24,2025-26,Winnipeg Jets,Vegas Golden Knights,4,1,False
+2026-03-25,2025-26,Buffalo Sabres,Boston Bruins,3,4,False
+2026-03-25,2025-26,Toronto Maple Leafs,New York Rangers,4,3,False
+2026-03-26,2025-26,Calgary Flames,Anaheim Ducks,2,3,False
+2026-03-26,2025-26,Florida Panthers,Minnesota Wild,2,3,False
+2026-03-26,2025-26,Montreal Canadiens,Columbus Blue Jackets,2,1,False
+2026-03-26,2025-26,Nashville Predators,New Jersey Devils,2,4,False
+2026-03-26,2025-26,New York Islanders,Dallas Stars,2,1,False
+2026-03-26,2025-26,Ottawa Senators,Pittsburgh Penguins,3,4,False
+2026-03-26,2025-26,Philadelphia Flyers,Chicago Blackhawks,5,1,False
+2026-03-26,2025-26,St. Louis Blues,San Jose Sharks,2,1,False
+2026-03-26,2025-26,Tampa Bay Lightning,Seattle Kraken,3,4,False
+2026-03-26,2025-26,Utah Mammoth,Washington Capitals,4,7,False
+2026-03-26,2025-26,Vancouver Canucks,Los Angeles Kings,0,4,False
+2026-03-26,2025-26,Vegas Golden Knights,Edmonton Oilers,3,4,False
+2026-03-26,2025-26,Winnipeg Jets,Colorado Avalanche,2,3,False
+2026-03-27,2025-26,Buffalo Sabres,Detroit Red Wings,2,5,False
+2026-03-27,2025-26,New York Rangers,Chicago Blackhawks,6,1,False
+2026-03-28,2025-26,Boston Bruins,Minnesota Wild,6,3,False
+2026-03-28,2025-26,Buffalo Sabres,Seattle Kraken,3,2,False
+2026-03-28,2025-26,Carolina Hurricanes,New Jersey Devils,5,2,False
+2026-03-28,2025-26,Columbus Blue Jackets,San Jose Sharks,2,3,False
+2026-03-28,2025-26,Calgary Flames,Vancouver Canucks,7,3,False
+2026-03-28,2025-26,Colorado Avalanche,Winnipeg Jets,2,4,False
+2026-03-28,2025-26,Detroit Red Wings,Philadelphia Flyers,3,5,False
+2026-03-28,2025-26,Edmonton Oilers,Anaheim Ducks,4,2,False
+2026-03-28,2025-26,Los Angeles Kings,Utah Mammoth,2,6,False
+2026-03-28,2025-26,Nashville Predators,Montreal Canadiens,1,4,False
+2026-03-28,2025-26,New York Islanders,Florida Panthers,5,2,False
+2026-03-28,2025-26,Pittsburgh Penguins,Dallas Stars,3,6,False
+2026-03-28,2025-26,St. Louis Blues,Toronto Maple Leafs,5,1,False
+2026-03-28,2025-26,Tampa Bay Lightning,Ottawa Senators,4,2,False
+2026-03-28,2025-26,Vegas Golden Knights,Washington Capitals,4,5,False
+2026-03-29,2025-26,Carolina Hurricanes,Montreal Canadiens,1,3,False
+2026-03-29,2025-26,Columbus Blue Jackets,Boston Bruins,3,4,False
+2026-03-29,2025-26,New Jersey Devils,Chicago Blackhawks,5,3,False
+2026-03-29,2025-26,New York Rangers,Florida Panthers,3,1,False
+2026-03-29,2025-26,Philadelphia Flyers,Dallas Stars,2,1,False
+2026-03-29,2025-26,Tampa Bay Lightning,Nashville Predators,3,2,False
+2026-03-30,2025-26,Anaheim Ducks,Toronto Maple Leafs,4,5,False
+2026-03-30,2025-26,Colorado Avalanche,Calgary Flames,9,2,False
+2026-03-30,2025-26,New York Islanders,Pittsburgh Penguins,3,8,False
+2026-03-30,2025-26,San Jose Sharks,St. Louis Blues,5,4,False
+2026-03-30,2025-26,Vegas Golden Knights,Vancouver Canucks,4,2,False
+2026-03-31,2025-26,Boston Bruins,Dallas Stars,6,3,False
+2026-03-31,2025-26,Buffalo Sabres,New York Islanders,4,3,False
+2026-03-31,2025-26,Columbus Blue Jackets,Carolina Hurricanes,2,5,False
+2026-03-31,2025-26,Chicago Blackhawks,Winnipeg Jets,3,4,False
+2026-03-31,2025-26,Edmonton Oilers,Seattle Kraken,3,0,False
+2026-03-31,2025-26,Florida Panthers,Ottawa Senators,6,3,False
+2026-03-31,2025-26,New York Rangers,New Jersey Devils,4,1,False
+2026-03-31,2025-26,Pittsburgh Penguins,Detroit Red Wings,5,1,False
+2026-03-31,2025-26,Tampa Bay Lightning,Montreal Canadiens,1,4,False
+2026-03-31,2025-26,Washington Capitals,Philadelphia Flyers,6,4,False
+2026-04-01,2025-26,Colorado Avalanche,Vancouver Canucks,6,8,False
+2026-04-01,2025-26,Los Angeles Kings,St. Louis Blues,2,1,False
+2026-04-01,2025-26,San Jose Sharks,Anaheim Ducks,4,3,False
+2026-04-02,2025-26,Carolina Hurricanes,Columbus Blue Jackets,5,1,False
+2026-04-02,2025-26,Dallas Stars,Winnipeg Jets,3,0,False
+2026-04-02,2025-26,Edmonton Oilers,Chicago Blackhawks,3,1,False
+2026-04-02,2025-26,Florida Panthers,Boston Bruins,2,1,False
+2026-04-02,2025-26,Los Angeles Kings,Nashville Predators,4,5,False
+2026-04-02,2025-26,Minnesota Wild,Vancouver Canucks,5,2,False
+2026-04-02,2025-26,New Jersey Devils,Washington Capitals,7,3,False
+2026-04-02,2025-26,New York Rangers,Montreal Canadiens,2,3,False
+2026-04-02,2025-26,Ottawa Senators,Buffalo Sabres,4,1,False
+2026-04-02,2025-26,Philadelphia Flyers,Detroit Red Wings,2,4,False
+2026-04-02,2025-26,Seattle Kraken,Utah Mammoth,2,6,False
+2026-04-02,2025-26,San Jose Sharks,Toronto Maple Leafs,4,1,False
+2026-04-02,2025-26,Tampa Bay Lightning,Pittsburgh Penguins,6,3,False
+2026-04-02,2025-26,Vegas Golden Knights,Calgary Flames,6,3,False
+2026-04-03,2025-26,Anaheim Ducks,St. Louis Blues,2,6,False
+2026-04-03,2025-26,New York Islanders,Philadelphia Flyers,1,4,False
+2026-04-04,2025-26,Anaheim Ducks,Calgary Flames,3,5,False
+2026-04-04,2025-26,Carolina Hurricanes,New York Islanders,4,3,False
+2026-04-04,2025-26,Columbus Blue Jackets,Winnipeg Jets,1,2,False
+2026-04-04,2025-26,Dallas Stars,Colorado Avalanche,0,2,False
+2026-04-04,2025-26,Edmonton Oilers,Vegas Golden Knights,1,5,False
+2026-04-04,2025-26,Los Angeles Kings,Toronto Maple Leafs,7,6,False
+2026-04-04,2025-26,New Jersey Devils,Montreal Canadiens,3,4,False
+2026-04-04,2025-26,New York Rangers,Detroit Red Wings,4,1,False
+2026-04-04,2025-26,Ottawa Senators,Minnesota Wild,1,4,False
+2026-04-04,2025-26,Pittsburgh Penguins,Florida Panthers,9,4,False
+2026-04-04,2025-26,Seattle Kraken,Chicago Blackhawks,2,4,False
+2026-04-04,2025-26,San Jose Sharks,Nashville Predators,3,6,False
+2026-04-04,2025-26,Tampa Bay Lightning,Boston Bruins,3,1,False
+2026-04-04,2025-26,Vancouver Canucks,Utah Mammoth,4,7,False
+2026-04-04,2025-26,Washington Capitals,Buffalo Sabres,6,2,False
+2026-04-05,2025-26,Colorado Avalanche,St. Louis Blues,2,3,False
+2026-04-05,2025-26,Detroit Red Wings,Minnesota Wild,4,5,False
+2026-04-05,2025-26,Montreal Canadiens,New Jersey Devils,0,3,False
+2026-04-05,2025-26,New York Rangers,Washington Capitals,8,1,False
+2026-04-05,2025-26,Ottawa Senators,Carolina Hurricanes,6,3,False
+2026-04-05,2025-26,Philadelphia Flyers,Boston Bruins,2,1,False
+2026-04-05,2025-26,Pittsburgh Penguins,Florida Panthers,5,2,False
+2026-04-06,2025-26,Buffalo Sabres,Tampa Bay Lightning,4,2,False
+2026-04-06,2025-26,Los Angeles Kings,Nashville Predators,3,2,False
+2026-04-06,2025-26,San Jose Sharks,Chicago Blackhawks,3,2,False
+2026-04-06,2025-26,Winnipeg Jets,Seattle Kraken,6,2,False
+2026-04-07,2025-26,Anaheim Ducks,Nashville Predators,0,5,False
+2026-04-07,2025-26,Carolina Hurricanes,Boston Bruins,6,5,False
+2026-04-07,2025-26,Dallas Stars,Calgary Flames,4,3,False
+2026-04-07,2025-26,Detroit Red Wings,Columbus Blue Jackets,3,4,False
+2026-04-07,2025-26,Minnesota Wild,Seattle Kraken,5,2,False
+2026-04-07,2025-26,Montreal Canadiens,Florida Panthers,4,3,False
+2026-04-07,2025-26,New Jersey Devils,Philadelphia Flyers,1,5,False
+2026-04-07,2025-26,Ottawa Senators,Tampa Bay Lightning,6,2,False
+2026-04-07,2025-26,St. Louis Blues,Colorado Avalanche,1,3,False
+2026-04-07,2025-26,Utah Mammoth,Edmonton Oilers,6,5,False
+2026-04-07,2025-26,Vancouver Canucks,Vegas Golden Knights,1,2,False
+2026-04-08,2025-26,New York Rangers,Buffalo Sabres,3,5,False
+2026-04-08,2025-26,San Jose Sharks,Edmonton Oilers,2,5,False
+2026-04-08,2025-26,Toronto Maple Leafs,Washington Capitals,0,4,False
+2026-04-09,2025-26,Anaheim Ducks,San Jose Sharks,6,1,False
+2026-04-09,2025-26,Buffalo Sabres,Columbus Blue Jackets,5,0,False
+2026-04-09,2025-26,Chicago Blackhawks,Carolina Hurricanes,2,7,False
+2026-04-09,2025-26,Colorado Avalanche,Calgary Flames,3,1,False
+2026-04-09,2025-26,Dallas Stars,Minnesota Wild,5,4,False
+2026-04-09,2025-26,Detroit Red Wings,Philadelphia Flyers,6,3,False
+2026-04-09,2025-26,Los Angeles Kings,Vancouver Canucks,4,1,False
+2026-04-09,2025-26,Montreal Canadiens,Tampa Bay Lightning,2,1,False
+2026-04-09,2025-26,New Jersey Devils,Pittsburgh Penguins,2,5,False
+2026-04-09,2025-26,New York Islanders,Toronto Maple Leafs,5,3,False
+2026-04-09,2025-26,Ottawa Senators,Florida Panthers,5,1,False
+2026-04-09,2025-26,Seattle Kraken,Vegas Golden Knights,4,3,False
+2026-04-09,2025-26,St. Louis Blues,Winnipeg Jets,2,3,False
+2026-04-09,2025-26,Utah Mammoth,Nashville Predators,4,1,False
+2026-04-11,2025-26,Boston Bruins,Tampa Bay Lightning,1,2,False
+2026-04-11,2025-26,Chicago Blackhawks,St. Louis Blues,3,5,False
+2026-04-11,2025-26,Colorado Avalanche,Vegas Golden Knights,2,3,False
+2026-04-11,2025-26,Dallas Stars,New York Rangers,2,0,False
+2026-04-11,2025-26,Detroit Red Wings,New Jersey Devils,3,5,False
+2026-04-11,2025-26,Los Angeles Kings,Edmonton Oilers,1,0,False
+2026-04-11,2025-26,Montreal Canadiens,Columbus Blue Jackets,2,5,False
+2026-04-11,2025-26,Nashville Predators,Minnesota Wild,2,1,False
+2026-04-11,2025-26,New York Islanders,Ottawa Senators,0,3,False
+2026-04-11,2025-26,Pittsburgh Penguins,Washington Capitals,3,6,False
+2026-04-11,2025-26,Seattle Kraken,Calgary Flames,4,1,False
+2026-04-11,2025-26,San Jose Sharks,Vancouver Canucks,3,4,False
+2026-04-11,2025-26,Toronto Maple Leafs,Florida Panthers,2,6,False
+2026-04-11,2025-26,Utah Mammoth,Carolina Hurricanes,1,4,False
+2026-04-11,2025-26,Winnipeg Jets,Philadelphia Flyers,1,7,False
+2026-04-12,2025-26,Anaheim Ducks,Vancouver Canucks,3,4,False
+2026-04-12,2025-26,Columbus Blue Jackets,Boston Bruins,2,3,False
+2026-04-12,2025-26,Calgary Flames,Utah Mammoth,4,1,False
+2026-04-12,2025-26,New Jersey Devils,Ottawa Senators,4,3,False
+2026-04-12,2025-26,New York Islanders,Montreal Canadiens,1,4,False
+2026-04-12,2025-26,Washington Capitals,Pittsburgh Penguins,3,0,False
+2026-04-13,2025-26,Chicago Blackhawks,Buffalo Sabres,1,5,False
+2026-04-13,2025-26,Edmonton Oilers,Colorado Avalanche,1,2,False
+2026-04-13,2025-26,Florida Panthers,New York Rangers,3,2,False
+2026-04-13,2025-26,Nashville Predators,San Jose Sharks,2,3,False
+2026-04-13,2025-26,Philadelphia Flyers,Carolina Hurricanes,3,2,False
+2026-04-13,2025-26,Seattle Kraken,Los Angeles Kings,3,5,False
+2026-04-13,2025-26,St. Louis Blues,Minnesota Wild,6,3,False
+2026-04-13,2025-26,Tampa Bay Lightning,Detroit Red Wings,4,3,False
+2026-04-13,2025-26,Toronto Maple Leafs,Dallas Stars,5,6,False
+2026-04-13,2025-26,Vegas Golden Knights,Winnipeg Jets,6,2,False
+2026-04-14,2025-26,Boston Bruins,New Jersey Devils,4,0,False
+2026-04-14,2025-26,Columbus Blue Jackets,Washington Capitals,1,2,False
+2026-04-14,2025-26,Calgary Flames,Colorado Avalanche,1,3,False
+2026-04-14,2025-26,Minnesota Wild,Anaheim Ducks,3,2,False
+2026-04-14,2025-26,New York Islanders,Carolina Hurricanes,1,2,False
+2026-04-14,2025-26,Philadelphia Flyers,Montreal Canadiens,4,2,False
+2026-04-14,2025-26,St. Louis Blues,Pittsburgh Penguins,7,5,False
+2026-04-14,2025-26,Utah Mammoth,Winnipeg Jets,5,3,False
+2026-04-14,2025-26,Vancouver Canucks,Los Angeles Kings,4,3,False
+2026-04-15,2025-26,Buffalo Sabres,Dallas Stars,3,4,False
+2026-04-15,2025-26,Chicago Blackhawks,San Jose Sharks,5,2,False
+2026-04-15,2025-26,Florida Panthers,Detroit Red Wings,8,1,False
+2026-04-15,2025-26,Ottawa Senators,Toronto Maple Leafs,3,1,False
+2026-04-15,2025-26,Tampa Bay Lightning,New York Rangers,2,4,False
+2026-04-15,2025-26,Vegas Golden Knights,Seattle Kraken,4,1,False
+2026-04-16,2025-26,Calgary Flames,Los Angeles Kings,3,1,False
+2026-04-16,2025-26,Colorado Avalanche,Seattle Kraken,2,0,False
+2026-04-16,2025-26,Edmonton Oilers,Vancouver Canucks,6,1,False
+2026-04-16,2025-26,Nashville Predators,Anaheim Ducks,4,5,False
+2026-04-16,2025-26,Utah Mammoth,St. Louis Blues,3,5,False
+2026-04-16,2025-26,Winnipeg Jets,San Jose Sharks,1,6,False

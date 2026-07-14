@@ -1,173 +1,96 @@
-import plotly.graph_objects as go
 import streamlit as st
+import pandas as pd
+import plotly.express as px
 
 from metadata.nfl_teams import NFL_TEAMS
+from metadata.nhl_teams import NHL_TEAMS
 
 
-def render_simulation_tab():
+def get_team_color_map(sport):
+    teams = NHL_TEAMS if sport == "NHL" else NFL_TEAMS
+    color_map = {}
+    for abbr, data in teams.items():
+        color = data["primary_color"]
+        color_map[abbr] = color
+        color_map[data["name"]] = color
+    return color_map
 
-    st.header("Season Simulation")
+
+def render_simulation_tab(sport="NFL"):
+    st.header(f"{sport} Season Simulation Results")
 
     if "simulation_results" not in st.session_state:
-
-        st.metric(
-            "Simulation Status",
-            "Not Running",
-        )
-
-        st.info(
-            "Configure the model in the sidebar and "
-            "click Run Simulation."
-        )
-
+        st.info("Run a simulation from the sidebar to see results.")
         return
 
-    results = st.session_state["simulation_results"]
-    simulation_count = st.session_state.get("simulation_count")
-    best_params = st.session_state.get("best_optimized_params")
-    optimize_for = st.session_state.get("optimize_for", [])
+    results = st.session_state.get("simulation_results", {})
+    summary = results.get("summary", pd.DataFrame())
+    distribution = results.get("distribution", pd.DataFrame())
+    achievement_probs = results.get("achievement_probs", pd.DataFrame())
 
-    st.metric(
-        "Simulation Status",
-        "Complete",
-    )
+    if summary.empty:
+        st.warning("No simulation results available yet.")
+        return
 
-    if simulation_count:
-        st.caption(
-            f"{simulation_count:,} Monte Carlo simulations completed"
-        )
+    # ====================== FORCE SHOW ACHIEVEMENT TABLE ======================
+    if not achievement_probs.empty:
+        st.subheader("Regular Season Achievement Probabilities")
 
-    # === Show which configuration was used ===
-    if best_params:
-        st.success("**Using optimized parameters**")
-        param_text = " | ".join([f"{k}: {v}" for k, v in best_params.items()])
-        st.caption(f"Optimized parameters: {param_text}")
-        if optimize_for:
-            st.caption(f"Optimizations applied to: {', '.join(optimize_for)}")
+        rename_map = {
+            "make_playoffs": "Make Playoffs",
+            "home_ice": "Home Ice (Top 2 in Div)",
+            "first_in_division": "1st in Division",
+            "first_in_conference": "1st in Conference",
+            "first_in_league": "1st in League"
+        }
+
+        display_df = achievement_probs.rename(columns=rename_map)
+
+        if "Make Playoffs" in display_df.columns:
+            display_df = display_df.sort_values("Make Playoffs", ascending=False)
+
+        st.dataframe(display_df, use_container_width=True)
     else:
-        st.info("Using default/fixed parameters (no optimization)")
+        st.warning("Achievement probability data is missing from results. This is a temporary display issue.")
 
-    st.divider()
+    # ====================== TRADITIONAL STATS ======================
+    if sport == "NHL":
+        metric_col = "mean_points"
+        metric_label = "Points"
+    else:
+        metric_col = "median_wins"
+        metric_label = "Wins"
 
-    st.subheader(
-        "Expected Wins"
-    )
+    st.subheader(f"Team {metric_label} Summary")
 
-    st.dataframe(
-        results["summary"],
-        use_container_width=True,
-        hide_index=True,
-    )
+    if not summary.empty:
+        display_df = summary.copy()
+        if metric_col in display_df.columns:
+            display_df = display_df.sort_values(metric_col, ascending=False)
+        st.dataframe(display_df, use_container_width=True)
 
-    st.divider()
+    # Distribution plot with team colors
+    if not distribution.empty and "team" in distribution.columns:
+        plot_col = "points" if sport == "NHL" and "points" in distribution.columns else "wins"
+        if plot_col in distribution.columns:
+            color_map = get_team_color_map(sport)
+            fig = px.box(
+                distribution,
+                x="team",
+                y=plot_col,
+                color="team",
+                color_discrete_map=color_map,
+                title=f"Distribution of {metric_label} Across Simulations",
+            )
+            fig.update_layout(xaxis_tickangle=-45, showlegend=False)
+            st.plotly_chart(fig, use_container_width=True)
 
-    st.subheader(
-        "Win Distribution Explorer"
-    )
-
-    summary = results["summary"].copy()
-    distribution = results["distribution"].copy()
-
-    teams = sorted(
-        summary["team"].unique()
-    )
-
-    selected_team = st.selectbox(
-        "Select Team",
-        teams,
-        index=teams.index("DEN"),
-    )
-
-    summary_row = summary[
-        summary["team"] == selected_team
-    ].iloc[0]
-
-    team_distribution = (
-        distribution[
-            distribution["team"] == selected_team
-        ]
-        .sort_values("wins")
-        .reset_index(drop=True)
-    )
-
-    cumulative = (
-        team_distribution["probability"]
-        .cumsum()
-    )
-
-    lower_bound = team_distribution.loc[
-        cumulative.ge(0.05).idxmax(),
-        "wins",
-    ]
-
-    upper_bound = team_distribution.loc[
-        cumulative.ge(0.95).idxmax(),
-        "wins",
-    ]
-
-    col1, col2, col3, col4 = st.columns(4)
-
-    col1.metric(
-        "Expected Wins",
-        f'{summary_row["mean"]:.1f}',
-    )
-
-    col2.metric(
-        "Median Wins",
-        f'{int(summary_row["median"])}',
-    )
-
-    col3.metric(
-        "Std Dev",
-        f'{summary_row["std"]:.1f}',
-    )
-
-    col4.metric(
-        "90% Range",
-        f"{lower_bound}-{upper_bound}",
-    )
-
-    st.subheader(
-        f"{selected_team} Win Distribution"
-    )
-
-    team_color = NFL_TEAMS[selected_team][
-        "primary_color"
-    ]
-
-    fig = go.Figure()
-
-    fig.add_bar(
-        x=team_distribution["wins"],
-        y=team_distribution["probability"] * 100,
-        marker_color=team_color,
-        hovertemplate=(
-            "<b>%{x} Wins</b><br>"
-            "Probability: %{y:.2f}%"
-            "<extra></extra>"
-        ),
-    )
-
-    fig.update_layout(
-        height=400,
-        margin=dict(
-            l=20,
-            r=20,
-            t=20,
-            b=20,
-        ),
-        xaxis_title="Wins",
-        yaxis_title="Probability (%)",
-        showlegend=False,
-    )
-
-    fig.update_xaxes(
-        tickmode="linear",
-        dtick=1,
-        tickangle=0,
-    )
-
-    st.plotly_chart(
-        fig,
-        use_container_width=True,
-    )
+    # Quick stats
+    if not summary.empty and metric_col in summary.columns:
+        st.subheader("Quick Stats")
+        col1, col2 = st.columns(2)
+        with col1:
+            top_idx = summary[metric_col].idxmax()
+            st.metric(f"Highest {metric_label}", summary.loc[top_idx, "team"], f"{summary.loc[top_idx, metric_col]:.1f}")
+        with col2:
+            st.metric(f"Average {metric_label}", f"{summary[metric_col].mean():.1f}")

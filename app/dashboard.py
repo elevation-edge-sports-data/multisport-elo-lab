@@ -1,8 +1,8 @@
 import bootstrap
 import streamlit as st
+import pandas as pd
 
 from components.layout import configure_page
-
 from tabs.configuration import render_configuration_tab
 from tabs.simulation import render_simulation_tab
 from tabs.elo_ratings import render_elo_ratings_tab
@@ -12,278 +12,178 @@ from tabs.evaluation import render_evaluation_tab
 from services.simulation_service import run_simulation
 from elo_lab.workflows.optimize_parameters import optimize_parameters_for_config
 
+from metadata.nfl_teams import NFL_TEAMS
+from metadata.nhl_teams import NHL_TEAMS
+
 
 configure_page()
 
-# Broncos Orange theme for checkboxes and progress bar
 st.markdown("""
 <style>
-    /* Progress bar color */
-    .stProgress > div > div > div > div {
-        background-color: #FB4F14 !important;
-    }
-    
-    /* Checkbox checked color */
+    .stProgress > div > div > div > div { background-color: #FB4F14 !important; }
     .stCheckbox > label > div[role="checkbox"][aria-checked="true"] {
-        background-color: #FB4F14 !important;
-        border-color: #FB4F14 !important;
+        background-color: #FB4F14 !important; border-color: #FB4F14 !important;
     }
 </style>
 """, unsafe_allow_html=True)
 
-
 st.title("MultiSport Elo Lab")
+st.caption("Interactive sports modeling analytics platform | Version 8 (NHL Integration)")
 
-st.caption(
-    "Interactive sports modeling analytics platform | "
-    "Version 6 Dashboard"
-)
+def get_sport_teams(sport):
+    return NHL_TEAMS if sport == "NHL" else NFL_TEAMS
 
+def get_available_seasons(sport):
+    schedule_path = "data/nhl_games.csv" if sport == "NHL" else "data/nfl_games.csv"
+    try:
+        schedule = pd.read_csv(schedule_path)
+        if "season" in schedule.columns:
+            seasons = sorted([str(s) for s in schedule["season"].dropna().unique()])
+            return seasons
+    except:
+        pass
+    return ["2025-26"] if sport == "NHL" else ["2025"]
 
-def build_model_config(
-    home_field: bool,
-    margin_of_victory: bool,
-    elevation: bool,
-) -> dict:
-    """Build the model configuration from enabled adjustments."""
-    adjustments_config = {}
+def get_initial_ratings(sport, schedule_path=None):
+    if schedule_path is None:
+        schedule_path = "data/nhl_games.csv" if sport == "NHL" else "data/nfl_games.csv"
 
-    if home_field:
-        adjustments_config["home_field"] = {"enabled": True, "value": 55}
-    if margin_of_victory:
-        adjustments_config["margin_of_victory"] = {"enabled": True, "scale": 1.0}
-    if elevation:
-        adjustments_config["elevation_edge"] = {"enabled": True, "value": 0.0}
+    try:
+        schedule = pd.read_csv(schedule_path)
+        teams = pd.concat([schedule["home_team"], schedule["away_team"]]).unique()
+    except:
+        teams = list(NHL_TEAMS.keys()) if sport == "NHL" else list(NFL_TEAMS.keys())
 
-    return {
-        "k": 20,
-        "adjustments": adjustments_config,
-    }
+    if sport == "NHL":
+        # Initial Elo ratings derived from final 2025-26 regular season standings
+        base_elo = {
+            "COL": 1620, "CAR": 1590, "DAL": 1585, "BUF": 1570,
+            "FLA": 1560, "VGK": 1555, "MIN": 1545, "MTL": 1540,
+            "TBL": 1535, "NYR": 1530, "EDM": 1525, "WPG": 1520,
+            "BOS": 1515, "LAK": 1510, "NSH": 1505, "PHI": 1500,
+            "SEA": 1495, "VAN": 1490, "NYI": 1485, "WSH": 1480,
+            "PIT": 1475, "DET": 1470, "CBJ": 1465, "OTT": 1460,
+            "CGY": 1455, "TOR": 1450, "CHI": 1445, "ANA": 1440,
+            "SJS": 1435, "UTA": 1430, "NJD": 1425,
+        }
+        return {team: base_elo.get(team, 1500) for team in teams}
+    
+    else:
+        # NFL initial Elo ratings derived from final 2025 regular season standings
+        base_elo = {
+            "KC": 1610, "BAL": 1595, "SF": 1585, "PHI": 1575,
+            "BUF": 1565, "DAL": 1555, "DET": 1545, "MIA": 1535,
+            "CIN": 1525, "HOU": 1515, "SEA": 1505, "GB": 1495,
+            "LAR": 1485, "MIN": 1475, "PIT": 1465, "ATL": 1455,
+            "TB": 1445, "NO": 1435, "LAC": 1425, "NYJ": 1415,
+            "CLE": 1405, "LV": 1395, "DEN": 1385, "IND": 1375,
+            "TEN": 1365, "JAX": 1355, "CAR": 1345, "ARI": 1335,
+            "WAS": 1325, "NYG": 1315, "CHI": 1305, "NE": 1295,
+        }
+        return {team: base_elo.get(team, 1500) for team in teams}
 
+def build_model_config(home_field, margin_of_victory, elevation):
+    adjustments = {}
+    if home_field: adjustments["home_field"] = {"enabled": True, "value": 55}
+    if margin_of_victory: adjustments["margin_of_victory"] = {"enabled": True, "scale": 1.0}
+    if elevation: adjustments["elevation_edge"] = {"enabled": True, "value": 0.0}
+    return {"k": 20, "adjustments": adjustments}
 
-def get_optimize_for(
-    home_field: bool,
-    margin_of_victory: bool,
-    elevation: bool,
-    opt_home_field: bool,
-    opt_margin_of_victory: bool,
-    opt_elevation: bool,
-) -> list[str]:
-    """Return list of adjustments the user wants to optimize parameters for."""
-    optimize_for = []
-    if home_field and opt_home_field:
-        optimize_for.append("home_field")
-    if margin_of_victory and opt_margin_of_victory:
-        optimize_for.append("margin_of_victory")
-    if elevation and opt_elevation:
-        optimize_for.append("elevation_edge")
-    return optimize_for
+def get_optimize_for(hf, mov, elev, opt_hf, opt_mov, opt_elev):
+    opts = []
+    if hf and opt_hf: opts.append("home_field")
+    if mov and opt_mov: opts.append("margin_of_victory")
+    if elev and opt_elev: opts.append("elevation_edge")
+    return opts
 
-
-# ==========================================================
-# SIDEBAR CONFIGURATION
-# ==========================================================
-
+# ==================== SIDEBAR ====================
 st.sidebar.header("Model Configuration")
 
+sport = st.sidebar.selectbox("Sport", ["NHL", "NFL"], index=0)  # Default = NHL
 
-sport = st.sidebar.selectbox(
-    "Sport",
-    ["NFL"]
-)
-
-
-season = st.sidebar.selectbox(
-    "Season",
-    ["2025"]
-)
-
+season_options = get_available_seasons(sport)
+season = st.sidebar.selectbox("Season", season_options, index=0)
 
 st.sidebar.divider()
-
-
 st.sidebar.subheader("Adjustments")
-
 home_field = st.sidebar.checkbox("Home Field Advantage", value=True)
 margin_of_victory = st.sidebar.checkbox("Margin of Victory", value=True)
 elevation = st.sidebar.checkbox("Elevation Edge", value=False)
 
 st.sidebar.divider()
-
-# === Parameter Optimization Controls ===
-optimize_params = st.sidebar.checkbox(
-    "Optimize parameters for selected adjustments", value=False
-)
-
-opt_home_field = opt_margin_of_victory = opt_elevation = False
-
+optimize_params = st.sidebar.checkbox("Optimize parameters", value=False)
+opt_hf = opt_mov = opt_elev = False
 if optimize_params:
-    st.sidebar.markdown("**Optimize parameters for:**")
-    if home_field:
-        opt_home_field = st.sidebar.checkbox("Home Field Advantage", value=True, key="opt_hfa")
-    if margin_of_victory:
-        opt_margin_of_victory = st.sidebar.checkbox("Margin of Victory", value=True, key="opt_mov")
-    if elevation:
-        opt_elevation = st.sidebar.checkbox("Elevation Edge", value=False, key="opt_elev")
+    if home_field: opt_hf = st.sidebar.checkbox("Optimize Home Field", value=True, key="opt_hf")
+    if margin_of_victory: opt_mov = st.sidebar.checkbox("Optimize Margin", value=True, key="opt_mov")
+    if elevation: opt_elev = st.sidebar.checkbox("Optimize Elevation", value=False, key="opt_elev")
 
 st.sidebar.divider()
 
-
-simulation_options = [
-    100,
-    500,
-    1000,
-    5000,
-    10000,
-    50000,
-]
-
-
+simulation_options = [100, 500, 1000, 5000, 10000]
 simulation_count = st.sidebar.selectbox(
     "Simulation Count",
     simulation_options,
-    index=0,   # Default changed to 100
-    format_func=lambda x: f"{x:,}",
+    index=0,  # Default = 100
+    format_func=lambda x: f"{x:,}"
 )
 
-
-st.sidebar.divider()
-
-
-# ==========================================================
-# SIMULATION EXECUTION
-# ==========================================================
-
 if st.sidebar.button("Run Simulation"):
-
     config = build_model_config(home_field, margin_of_victory, elevation)
-    optimize_for = get_optimize_for(
-        home_field, margin_of_victory, elevation,
-        opt_home_field, opt_margin_of_victory, opt_elevation
-    )
+    optimize_for = get_optimize_for(home_field, margin_of_victory, elevation, opt_hf, opt_mov, opt_elev)
+    
+    schedule_path = "data/nhl_games.csv" if sport == "NHL" else "data/nfl_games.csv"
+    initial_ratings = get_initial_ratings(sport, schedule_path)
 
-    st.session_state["last_config"] = config
-    st.session_state["active_adjustments"] = list(config["adjustments"].keys())
-    st.session_state["optimize_for"] = optimize_for
-
-    # Progress indicator in the sidebar
     with st.sidebar.status("Running simulation...", expanded=True) as status:
-        progress_bar = st.sidebar.progress(0, text="Starting...")
-
+        pb = st.sidebar.progress(0, text="Starting...")
+        
         if optimize_for:
-            progress_bar.progress(20, text="Optimizing parameters...")
-            best_config, opt_results = optimize_parameters_for_config(
-                base_config=config,
-                optimize_for=optimize_for
-            )
-            st.session_state["optimization_results"] = opt_results
+            pb.progress(20, "Optimizing parameters...")
+            best_config, _ = optimize_parameters_for_config(base_config=config, optimize_for=optimize_for)
             final_config = best_config
-
-            best_params = {"k": best_config.get("k")}
-            for adj, params in best_config.get("adjustments", {}).items():
-                for key, value in params.items():
-                    if key in ["value", "scale"]:
-                        best_params[f"{adj}_{key}"] = value
-            st.session_state["best_optimized_params"] = best_params
-
-            progress_bar.progress(50, text="Optimization complete")
+            pb.progress(50, "Optimization complete")
         else:
             final_config = config
-            st.session_state["best_optimized_params"] = None
-            progress_bar.progress(50, text="Running simulations...")
+            pb.progress(50, "Running simulations...")
 
-        # Run the actual Monte Carlo simulation
-        progress_bar.progress(70, text="Running Monte Carlo simulations...")
-
-        # Temporary Version 7 validation initialization.
-        initial_ratings = {
-            "ARI": 1340,
-            "ATL": 1350,
-            "BAL": 1360,
-            "BUF": 1370,
-            "CAR": 1380,
-            "CHI": 1390,
-            "CIN": 1400,
-            "CLE": 1410,
-            "DAL": 1420,
-            "DEN": 1430,
-            "DET": 1440,
-            "GB": 1450,
-            "HOU": 1460,
-            "IND": 1470,
-            "JAX": 1480,
-            "KC": 1490,
-            "LAC": 1500,
-            "LAR": 1510,
-            "LV": 1520,
-            "MIA": 1530,
-            "MIN": 1540,
-            "NE": 1550,
-            "NO": 1560,
-            "NYG": 1570,
-            "NYJ": 1580,
-            "PHI": 1590,
-            "PIT": 1600,
-            "SEA": 1610,
-            "SF": 1620,
-            "TB": 1630,
-            "TEN": 1640,
-            "WAS": 1650,
-        }
-
+        pb.progress(70, "Running Monte Carlo simulations...")
         results = run_simulation(
             config=final_config,
             n_sims=simulation_count,
             initial_ratings=initial_ratings,
+            sport=sport,
+            season=season,
         )
-
         st.session_state["simulation_results"] = results
-        st.session_state["simulation_count"] = simulation_count
-
-        progress_bar.progress(100, text="Complete!")
+        st.session_state["sport"] = sport
+        pb.progress(100, "Complete!")
         status.update(label="Simulation complete!", state="complete")
-# ==========================================================
-# TABS
-# ==========================================================
 
-tabs = st.tabs(
-    [
-        "Model Configuration",
-        "Season Simulation",
-        "Elo Ratings",
-        "Elo Evolution",
-        "Model Evaluation",
-    ]
-)
-
+# ==================== TABS ====================
+tabs = st.tabs([
+    "Model Configuration",
+    "Season Simulation",
+    "Elo Ratings",
+    "Elo Trajectory",
+    "Model Evaluation"
+])
 
 with tabs[0]:
-
     render_configuration_tab(
-        sport=sport,
-        season=season,
-        home_field=home_field,
-        margin_of_victory=margin_of_victory,
-        elevation=elevation,
-        simulation_count=simulation_count,
+        sport=sport, season=season,
+        home_field=home_field, margin_of_victory=margin_of_victory,
+        elevation=elevation, simulation_count=simulation_count
     )
 
-
 with tabs[1]:
-
-    render_simulation_tab()
-
+    render_simulation_tab(sport=sport)
 
 with tabs[2]:
-
-    render_elo_ratings_tab()
-
+    render_elo_ratings_tab(sport=sport)
 
 with tabs[3]:
-
-    render_elo_evolution_tab()
-
+    render_elo_evolution_tab(sport=sport)
 
 with tabs[4]:
-
     render_evaluation_tab()

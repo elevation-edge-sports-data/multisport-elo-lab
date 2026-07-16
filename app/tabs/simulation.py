@@ -36,15 +36,27 @@ def render_simulation_tab(sport="NFL"):
     if not achievement_probs.empty:
         st.subheader("Regular Season Achievement Probabilities")
 
-        rename_map = {
-            "make_playoffs": "Make Playoffs",
-            "home_ice": "Home Ice (Top 2 in Div)",
-            "first_in_division": "1st in Division",
-            "first_in_conference": "1st in Conference",
-            "first_in_league": "1st in League"
-        }
+        if sport == "NHL":
+            rename_map = {
+                "make_playoffs": "Make Playoffs",
+                "home_ice": "Home Ice (Top 2 in Div)",
+                "first_in_division": "1st in Division",
+                "first_in_conference": "1st in Conference",
+                "first_in_league": "1st in League"
+            }
+            # Keep all NHL columns
+            cols_to_show = [c for c in ["make_playoffs", "home_ice", "first_in_division", "first_in_conference", "first_in_league"] if c in achievement_probs.columns]
+        else:
+            # NFL: no Home Ice; show 4 probs (make playoffs + 1st div/conf/league)
+            rename_map = {
+                "make_playoffs": "Make Playoffs",
+                "first_in_division": "1st in Division",
+                "first_in_conference": "1st in Conference",
+                "first_in_league": "1st in League"
+            }
+            cols_to_show = [c for c in ["make_playoffs", "first_in_division", "first_in_conference", "first_in_league"] if c in achievement_probs.columns]
 
-        display_df = achievement_probs.rename(columns=rename_map)
+        display_df = achievement_probs[["team"] + cols_to_show].rename(columns=rename_map)
 
         if "Make Playoffs" in display_df.columns:
             display_df = display_df.sort_values("Make Playoffs", ascending=False)

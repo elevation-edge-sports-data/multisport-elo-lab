@@ -1,5 +1,19 @@
 # Changelog
 
+## Version 8.2 — NFL Achievement Probabilities Fix
+
+### Fixed
+- **NFL Season Simulation tab** no longer displays the NHL-only "Home Ice (Top 2 in Div)" column
+- NFL achievement table now shows exactly four probabilities: Make Playoffs, 1st in Division, 1st in Conference, 1st in League
+- NFL achievement probabilities were previously a placeholder (only "Make Playoffs" was non-zero)
+- Implemented proper NFL playoff structure: 4 division winners + 3 wild cards per conference
+- All four probability columns now produce realistic, non-zero values from Monte Carlo simulations
+
+### Improved
+- Achievement probability calculation is now fully multi-sport aware (NHL, NFL logic paths)
+- Season Simulation display logic is sport-conditional
+
+
 ## Version 8.1 — Calibration, Brier Decomposition & Grid Search Landscape
 
 ### Added

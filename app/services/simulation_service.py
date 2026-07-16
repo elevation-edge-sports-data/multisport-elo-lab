@@ -7,12 +7,15 @@ from elo_lab.workflows.simulate_season import (
 )
 
 from metadata.nhl_teams import NHL_TEAMS
+from metadata.nfl_teams import NFL_TEAMS
 
 
 def calculate_achievement_probabilities(sim_results: pd.DataFrame, sport: str) -> pd.DataFrame:
     if sim_results.empty:
-        return pd.DataFrame(columns=["team", "make_playoffs", "home_ice", 
-                                     "first_in_division", "first_in_conference", "first_in_league"])
+        cols = ["team", "make_playoffs", "first_in_division", "first_in_conference", "first_in_league"]
+        if sport == "NHL":
+            cols.insert(2, "home_ice")
+        return pd.DataFrame(columns=cols)
 
     all_results = []
 
@@ -73,37 +76,108 @@ def calculate_achievement_probabilities(sim_results: pd.DataFrame, sport: str) -
             sim_data["first_in_conference"] = sim_data["team"].isin(first_conf)
             sim_data["first_in_league"] = sim_data["team"] == first_league
 
-        else:
-            # NFL placeholder
-            sim_data = sim_data.sort_values("wins", ascending=False)
-            n = min(7, len(sim_data))
-            sim_data["make_playoffs"] = False
-            sim_data.iloc[:n, sim_data.columns.get_loc("make_playoffs")] = True
-            for col in ["home_ice", "first_in_division", "first_in_conference", "first_in_league"]:
-                sim_data[col] = False
+            all_results.append(sim_data[[
+                "sim_id", "team", "make_playoffs", "home_ice",
+                "first_in_division", "first_in_conference", "first_in_league"
+            ]])
 
-        all_results.append(sim_data[[
-            "sim_id", "team", "make_playoffs", "home_ice",
-            "first_in_division", "first_in_conference", "first_in_league"
-        ]])
+        else:
+            # NFL: proper playoff structure (7 teams per conference)
+            # Division winners + 3 wild cards per conference
+            team_lookup = {}
+            for abbr, data in NFL_TEAMS.items():
+                team_lookup[abbr.lower().strip()] = data
+                team_lookup[data["name"].lower().strip()] = data
+
+            def get_meta(team_name):
+                key = str(team_name).lower().strip()
+                return team_lookup.get(key, {})
+
+            sim_data["conference"] = sim_data["team"].apply(lambda x: get_meta(x).get("conference"))
+            sim_data["division"] = sim_data["team"].apply(lambda x: get_meta(x).get("division"))
+
+            matched = sim_data.dropna(subset=["conference", "division"]).copy()
+            if matched.empty:
+                continue
+
+            # Sort by wins descending (primary; secondary not needed for sims as ties rare)
+            matched = matched.sort_values("wins", ascending=False)
+
+            qualified = set()
+            first_div = set()
+            first_conf = set()
+
+            # Per conference (AFC / NFC)
+            for conf in ["AFC", "NFC"]:
+                conf_teams = matched[matched["conference"] == conf].copy()
+                if conf_teams.empty:
+                    continue
+
+                # Division winners (top team in each of 4 divisions)
+                div_winners = []
+                for div in ["East", "North", "South", "West"]:
+                    div_group = conf_teams[conf_teams["division"] == div]
+                    if not div_group.empty:
+                        winner = div_group.iloc[0]["team"]
+                        div_winners.append(winner)
+                        first_div.add(winner)
+
+                # Remaining teams for wild cards (exclude division winners)
+                remaining = conf_teams[~conf_teams["team"].isin(div_winners)]
+                wild_cards = remaining.head(3)["team"].tolist()
+
+                qualified.update(div_winners)
+                qualified.update(wild_cards)
+
+                # First in Conference = top team overall in conf (by wins)
+                if not conf_teams.empty:
+                    first_conf.add(conf_teams.iloc[0]["team"])
+
+            # First in League = overall best record
+            first_league = matched.iloc[0]["team"] if not matched.empty else None
+
+            # No "home_ice" for NFL (home-field is for #1 seeds / conference winners, but not tracked as top-2-div)
+            sim_data["make_playoffs"] = sim_data["team"].isin(qualified)
+            sim_data["first_in_division"] = sim_data["team"].isin(first_div)
+            sim_data["first_in_conference"] = sim_data["team"].isin(first_conf)
+            sim_data["first_in_league"] = sim_data["team"] == first_league
+            # Explicitly set home_ice to False for consistency if needed later, but we omit it
+            sim_data["home_ice"] = False
+
+            all_results.append(sim_data[[
+                "sim_id", "team", "make_playoffs", "home_ice",
+                "first_in_division", "first_in_conference", "first_in_league"
+            ]])
 
     if not all_results:
-        return pd.DataFrame(columns=["team", "make_playoffs", "home_ice", 
-                                     "first_in_division", "first_in_conference", "first_in_league"])
+        cols = ["team", "make_playoffs", "first_in_division", "first_in_conference", "first_in_league"]
+        if sport == "NHL":
+            cols.insert(2, "home_ice")
+        return pd.DataFrame(columns=cols)
 
     df = pd.concat(all_results, ignore_index=True)
 
-    prob_df = df.groupby("team").agg(
-        make_playoffs=("make_playoffs", "mean"),
-        home_ice=("home_ice", "mean"),
-        first_in_division=("first_in_division", "mean"),
-        first_in_conference=("first_in_conference", "mean"),
-        first_in_league=("first_in_league", "mean"),
-    ).reset_index()
+    # Aggregate probabilities; for NFL drop home_ice
+    agg_dict = {
+        "make_playoffs": ("make_playoffs", "mean"),
+        "first_in_division": ("first_in_division", "mean"),
+        "first_in_conference": ("first_in_conference", "mean"),
+        "first_in_league": ("first_in_league", "mean"),
+    }
+    if sport == "NHL":
+        agg_dict["home_ice"] = ("home_ice", "mean")
+
+    prob_df = df.groupby("team").agg(**agg_dict).reset_index()
 
     for col in prob_df.columns:
         if col != "team":
             prob_df[col] = (prob_df[col] * 100).round(1)
+
+    # Ensure column order
+    if sport == "NHL":
+        prob_df = prob_df[["team", "make_playoffs", "home_ice", "first_in_division", "first_in_conference", "first_in_league"]]
+    else:
+        prob_df = prob_df[["team", "make_playoffs", "first_in_division", "first_in_conference", "first_in_league"]]
 
     return prob_df
 

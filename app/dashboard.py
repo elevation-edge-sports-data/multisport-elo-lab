@@ -70,15 +70,18 @@ def get_initial_ratings(sport, schedule_path=None):
     
     else:
         # NFL initial Elo ratings derived from final 2025 regular season standings
+        # (same methodology as prior year: rank by final W-L-T / PCT, assign descending from ~1610 by steps of 10)
+        # 2025 final standings: DEN/NE/SEA 14-3, JAX 13-4, BUF/HOU/LAR/SF 12-5, etc.
+        # This places Denver near the top as the AFC #1 seed / co-best record.
         base_elo = {
-            "KC": 1610, "BAL": 1595, "SF": 1585, "PHI": 1575,
-            "BUF": 1565, "DAL": 1555, "DET": 1545, "MIA": 1535,
-            "CIN": 1525, "HOU": 1515, "SEA": 1505, "GB": 1495,
-            "LAR": 1485, "MIN": 1475, "PIT": 1465, "ATL": 1455,
-            "TB": 1445, "NO": 1435, "LAC": 1425, "NYJ": 1415,
-            "CLE": 1405, "LV": 1395, "DEN": 1385, "IND": 1375,
-            "TEN": 1365, "JAX": 1355, "CAR": 1345, "ARI": 1335,
-            "WAS": 1325, "NYG": 1315, "CHI": 1305, "NE": 1295,
+            "DEN": 1610, "NE": 1600, "SEA": 1590, "JAX": 1580,
+            "BUF": 1570, "HOU": 1560, "LAR": 1550, "SF": 1540,
+            "CHI": 1530, "LAC": 1520, "PHI": 1510, "PIT": 1500,
+            "GB": 1490, "DET": 1480, "MIN": 1470, "ATL": 1460,
+            "BAL": 1450, "CAR": 1440, "TB": 1430, "IND": 1420,
+            "DAL": 1410, "MIA": 1400, "CIN": 1390, "KC": 1380,
+            "NO": 1370, "CLE": 1360, "WAS": 1350, "NYG": 1340,
+            "ARI": 1330, "LV": 1320, "NYJ": 1310, "TEN": 1300,
         }
         return {team: base_elo.get(team, 1500) for team in teams}
 

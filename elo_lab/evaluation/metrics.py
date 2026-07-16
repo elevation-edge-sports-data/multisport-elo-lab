@@ -21,3 +21,22 @@ def log_loss(p, y):
 
 def brier(p, y):
     return (p - y) ** 2
+
+def expected_calibration_error(
+    probs: np.ndarray | list,
+    actuals: np.ndarray | list,
+    bins: int = 10,
+) -> float:
+    """Expected Calibration Error (ECE)."""
+    from .diagnostics import brier_decomposition
+    return brier_decomposition(probs, actuals, bins=bins)["ece"]
+
+
+def brier_score(
+    probs: np.ndarray | list,
+    actuals: np.ndarray | list,
+) -> float:
+    """Mean Brier score (convenience wrapper)."""
+    probs = np.asarray(probs, dtype=float)
+    actuals = np.asarray(actuals, dtype=float)
+    return float(np.mean((probs - actuals) ** 2))

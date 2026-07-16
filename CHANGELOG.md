@@ -1,5 +1,59 @@
 # Changelog
 
+## Version 8.1 — Calibration, Brier Decomposition & Grid Search Landscape
+
+### Added
+- **Brier score decomposition** on the Model Evaluation tab
+  - Reliability, Resolution, and Uncertainty components
+  - Expected Calibration Error (ECE) as a single-number summary
+- **Calibration plot** (reliability diagram)
+  - Binned predicted win probability vs observed win rate
+  - Perfect-calibration diagonal and sample-size-aware markers
+- **Baseline comparisons**
+  - Home Win Rate and Coin Flip (0.5) baselines shown alongside the selected model
+  - Explicit delta columns quantifying lift over the naïve baselines
+- **Grid Search Landscape** visualization
+  - Interactive heatmap of any two optimized parameters
+  - Metric selector (Log Loss / Brier / Accuracy)
+  - Clear marker for the best combination
+  - Top-10 parameter combinations table
+- Extended evaluation service now provides access to raw prediction arrays for calibration and decomposition calculations
+
+### Improved
+- Model Evaluation tab now surfaces deeper diagnostics on calibration, resolution, and optimization results
+- Users can inspect any backtested model individually via a selector
+
+## Version 8.0 — Multisport NHL Integration + Achievement Probabilities
+
+### Added
+
+* Full multi-sport support with NHL integrated alongside NFL
+* Complete NHL team metadata (`app/metadata/nhl_teams.py`) including conference, division, and primary/secondary colors for all 32 teams
+* NHL schedule/game data (`data/nhl_games.csv`)
+* Sport selector in the dashboard sidebar (NHL / NFL, defaults to NHL)
+* **Regular Season Achievement Probabilities** derived from Monte Carlo simulations:
+  * Make Playoffs
+  * Home Ice (Top 2 in Division)
+  * 1st in Division
+  * 1st in Conference
+  * 1st in League
+* Sport-specific simulation logic (NHL points system + overtime handling vs NFL win-based outcomes)
+* Dynamic metric handling in the Season Simulation tab (points for NHL, wins for NFL)
+* Team-colored visualizations that pull from the selected sport’s branding
+
+### Changed
+
+* Dashboard, simulation service, and all major tabs (Season Simulation, Elo Ratings, Elo Evolution, Model Evaluation) are now fully multi-sport aware
+* Season simulation workflow generalized via sport configuration (schedule path, scoring rules, OT rate, etc.)
+* Schedule loading, initial Elo ratings, conference/division filters, and team lookups are now sport-dependent
+* Achievement probability table is sorted by Make Playoffs probability and displayed with clean, user-friendly column names
+
+### Improved
+
+* Simulation results now surface high-value outcome probabilities beyond just win/point totals
+* Visual consistency across sports through proper team colors
+* Expanded suite of backtest outputs across many parameter combinations (MOV, HFA, k-factor, etc.)
+
 ## Version 7.0 — Parameter Optimization & Elevation Edge
 
 ### Added

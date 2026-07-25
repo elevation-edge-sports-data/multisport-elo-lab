@@ -1,4 +1,8 @@
 import pandas as pd
+import tempfile
+import os
+from pathlib import Path
+
 from elo_lab.workflows.simulate_season import (
     simulate_many_seasons,
     simulate_elo_evolution,
@@ -6,13 +10,107 @@ from elo_lab.workflows.simulate_season import (
     win_distributions,
 )
 
-from metadata.nhl_teams import NHL_TEAMS
+try:
+    from elo_lab.configuration.sport_configs import SPORT_CONFIGS
+except ImportError:
+    SPORT_CONFIGS = {}
+
+try:
+    from metadata.nhl_teams import NHL_TEAMS
+except ImportError:
+    NHL_TEAMS = {}
+
+
+def _resolve_schedule_path(sport: str, season=None) -> tuple:
+    """
+    Return (schedule_path, tmp_path_or_None).
+
+    Preference (combined CSVs are temporary / being removed):
+      1. Per-season file for the requested season under data/{sport}/
+      2. Concatenate all per-season files under data/{sport}/ (optionally filter)
+      3. Combined CSV (legacy fallback while visualizations still need it)
+    """
+    sport_l = sport.lower()
+    season_dir = Path(f"data/{sport_l}")
+
+    # 1. Specific per-season file
+    if season is not None and season_dir.is_dir():
+        candidates = [
+            season_dir / f"{sport_l}_{season}.csv",
+            season_dir / f"{season}.csv",
+        ]
+        for c in candidates:
+            if c.exists():
+                return str(c), None
+
+    # 2. Build from all per-season files
+    if season_dir.is_dir():
+        files = sorted(season_dir.glob(f"{sport_l}_*.csv"))
+        if not files:
+            files = sorted(season_dir.glob("*.csv"))
+        frames = []
+        for f in files:
+            try:
+                df = pd.read_csv(f)
+                if "season" not in df.columns:
+                    year = f.stem.split("_")[-1]
+                    df["season"] = year
+                frames.append(df)
+            except Exception:
+                continue
+        if frames:
+            combined_df = pd.concat(frames, ignore_index=True)
+            if season is not None and "season" in combined_df.columns:
+                combined_df = combined_df[
+                    combined_df["season"].astype(str) == str(season)
+                ]
+            if not combined_df.empty:
+                tmp = tempfile.NamedTemporaryFile(
+                    mode="w", suffix=".csv", delete=False, newline=""
+                )
+                combined_df.to_csv(tmp.name, index=False)
+                tmp.close()
+                return tmp.name, tmp.name
+
+    # 3. Legacy combined CSV
+    combined = {
+        "NHL": "data/nhl_games.csv",
+        "NFL": "data/nfl_games.csv",
+        "NBA": "data/nba_games.csv",
+    }.get(sport, f"data/{sport_l}_games.csv")
+
+    cfg = SPORT_CONFIGS.get(sport, {})
+    if cfg.get("schedule_path"):
+        combined = cfg["schedule_path"]
+
+    if Path(combined).exists():
+        if season is None:
+            return combined, None
+        try:
+            df = pd.read_csv(combined)
+            if "season" in df.columns:
+                filtered = df[df["season"].astype(str) == str(season)]
+                if not filtered.empty:
+                    tmp = tempfile.NamedTemporaryFile(
+                        mode="w", suffix=".csv", delete=False, newline=""
+                    )
+                    filtered.to_csv(tmp.name, index=False)
+                    tmp.close()
+                    return tmp.name, tmp.name
+        except Exception:
+            pass
+        return combined, None
+
+    return combined, None
+
 
 
 def calculate_achievement_probabilities(sim_results: pd.DataFrame, sport: str) -> pd.DataFrame:
     if sim_results.empty:
-        return pd.DataFrame(columns=["team", "make_playoffs", "home_ice", 
-                                     "first_in_division", "first_in_conference", "first_in_league"])
+        return pd.DataFrame(columns=[
+            "team", "make_playoffs", "home_ice",
+            "first_in_division", "first_in_conference", "first_in_league",
+        ])
 
     all_results = []
 
@@ -20,7 +118,6 @@ def calculate_achievement_probabilities(sim_results: pd.DataFrame, sport: str) -
         sim_data = sim_results[sim_results["sim_id"] == sim_id].copy()
 
         if sport == "NHL":
-            # Robust matching for both abbreviations and full names
             team_lookup = {}
             for abbr, data in NHL_TEAMS.items():
                 team_lookup[abbr.lower().strip()] = data
@@ -30,8 +127,12 @@ def calculate_achievement_probabilities(sim_results: pd.DataFrame, sport: str) -
                 key = str(team_name).lower().strip()
                 return team_lookup.get(key, {})
 
-            sim_data["conference"] = sim_data["team"].apply(lambda x: get_meta(x).get("conference"))
-            sim_data["division"] = sim_data["team"].apply(lambda x: get_meta(x).get("division"))
+            sim_data["conference"] = sim_data["team"].apply(
+                lambda x: get_meta(x).get("conference")
+            )
+            sim_data["division"] = sim_data["team"].apply(
+                lambda x: get_meta(x).get("division")
+            )
 
             matched = sim_data.dropna(subset=["conference", "division"]).copy()
             if matched.empty:
@@ -44,27 +145,22 @@ def calculate_achievement_probabilities(sim_results: pd.DataFrame, sport: str) -
             first_div = set()
             first_conf = set()
 
-            # Make Playoffs
             for conf in ["Eastern", "Western"]:
                 conf_teams = matched[matched["conference"] == conf]
                 qualified.update(conf_teams.head(8)["team"].tolist())
 
-            # Home Ice (Top 2 per division)
             for _, group in matched.groupby(["conference", "division"]):
                 home_ice.update(group.head(2)["team"].tolist())
 
-            # First in Division
             for _, group in matched.groupby(["conference", "division"]):
                 if not group.empty:
                     first_div.add(group.iloc[0]["team"])
 
-            # First in Conference
             for conf in ["Eastern", "Western"]:
                 conf_teams = matched[matched["conference"] == conf]
                 if not conf_teams.empty:
                     first_conf.add(conf_teams.iloc[0]["team"])
 
-            # First in League
             first_league = matched.iloc[0]["team"] if not matched.empty else None
 
             sim_data["make_playoffs"] = sim_data["team"].isin(qualified)
@@ -74,22 +170,27 @@ def calculate_achievement_probabilities(sim_results: pd.DataFrame, sport: str) -
             sim_data["first_in_league"] = sim_data["team"] == first_league
 
         else:
-            # NFL placeholder
+            # NFL / NBA placeholder – top 7 by wins
             sim_data = sim_data.sort_values("wins", ascending=False)
             n = min(7, len(sim_data))
             sim_data["make_playoffs"] = False
             sim_data.iloc[:n, sim_data.columns.get_loc("make_playoffs")] = True
-            for col in ["home_ice", "first_in_division", "first_in_conference", "first_in_league"]:
+            for col in [
+                "home_ice", "first_in_division",
+                "first_in_conference", "first_in_league",
+            ]:
                 sim_data[col] = False
 
         all_results.append(sim_data[[
             "sim_id", "team", "make_playoffs", "home_ice",
-            "first_in_division", "first_in_conference", "first_in_league"
+            "first_in_division", "first_in_conference", "first_in_league",
         ]])
 
     if not all_results:
-        return pd.DataFrame(columns=["team", "make_playoffs", "home_ice", 
-                                     "first_in_division", "first_in_conference", "first_in_league"])
+        return pd.DataFrame(columns=[
+            "team", "make_playoffs", "home_ice",
+            "first_in_division", "first_in_conference", "first_in_league",
+        ])
 
     df = pd.concat(all_results, ignore_index=True)
 
@@ -109,31 +210,51 @@ def calculate_achievement_probabilities(sim_results: pd.DataFrame, sport: str) -
 
 
 def run_simulation(config, n_sims, initial_ratings=None, sport="NFL", season=None):
-    sim_results = simulate_many_seasons(
-        n_sims=n_sims,
-        config=config,
-        initial_ratings=initial_ratings,
-        sport=sport,
-    )
+    schedule_path, tmp_path = _resolve_schedule_path(sport, season)
 
-    summary = summarize_simulations(sim_results)
-    distributions = win_distributions(sim_results)
-    elo_evolution = simulate_elo_evolution(
-        n_sims=n_sims,
-        config=config,
-        initial_ratings=initial_ratings,
-        sport=sport,
-    )
+    try:
+        sim_results = simulate_many_seasons(
+            n_sims=n_sims,
+            schedule_path=schedule_path,
+            config=config,
+            initial_ratings=initial_ratings,
+            sport=sport,
+        )
 
-    achievement_probs = calculate_achievement_probabilities(sim_results, sport)
+        summary = summarize_simulations(sim_results)
+        distributions = win_distributions(sim_results)
 
-    if not achievement_probs.empty:
-        summary = summary.merge(achievement_probs, on="team", how="left")
+        try:
+            elo_evolution = simulate_elo_evolution(
+                n_sims=n_sims,
+                config=config,
+                initial_ratings=initial_ratings,
+                sport=sport,
+                schedule_path=schedule_path,
+            )
+        except TypeError:
+            elo_evolution = simulate_elo_evolution(
+                n_sims=n_sims,
+                config=config,
+                initial_ratings=initial_ratings,
+                sport=sport,
+            )
 
-    return {
-        "raw": sim_results,
-        "summary": summary,
-        "distribution": distributions,
-        "elo_evolution": elo_evolution,
-        "achievement_probs": achievement_probs,
-    }
+        achievement_probs = calculate_achievement_probabilities(sim_results, sport)
+
+        if not achievement_probs.empty:
+            summary = summary.merge(achievement_probs, on="team", how="left")
+
+        return {
+            "raw": sim_results,
+            "summary": summary,
+            "distribution": distributions,
+            "elo_evolution": elo_evolution,
+            "achievement_probs": achievement_probs,
+        }
+    finally:
+        if tmp_path and os.path.exists(tmp_path):
+            try:
+                os.unlink(tmp_path)
+            except Exception:
+                pass

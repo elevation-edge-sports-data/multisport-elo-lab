@@ -2,18 +2,28 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-from metadata.nfl_teams import NFL_TEAMS
-from metadata.nhl_teams import NHL_TEAMS
+try:
+    from metadata import load_teams, NFL_TEAMS, NHL_TEAMS, NBA_TEAMS
+except ImportError:
+    from metadata import NFL_TEAMS, NHL_TEAMS
+    try:
+        from metadata import NBA_TEAMS
+    except ImportError:
+        NBA_TEAMS = {}
+    def load_teams(sport):
+        return {"NFL": NFL_TEAMS, "NHL": NHL_TEAMS, "NBA": NBA_TEAMS}.get(sport, {})
 
 
-def get_team_color_map(sport):
-    """Return a dict mapping team name/abbreviation → primary color"""
-    teams = NHL_TEAMS if sport == "NHL" else NFL_TEAMS
+def get_team_color_map(sport: str) -> dict:
+    try:
+        teams = load_teams(sport)
+    except Exception:
+        teams = NHL_TEAMS if sport == "NHL" else (NBA_TEAMS if sport == "NBA" else NFL_TEAMS)
     color_map = {}
     for abbr, data in teams.items():
-        color = data["primary_color"]
+        color = data.get("primary_color", "#888888")
         color_map[abbr] = color
-        color_map[data["name"]] = color
+        color_map[data.get("name", abbr)] = color
     return color_map
 
 
@@ -27,11 +37,10 @@ def render_elo_ratings_tab(sport="NFL"):
     results = st.session_state.get("simulation_results", {})
     elo_evolution = results.get("elo_evolution", pd.DataFrame())
 
-    if elo_evolution.empty:
+    if elo_evolution is None or (hasattr(elo_evolution, "empty") and elo_evolution.empty):
         st.warning("No Elo rating data available from the last simulation.")
         return
 
-    # Get latest Elo per team
     if "games_played" in elo_evolution.columns:
         latest_elo = (
             elo_evolution.sort_values("games_played")
@@ -53,13 +62,9 @@ def render_elo_ratings_tab(sport="NFL"):
     color_map = get_team_color_map(sport)
 
     st.subheader("Final Elo Ratings (Latest from Simulation)")
-
-    # Table
     st.dataframe(latest_elo, use_container_width=True)
 
-    # Bar chart with team colors
     st.subheader("Elo Rating by Team")
-
     fig = px.bar(
         latest_elo,
         x="team",
@@ -67,7 +72,7 @@ def render_elo_ratings_tab(sport="NFL"):
         color="team",
         color_discrete_map=color_map,
         title=f"{sport} Final Elo Ratings",
-        labels={"elo": "Elo Rating", "team": "Team"}
+        labels={"elo": "Elo Rating", "team": "Team"},
     )
     fig.update_layout(xaxis_tickangle=-45, showlegend=False)
     st.plotly_chart(fig, use_container_width=True)

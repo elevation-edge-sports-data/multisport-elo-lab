@@ -13,17 +13,25 @@ from .nhl_teams import NHL_TEAMS
 from .nfl_venues import NFL_VENUES, get_elevation_bins as _nfl_bins, get_elevation_ft as _nfl_ft
 from .nhl_venues import NHL_VENUES, get_elevation_bins as _nhl_bins, get_elevation_ft as _nhl_ft
 
-# NBA is prepared but not yet fully integrated
+# NBA teams + venues
+try:
+    from .nba_teams import NBA_TEAMS
+except ImportError:
+    NBA_TEAMS = {}
+
 try:
     from .nba_venues import NBA_VENUES, get_elevation_bins as _nba_bins, get_elevation_ft as _nba_ft
 except ImportError:
     NBA_VENUES = {}
-    def _nba_bins(): return {}
-    def _nba_ft(): return {}
+    def _nba_bins():
+        return {}
+    def _nba_ft():
+        return {}
 
 __all__ = [
     "NFL_TEAMS",
     "NHL_TEAMS",
+    "NBA_TEAMS",
     "NFL_VENUES",
     "NHL_VENUES",
     "NBA_VENUES",
@@ -46,7 +54,9 @@ def load_teams(sport: str) -> Dict[str, Dict[str, Any]]:
         return NFL_TEAMS
     if sport == "NHL":
         return NHL_TEAMS
-    raise ValueError(f"Unknown sport: {sport}. NBA teams not yet added.")
+    if sport == "NBA":
+        return NBA_TEAMS
+    raise ValueError(f"Unknown sport: {sport}")
 
 
 def load_venues(sport: str) -> Dict[str, Dict[str, Any]]:

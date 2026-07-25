@@ -12,8 +12,8 @@ from tabs.evaluation import render_evaluation_tab
 from services.simulation_service import run_simulation
 from elo_lab.workflows.optimize_parameters import optimize_parameters_for_config
 
-from metadata.nfl_teams import NFL_TEAMS
-from metadata.nhl_teams import NHL_TEAMS
+# Clean metadata API (single source of truth for teams + venues)
+from metadata import NFL_TEAMS, NHL_TEAMS, get_sport_teams, load_teams
 
 
 configure_page()
@@ -30,8 +30,6 @@ st.markdown("""
 st.title("MultiSport Elo Lab")
 st.caption("Interactive sports modeling analytics platform | Version 8 (NHL Integration)")
 
-def get_sport_teams(sport):
-    return NHL_TEAMS if sport == "NHL" else NFL_TEAMS
 
 def get_available_seasons(sport):
     schedule_path = "data/nhl_games.csv" if sport == "NHL" else "data/nfl_games.csv"
@@ -43,6 +41,7 @@ def get_available_seasons(sport):
     except:
         pass
     return ["2025-26"] if sport == "NHL" else ["2025"]
+
 
 def get_initial_ratings(sport, schedule_path=None):
     if schedule_path is None:
@@ -56,6 +55,8 @@ def get_initial_ratings(sport, schedule_path=None):
 
     if sport == "NHL":
         # Initial Elo ratings derived from final 2025-26 regular season standings
+        # NOTE: This will be replaced in the next phase with proper previous-season
+        #       carry-over that includes playoff outcomes + regression-to-mean.
         base_elo = {
             "COL": 1620, "CAR": 1590, "DAL": 1585, "BUF": 1570,
             "FLA": 1560, "VGK": 1555, "MIN": 1545, "MTL": 1540,
@@ -73,6 +74,8 @@ def get_initial_ratings(sport, schedule_path=None):
         # (same methodology as prior year: rank by final W-L-T / PCT, assign descending from ~1610 by steps of 10)
         # 2025 final standings: DEN/NE/SEA 14-3, JAX 13-4, BUF/HOU/LAR/SF 12-5, etc.
         # This places Denver near the top as the AFC #1 seed / co-best record.
+        # NOTE: This will be replaced in the next phase with proper previous-season
+        #       carry-over that includes playoff outcomes + regression-to-mean.
         base_elo = {
             "DEN": 1610, "NE": 1600, "SEA": 1590, "JAX": 1580,
             "BUF": 1570, "HOU": 1560, "LAR": 1550, "SF": 1540,
@@ -85,6 +88,7 @@ def get_initial_ratings(sport, schedule_path=None):
         }
         return {team: base_elo.get(team, 1500) for team in teams}
 
+
 def build_model_config(home_field, margin_of_victory, elevation):
     adjustments = {}
     if home_field: adjustments["home_field"] = {"enabled": True, "value": 55}
@@ -92,12 +96,14 @@ def build_model_config(home_field, margin_of_victory, elevation):
     if elevation: adjustments["elevation_edge"] = {"enabled": True, "value": 0.0}
     return {"k": 20, "adjustments": adjustments}
 
+
 def get_optimize_for(hf, mov, elev, opt_hf, opt_mov, opt_elev):
     opts = []
     if hf and opt_hf: opts.append("home_field")
     if mov and opt_mov: opts.append("margin_of_victory")
     if elev and opt_elev: opts.append("elevation_edge")
     return opts
+
 
 # ==================== SIDEBAR ====================
 st.sidebar.header("Model Configuration")

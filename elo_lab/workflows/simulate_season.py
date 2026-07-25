@@ -233,16 +233,10 @@ def simulate_elo_evolution(n_sims=500, schedule_path=None, config=None,
 
 
 def summarize_simulations(sim_results):
-    if "points" in sim_results.columns:
-        return sim_results.groupby("team").agg(
-            median_wins=("wins", "median"),
-            mean_points=("points", "mean"),
-        ).reset_index()
-    else:
-        return sim_results.groupby("team").agg(
-            median_wins=("wins", "median"),
-            mean_points=("wins", "mean"),
-        ).reset_index()
+    return sim_results.groupby("team").agg(
+        median_wins=("wins", "median"),
+        mean_points=("points", "mean") if "points" in sim_results.columns else ("wins", "mean"),
+    ).reset_index()
 
 
 def win_distributions(sim_results):

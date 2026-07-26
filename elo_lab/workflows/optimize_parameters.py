@@ -18,6 +18,7 @@ os.makedirs("outputs", exist_ok=True)
 
 
 # Default parameter grids (can be moved to configuration/ later)
+# elevation_edge.value = Elo points per 1000 ft of elevation advantage
 DEFAULT_PARAM_GRIDS: dict[str, dict[str, list[Any]]] = {
     "home_field": {
         "value": [20, 35, 50, 65, 80],
@@ -26,7 +27,7 @@ DEFAULT_PARAM_GRIDS: dict[str, dict[str, list[Any]]] = {
         "scale": [0.5, 0.75, 1.0, 1.25, 1.5],
     },
     "elevation_edge": {
-        "value": [0.5, 1.0, 1.5, 2.0, 2.5, 3.0],
+        "value": [0.0, 2.0, 4.0, 6.0, 8.0, 10.0],  # Elo pts per 1000 ft
     },
 }
 
@@ -122,8 +123,7 @@ def optimize_parameters_for_config(
 
         try:
             # Use clear naming for backtest files
-            backtest_filename = f"backtest_{label}"
-            df = run_backtest(config, backtest_filename)
+            df = run_backtest(config, label)
 
             p = df["p_home"].astype(float).values
             y = df["actual"].astype(int).values

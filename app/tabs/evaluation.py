@@ -8,6 +8,7 @@ from services.evaluation_service import (
     get_model_metrics,
     list_available_models,
     get_prediction_arrays,
+    get_log5_arrays,
 )
 from elo_lab.evaluation.diagnostics import (
     calibration_and_decomposition,
@@ -18,7 +19,7 @@ def render_evaluation_tab():
     st.header("Model Evaluation")
 
     # ------------------------------------------------------------------
-    # 1. Aggregate metrics (unchanged behavior)
+    # 1. Aggregate metrics
     # ------------------------------------------------------------------
     metrics = get_model_metrics()
 
@@ -29,7 +30,33 @@ def render_evaluation_tab():
         )
         return
 
-    # Metric leaders
+    # --- Permanent Log5 baseline row ---
+    sport = st.session_state.get("sport", "NFL")
+    log5_arrays = get_log5_arrays(sport=sport)
+    if log5_arrays is not None:
+        log5_probs, log5_actuals = log5_arrays
+        log5_acc = float(np.mean((log5_probs >= 0.5).astype(int) == log5_actuals))
+        log5_p = np.clip(log5_probs, 1e-15, 1.0 - 1e-15)
+        log5_ll = float(
+            -np.mean(
+                log5_actuals * np.log(log5_p)
+                + (1 - log5_actuals) * np.log(1 - log5_p)
+            )
+        )
+        log5_brier = float(np.mean((log5_probs - log5_actuals) ** 2))
+        log5_row = pd.DataFrame(
+            [
+                {
+                    "model": "Log5 (win%)",
+                    "accuracy": log5_acc,
+                    "log_loss": log5_ll,
+                    "brier": log5_brier,
+                }
+            ]
+        )
+        metrics = pd.concat([metrics, log5_row], ignore_index=True)
+
+    # Metric leaders (among Elo models only would be nicer, but keep simple)
     best_accuracy = metrics.loc[metrics["accuracy"].idxmax()]
     best_log_loss = metrics.loc[metrics["log_loss"].idxmin()]
     best_brier = metrics.loc[metrics["brier"].idxmin()]
@@ -50,7 +77,7 @@ def render_evaluation_tab():
 
     st.divider()
 
-    # Model comparison table
+    # Model comparison table (Elo models + Log5)
     st.subheader("Model Comparison")
 
     comparison = (
@@ -62,7 +89,7 @@ def render_evaluation_tab():
                 "brier": "Brier Score",
             }
         )
-        .sort_values("Accuracy", ascending=False)
+        .sort_values("Brier Score", ascending=True)
         .reset_index(drop=True)
     )
 
@@ -73,14 +100,14 @@ def render_evaluation_tab():
     )
 
     st.caption(
-        "Each metric highlights the model that performed best "
-        "for that specific evaluation criterion."
+        "Includes Elo backtest models and the permanent Log5 (win%) baseline. "
+        "Sorted by Brier Score (lower is better)."
     )
 
     st.divider()
 
     # ------------------------------------------------------------------
-    # 2. Model selector + detailed diagnostics (Tier 1)
+    # 2. Model selector + detailed diagnostics
     # ------------------------------------------------------------------
     st.subheader("Detailed Diagnostics")
 
@@ -90,16 +117,18 @@ def render_evaluation_tab():
         st.info("No backtest prediction files found for detailed diagnostics.")
         return
 
-    # Default to the best Brier model if it exists, otherwise first model
+    # Default to the best Brier Elo model if it exists
     default_idx = 0
-    if best_brier["model"] in available_models:
-        default_idx = available_models.index(best_brier["model"])
+    elo_only = [m for m in available_models]
+    if best_brier["model"] in elo_only:
+        default_idx = elo_only.index(best_brier["model"])
 
     selected_model = st.selectbox(
         "Select model for detailed diagnostics",
         options=available_models,
         index=default_idx,
-        help="Brier decomposition, ECE, and calibration plot are computed on this model’s predictions.",
+        help="Brier decomposition, ECE, calibration plot, and residuals "
+        "are computed on this model’s predictions.",
     )
 
     arrays = get_prediction_arrays(selected_model)
@@ -158,40 +187,42 @@ def render_evaluation_tab():
     st.divider()
 
     # ------------------------------------------------------------------
-    # 3b. Baseline comparisons
+    # 3b. Baseline comparisons (home-win-rate + coin-flip)
     # ------------------------------------------------------------------
     st.markdown("**Baseline Comparison**")
 
-    # --- Helper: compute the three metrics for a constant probability ---
-    def _constant_metrics(p_const: float, actuals: np.ndarray) -> dict:
-        p = np.full_like(actuals, fill_value=p_const, dtype=float)
-        # Accuracy at 0.5 threshold
+    def _constant_metrics(p_const: float, actuals_arr: np.ndarray) -> dict:
+        p = np.full_like(actuals_arr, fill_value=p_const, dtype=float)
         preds = (p >= 0.5).astype(int)
-        acc = float(np.mean(preds == actuals))
-        # Log loss (clipped)
+        acc = float(np.mean(preds == actuals_arr))
         p_clip = np.clip(p, 1e-15, 1 - 1e-15)
-        ll = float(-np.mean(actuals * np.log(p_clip) + (1 - actuals) * np.log(1 - p_clip)))
-        # Brier
-        brier = float(np.mean((p - actuals) ** 2))
+        ll = float(
+            -np.mean(
+                actuals_arr * np.log(p_clip)
+                + (1 - actuals_arr) * np.log(1 - p_clip)
+            )
+        )
+        brier = float(np.mean((p - actuals_arr) ** 2))
         return {"accuracy": acc, "log_loss": ll, "brier": brier}
 
-    home_win_rate = float(np.mean(actuals))          # historical base rate
+    home_win_rate = float(np.mean(actuals))
     coin_flip = 0.5
 
     baseline_home = _constant_metrics(home_win_rate, actuals)
     baseline_coin = _constant_metrics(coin_flip, actuals)
 
-    # Selected model metrics (already computed earlier as `result`)
     model_metrics = {
         "accuracy": float(np.mean((probs >= 0.5).astype(int) == actuals)),
-        "log_loss": float(-np.mean(
-            actuals * np.log(np.clip(probs, 1e-15, 1 - 1e-15))
-            + (1 - actuals) * np.log(1 - np.clip(probs, 1e-15, 1 - 1e-15))
-        )),
+        "log_loss": float(
+            -np.mean(
+                actuals * np.log(np.clip(probs, 1e-15, 1 - 1e-15))
+                + (1 - actuals)
+                * np.log(1 - np.clip(probs, 1e-15, 1 - 1e-15))
+            )
+        ),
         "brier": result["brier"],
     }
 
-    # Build comparison table
     baseline_df = pd.DataFrame(
         [
             {
@@ -215,12 +246,10 @@ def render_evaluation_tab():
         ]
     )
 
-    # Delta vs best naïve baseline (Home Win Rate)
     baseline_df["Δ Accuracy"] = baseline_df["Accuracy"] - baseline_home["accuracy"]
-    baseline_df["Δ Log Loss"] = baseline_home["log_loss"] - baseline_df["Log Loss"]  # positive = better
-    baseline_df["Δ Brier"] = baseline_home["brier"] - baseline_df["Brier Score"]     # positive = better
+    baseline_df["Δ Log Loss"] = baseline_home["log_loss"] - baseline_df["Log Loss"]
+    baseline_df["Δ Brier"] = baseline_home["brier"] - baseline_df["Brier Score"]
 
-    # Formatting
     display_df = baseline_df.copy()
     for col in ["Accuracy", "Log Loss", "Brier Score"]:
         display_df[col] = display_df[col].map(lambda x: f"{x:.4f}")
@@ -240,7 +269,7 @@ def render_evaluation_tab():
     )
 
     # ------------------------------------------------------------------
-    # 4. Calibration plot (reliability diagram) – skeleton
+    # 4. Calibration plot (reliability diagram)
     # ------------------------------------------------------------------
     st.subheader("Calibration Plot (Reliability Diagram)")
 
@@ -248,67 +277,131 @@ def render_evaluation_tab():
 
     if not bin_stats:
         st.info("No calibration bins available (empty predictions).")
-        return
+    else:
+        pred_probs = [b["pred_prob"] for b in bin_stats]
+        actual_rates = [b["actual_rate"] for b in bin_stats]
+        counts = [b["count"] for b in bin_stats]
 
-    # Prepare data for plotting
-    pred_probs = [b["pred_prob"] for b in bin_stats]
-    actual_rates = [b["actual_rate"] for b in bin_stats]
-    counts = [b["count"] for b in bin_stats]
+        fig = go.Figure()
 
-    fig = go.Figure()
-
-    # Perfect calibration line
-    fig.add_trace(
-        go.Scatter(
-            x=[0, 1],
-            y=[0, 1],
-            mode="lines",
-            name="Perfect calibration",
-            line=dict(color="gray", dash="dash"),
+        fig.add_trace(
+            go.Scatter(
+                x=[0, 1],
+                y=[0, 1],
+                mode="lines",
+                name="Perfect calibration",
+                line=dict(color="gray", dash="dash"),
+            )
         )
-    )
 
-    # Observed vs predicted
-    fig.add_trace(
+        fig.add_trace(
+            go.Scatter(
+                x=pred_probs,
+                y=actual_rates,
+                mode="markers+lines",
+                name="Model",
+                marker=dict(
+                    size=[max(8, c / max(counts) * 30) for c in counts],
+                    color="steelblue",
+                    line=dict(width=1, color="DarkSlateGrey"),
+                ),
+                text=[f"n = {c}" for c in counts],
+                hovertemplate=(
+                    "Predicted: %{x:.3f}<br>"
+                    "Observed: %{y:.3f}<br>"
+                    "%{text}<extra></extra>"
+                ),
+            )
+        )
+
+        fig.update_layout(
+            xaxis_title="Mean Predicted Win Probability",
+            yaxis_title="Observed Win Rate",
+            xaxis=dict(range=[0, 1], dtick=0.1),
+            yaxis=dict(range=[0, 1], dtick=0.1),
+            height=450,
+            legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01),
+            margin=dict(l=40, r=40, t=40, b=40),
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+        st.caption(
+            "Points above the diagonal = under-confident (actual wins more often than predicted).  "
+            "Points below the diagonal = over-confident.  "
+            "Marker size is proportional to the number of games in the bin."
+        )
+
+    # ------------------------------------------------------------------
+    # 5. Residual diagnostics
+    # ------------------------------------------------------------------
+    st.divider()
+    st.subheader("Residual Diagnostics")
+
+    residuals = actuals - probs  # observed − predicted
+
+    r1, r2 = st.columns(2)
+    with r1:
+        st.metric("Mean residual", f"{float(np.mean(residuals)):.4f}")
+    with r2:
+        st.metric("Std residual", f"{float(np.std(residuals)):.4f}")
+
+    fig_res = go.Figure()
+    fig_res.add_hline(y=0, line_dash="dash", line_color="gray")
+    fig_res.add_trace(
         go.Scatter(
-            x=pred_probs,
-            y=actual_rates,
-            mode="markers+lines",
-            name="Model",
+            x=probs,
+            y=residuals,
+            mode="markers",
             marker=dict(
-                size=[max(8, c / max(counts) * 30) for c in counts],  # size ∝ count
-                color="steelblue",
-                line=dict(width=1, color="DarkSlateGrey"),
+                size=6,
+                opacity=0.45,
+                color=actuals,
+                colorscale=[[0, "crimson"], [1, "steelblue"]],
+                showscale=False,
             ),
-            text=[f"n = {c}" for c in counts],
-            hovertemplate=(
-                "Predicted: %{x:.3f}<br>"
-                "Observed: %{y:.3f}<br>"
-                "%{text}<extra></extra>"
-            ),
+            name="Games",
+            hovertemplate="p=%{x:.3f}<br>residual=%{y:.3f}<extra></extra>",
         )
     )
 
-    fig.update_layout(
-        xaxis_title="Mean Predicted Win Probability",
-        yaxis_title="Observed Win Rate",
-        xaxis=dict(range=[0, 1], dtick=0.1),
-        yaxis=dict(range=[0, 1], dtick=0.1),
-        height=450,
-        legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01),
+    # Binned mean residual
+    n_bins = 10
+    bin_edges = np.linspace(0, 1, n_bins + 1)
+    bin_centers = []
+    bin_means = []
+    for i in range(n_bins):
+        mask = (probs >= bin_edges[i]) & (probs < bin_edges[i + 1])
+        if mask.sum() == 0:
+            continue
+        bin_centers.append((bin_edges[i] + bin_edges[i + 1]) / 2)
+        bin_means.append(float(np.mean(residuals[mask])))
+
+    if bin_centers:
+        fig_res.add_trace(
+            go.Scatter(
+                x=bin_centers,
+                y=bin_means,
+                mode="markers+lines",
+                marker=dict(size=10, symbol="square", color="black"),
+                name="Binned mean",
+            )
+        )
+
+    fig_res.update_layout(
+        xaxis_title="Predicted home-win probability",
+        yaxis_title="Residual (actual − predicted)",
+        height=420,
         margin=dict(l=40, r=40, t=40, b=40),
     )
-
-    st.plotly_chart(fig, use_container_width=True)
-
+    st.plotly_chart(fig_res, use_container_width=True)
     st.caption(
-        "Points above the diagonal = under-confident (actual wins more often than predicted).  "
-        "Points below the diagonal = over-confident.  "
-        "Marker size is proportional to the number of games in the bin."
+        "Points near zero are well-calibrated. Systematic curves indicate "
+        "over-/under-confidence. Blue = home win, red = home loss."
     )
 
     # ------------------------------------------------------------------
-    # 5. Grid Search Landscape
+    # 6. Grid Search Landscape
     # ------------------------------------------------------------------
     st.divider()
     st.subheader("Grid Search Landscape")
@@ -323,11 +416,11 @@ def render_evaluation_tab():
     else:
         search_df = pd.read_csv(search_path)
 
-        # Identify parameter columns vs metric columns
         metric_cols = {"accuracy", "log_loss", "brier"}
         id_cols = {"label"}
         param_cols = [
-            c for c in search_df.columns
+            c
+            for c in search_df.columns
             if c not in metric_cols | id_cols
             and pd.api.types.is_numeric_dtype(search_df[c])
         ]
@@ -338,7 +431,6 @@ def render_evaluation_tab():
                 f"Found: {param_cols}"
             )
         else:
-            # ---- Controls ----
             col_metric, col_x, col_y = st.columns(3)
 
             with col_metric:
@@ -354,26 +446,23 @@ def render_evaluation_tab():
                 )
 
             with col_x:
-                x_param = st.selectbox("X-axis parameter", options=param_cols, index=0)
+                x_param = st.selectbox(
+                    "X-axis parameter", options=param_cols, index=0
+                )
 
             with col_y:
-                # Default to a different parameter than x
                 default_y = 1 if len(param_cols) > 1 else 0
-                y_param = st.selectbox("Y-axis parameter", options=param_cols, index=default_y)
+                y_param = st.selectbox(
+                    "Y-axis parameter", options=param_cols, index=default_y
+                )
 
-            # ---- Heatmap data ----
-            # Average if multiple runs share the same (x, y) pair (e.g. different k)
             pivot = (
-                search_df
-                .groupby([y_param, x_param], as_index=False)[color_metric]
+                search_df.groupby([y_param, x_param], as_index=False)[color_metric]
                 .mean()
                 .pivot(index=y_param, columns=x_param, values=color_metric)
             )
-
-            # Sort axes for nicer display
             pivot = pivot.sort_index(axis=0).sort_index(axis=1)
 
-            # Best cell
             if color_metric == "accuracy":
                 best_val = pivot.max().max()
                 best_idx = pivot.stack().idxmax()
@@ -383,7 +472,6 @@ def render_evaluation_tab():
 
             best_y, best_x = best_idx
 
-            # ---- Plotly heatmap ----
             fig = go.Figure(
                 data=go.Heatmap(
                     z=pivot.values,
@@ -399,7 +487,6 @@ def render_evaluation_tab():
                 )
             )
 
-            # Mark the best combination
             fig.add_trace(
                 go.Scatter(
                     x=[str(best_x)],
@@ -426,7 +513,13 @@ def render_evaluation_tab():
                 yaxis_title=y_param,
                 height=480,
                 margin=dict(l=60, r=40, t=40, b=60),
-                legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0.5, xanchor="center"),
+                legend=dict(
+                    orientation="h",
+                    yanchor="bottom",
+                    y=1.02,
+                    x=0.5,
+                    xanchor="center",
+                ),
             )
 
             st.plotly_chart(fig, use_container_width=True)
@@ -436,18 +529,15 @@ def render_evaluation_tab():
                 "Color scale is reversed for Log Loss / Brier (lower = greener)."
             )
 
-            # ---- Top-N table ----
             st.markdown("**Top combinations**")
 
             ascending = color_metric != "accuracy"
             top_n = (
-                search_df
-                .sort_values(color_metric, ascending=ascending)
+                search_df.sort_values(color_metric, ascending=ascending)
                 .head(10)
                 .reset_index(drop=True)
             )
 
-            # Nice column order
             display_cols = ["label"] + param_cols + ["accuracy", "log_loss", "brier"]
             display_cols = [c for c in display_cols if c in top_n.columns]
 
@@ -460,4 +550,4 @@ def render_evaluation_tab():
                 top_display,
                 use_container_width=True,
                 hide_index=True,
-            )    
+            )

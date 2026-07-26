@@ -1,10 +1,12 @@
 """
 MultiSport Elo Lab – Streamlit dashboard
 
-Version 9 with:
+Version 10 with:
   - NHL / NFL / NBA support
   - Multiseason-aware initial Elo (rating_source, rating_basis, apply_regression)
-  - Existing adjustment toggles + parameter optimization
+  - Continuous Elevation Edge (Elo pts per 1000 ft)
+  - Sport-specific home advantage labels (ice / court / field)
+  - Log5 baseline + residual diagnostics
   - Tabs: Configuration, Season Simulation, Elo Ratings, Elo Trajectory, Model Evaluation
 """
 
@@ -45,14 +47,14 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("MultiSport Elo Lab")
-st.caption("Interactive sports modeling analytics platform | Version 9 (Multiseason + NBA + Advanced parameters)")
+st.caption("Interactive sports modeling analytics platform | Version 10")
 
 
 # ---------------------------------------------------------------------------
-# Model config helpers (unchanged behaviour)
+# Model config helpers
 # ---------------------------------------------------------------------------
 def build_model_config(home_field, margin_of_victory, elevation, k=20,
-                       hfa_value=55, mov_scale=1.0, elev_value=0.0):
+                       hfa_value=55, mov_scale=1.0, elev_value=1.0):
     adjustments = {}
     if home_field:
         adjustments["home_field"] = {"enabled": True, "value": hfa_value}
@@ -83,6 +85,26 @@ def _schedule_path(sport: str) -> str:
     return mapping.get(sport, f"data/{sport.lower()}_games.csv")
 
 
+# Sport-specific home advantage display labels (config key remains "home_field")
+_HOME_ADV_LABELS = {
+    "NHL": {
+        "checkbox": "Home-Ice Advantage",
+        "slider": "Home-ice advantage value",
+        "optimize": "Optimize Home Ice",
+    },
+    "NBA": {
+        "checkbox": "Home-Court Advantage",
+        "slider": "Home-court advantage value",
+        "optimize": "Optimize Home Court",
+    },
+    "NFL": {
+        "checkbox": "Home-Field Advantage",
+        "slider": "Home-field advantage value",
+        "optimize": "Optimize Home Field",
+    },
+}
+
+
 # ---------------------------------------------------------------------------
 # SIDEBAR
 # ---------------------------------------------------------------------------
@@ -90,6 +112,9 @@ st.sidebar.header("Model Configuration")
 
 # Sport + Season
 sport = st.sidebar.selectbox("Sport", ["NHL", "NBA", "NFL"], index=0)
+st.session_state["sport"] = sport  # available to evaluation tab before Run Simulation
+
+_home = _HOME_ADV_LABELS.get(sport, _HOME_ADV_LABELS["NFL"])
 
 season_options = get_available_seasons(sport)
 season = st.sidebar.selectbox(
@@ -100,7 +125,7 @@ season = st.sidebar.selectbox(
 
 st.sidebar.divider()
 st.sidebar.subheader("Adjustments")
-home_field = st.sidebar.checkbox("Home Field Advantage", value=True)
+home_field = st.sidebar.checkbox(_home["checkbox"], value=True)
 margin_of_victory = st.sidebar.checkbox("Margin of Victory", value=True)
 elevation = st.sidebar.checkbox("Elevation Edge", value=False)
 
@@ -109,7 +134,7 @@ optimize_params = st.sidebar.checkbox("Optimize parameters", value=False)
 opt_hf = opt_mov = opt_elev = False
 if optimize_params:
     if home_field:
-        opt_hf = st.sidebar.checkbox("Optimize Home Field", value=True, key="opt_hf")
+        opt_hf = st.sidebar.checkbox(_home["optimize"], value=True, key="opt_hf")
     if margin_of_victory:
         opt_mov = st.sidebar.checkbox("Optimize Margin", value=True, key="opt_mov")
     if elevation:
@@ -152,13 +177,19 @@ with st.sidebar.expander("Advanced parameters", expanded=False):
     st.markdown("**Engine parameters**")
     k = st.slider("k-factor", min_value=5, max_value=40, value=20, step=1)
     hfa_value = st.slider(
-        "Home-field advantage value", min_value=0, max_value=100, value=55, step=5
+        _home["slider"], min_value=0, max_value=100, value=55, step=5
     )
     mov_scale = st.slider(
         "Margin-of-victory scale", min_value=0.0, max_value=3.0, value=1.0, step=0.1
     )
     elev_value = st.slider(
-        "Elevation Edge value", min_value=0.0, max_value=50.0, value=0.0, step=1.0
+        "Elevation Edge (Elo pts per 1000 ft)",
+        min_value=0.0,
+        max_value=10.0,
+        value=1.0,
+        step=0.5,
+        help="Home-team Elo boost = value × max(0, home_ft − away_ft) / 1000. "
+             "Default 1.0. Optimization searches [0, 2, 4, 6, 8, 10].",
     )
 
 st.sidebar.divider()

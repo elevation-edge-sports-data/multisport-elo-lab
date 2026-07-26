@@ -1,60 +1,59 @@
 """
-Elevation Edge Adjustment
+Elevation Edge Adjustment (continuous)
 
-Gives the home team an advantage when playing at higher elevation.
-Uses a binned elevation ranking system to avoid overfitting to raw elevation values.
+Gives the home team an advantage proportional to the elevation
+difference in feet. Uses raw elevation_ft from the metadata layer.
 
-Bins are now loaded from the central metadata layer (app/metadata/nfl_venues.py).
+Replaces the previous binned implementation.
 """
 
 from typing import Any, Dict
 
-from metadata import get_elevation_bins
+from metadata import get_elevation_ft
+
+# Default scale: Elo points per 1000 ft of elevation advantage.
+# Tunable via config["adjustments"]["elevation_edge"]["value"]
+DEFAULT_SCALE = 15.0  # ≈ 15 Elo points per 1000 ft
 
 
-def apply(state: Dict[str, Any], config: Dict[str, Any]) -> None:
+def apply(state: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Apply Elevation Edge adjustment to the game state.
+    Apply continuous Elevation Edge to home_elo.
 
-    Adds a boost to the home team's rating when they have a higher
-    elevation bin than the away team.
+    boost = scale * max(0, home_ft - away_ft) / 1000
+
+    Matches the style of home_field.py:
+    - reads config from state["config"]
+    - mutates state["home_elo"]
+    - returns state
     """
+    config = state["config"]
+    adj = config.get("adjustments", {}).get("elevation_edge", {})
+
+    if not adj.get("enabled", False):
+        return state
+
     context = state.get("context", {})
     home_team = context.get("home_team")
     away_team = context.get("away_team")
+    sport = context.get("sport", "NFL").upper()
 
     if not home_team or not away_team:
-        return
+        return state
 
-    bins = get_elevation_bins("NFL")  # currently only NFL uses elevation
-    home_bin = bins.get(home_team, 0)
-    away_bin = bins.get(away_team, 0)
+    elev = get_elevation_ft(sport)
+    home_ft = float(elev.get(home_team, 0) or 0)
+    away_ft = float(elev.get(away_team, 0) or 0)
 
-    bin_advantage = max(0, home_bin - away_bin)
+    delta_ft = max(0.0, home_ft - away_ft)
+    if delta_ft == 0.0:
+        return state
 
-    if bin_advantage == 0:
-        return
+    scale = float(adj.get("value", DEFAULT_SCALE))
+    boost = scale * (delta_ft / 1000.0)
 
-    # Get the tunable parameter (defaults to 0 if not set)
-    elevation_config = (
-        config.get("adjustments", {})
-        .get("elevation_edge", {})
-    )
-    elevation_param = elevation_config.get("value", 0)
+    state["home_elo"] += boost
+    # Optional diagnostic key (useful for logging / evaluation)
+    state["elevation_boost"] = boost
 
-    if elevation_param == 0:
-        return
-
-    # Apply linear boost based on bin difference
-    boost = elevation_param * bin_advantage
-
-    # Apply boost to home team's rating (or rating difference)
-    # Adjust this line if your state structure uses a different key
-    if "ratings" in state:
-        state["ratings"][home_team] = state["ratings"].get(home_team, 1500) + boost
-    elif "rating_diff" in state:
-        state["rating_diff"] += boost
-    else:
-        # Fallback: store in a custom key for later processing
-        state.setdefault("elevation_boost", 0)
-        state["elevation_boost"] += boost
+    return state

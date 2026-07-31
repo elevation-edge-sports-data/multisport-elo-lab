@@ -1,14 +1,20 @@
 """
 MultiSport Elo Lab – Streamlit dashboard
 
-Version 10 with:
-  - NHL / NFL / NBA support
+Version 11 with:
+  - NHL / NFL / NBA support + full playoff-bracket simulation
   - Multiseason-aware initial Elo (rating_source, rating_basis, apply_regression)
   - Continuous Elevation Edge (Elo pts per 1000 ft)
   - Sport-specific home advantage labels (ice / court / field)
   - Log5 baseline + residual diagnostics
+  - Precomputed default simulations loaded instantly on sport change
   - Tabs: Configuration, Season Simulation, Elo Ratings, Elo Trajectory, Model Evaluation
 """
+
+from __future__ import annotations
+
+import pickle
+from pathlib import Path
 
 import bootstrap
 import streamlit as st
@@ -47,7 +53,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("MultiSport Elo Lab")
-st.caption("Interactive sports modeling analytics platform | Version 10")
+st.caption("Interactive sports modeling analytics platform | Version 11")
 
 
 # ---------------------------------------------------------------------------
@@ -85,6 +91,24 @@ def _schedule_path(sport: str) -> str:
     return mapping.get(sport, f"data/{sport.lower()}_games.csv")
 
 
+# ---------------------------------------------------------------------------
+# Precomputed default results loader
+# ---------------------------------------------------------------------------
+PRECOMPUTED_DIR = Path("data/precomputed")
+
+
+def load_default_results(sport: str):
+    """Return the precomputed simulation dict for `sport`, or None."""
+    path = PRECOMPUTED_DIR / f"{sport}_default.pkl"
+    if not path.exists():
+        return None
+    try:
+        with open(path, "rb") as f:
+            return pickle.load(f)
+    except Exception:
+        return None
+
+
 # Sport-specific home advantage display labels (config key remains "home_field")
 _HOME_ADV_LABELS = {
     "NHL": {
@@ -113,6 +137,26 @@ st.sidebar.header("Model Configuration")
 # Sport + Season
 sport = st.sidebar.selectbox("Sport", ["NHL", "NBA", "NFL"], index=0)
 st.session_state["sport"] = sport  # available to evaluation tab before Run Simulation
+
+# ------------------------------------------------------------------
+# Auto-load precomputed defaults when sport changes (or on first load)
+# ------------------------------------------------------------------
+_prev_sport = st.session_state.get("_loaded_sport")
+if (
+    "simulation_results" not in st.session_state
+    or _prev_sport != sport
+):
+    defaults = load_default_results(sport)
+    if defaults is not None:
+        st.session_state["simulation_results"] = defaults
+        st.session_state["_loaded_sport"] = sport
+        st.session_state["is_default_run"] = True
+    else:
+        # No precomputed file – clear any stale results from another sport
+        if _prev_sport != sport:
+            st.session_state.pop("simulation_results", None)
+            st.session_state.pop("is_default_run", None)
+        st.session_state["_loaded_sport"] = sport
 
 _home = _HOME_ADV_LABELS.get(sport, _HOME_ADV_LABELS["NFL"])
 
@@ -259,13 +303,15 @@ if st.sidebar.button("Run Simulation", type="primary"):
         st.session_state["simulation_results"] = results
         st.session_state["sport"] = sport
         st.session_state["season"] = season
-        st.session_state["last_config"] = final_config          # used by configuration tab
-        st.session_state["optimize_for"] = optimize_for         # used by configuration tab
+        st.session_state["last_config"] = final_config
+        st.session_state["optimize_for"] = optimize_for
         st.session_state["final_config"] = final_config
         st.session_state["initial_ratings"] = initial_ratings
         st.session_state["rating_source"] = rating_source
         st.session_state["rating_basis"] = rating_basis
         st.session_state["apply_regression"] = apply_regression
+        st.session_state["is_default_run"] = False          # custom run overrides defaults
+        st.session_state["_loaded_sport"] = sport
 
         pb.progress(100, text="Complete!")
         status.update(label="Simulation complete!", state="complete")
@@ -283,7 +329,6 @@ tabs = st.tabs([
 ])
 
 with tabs[0]:
-    # Signature: (sport, season, home_field, margin_of_victory, elevation, simulation_count)
     render_configuration_tab(
         sport=sport,
         season=season,
@@ -294,17 +339,19 @@ with tabs[0]:
     )
 
 with tabs[1]:
-    # Signature: (sport="NFL")
+    # Optional caption when showing precomputed defaults
+    if st.session_state.get("is_default_run"):
+        st.caption(
+            "Showing precomputed default simulation. "
+            "Click **Run Simulation** in the sidebar to re-run with your current settings."
+        )
     render_simulation_tab(sport=sport)
 
 with tabs[2]:
-    # Signature: (sport="NFL")
     render_elo_ratings_tab(sport=sport)
 
 with tabs[3]:
-    # Signature: (sport="NFL")
     render_elo_evolution_tab(sport=sport)
 
 with tabs[4]:
-    # Signature: ()
     render_evaluation_tab()

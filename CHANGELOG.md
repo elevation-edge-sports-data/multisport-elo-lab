@@ -2,6 +2,55 @@
 
 All notable changes to MultiSport Elo Lab are documented in this file.
 
+## Version 11.2 — Instant Default Simulations
+
+### Added
+- **Precomputed default simulations** load automatically when switching sports  
+  - No 20-second wait to see baseline results  
+  - Override anytime with **Run Simulation**
+- `elo_lab/workflows/generate_default_sims.py`  
+  - One-command generator for NHL / NBA / NFL defaults  
+  - `python -m elo_lab.workflows.generate_default_sims`
+- 1000-sim model comparison baseline under `outputs/`
+
+### Changed
+- Dashboard caption and version string updated to Version 11.2
+- `.gitignore` expanded for precomputed pickles and common artifacts
+
+### Improved
+- Season Simulation tab shows a clear caption when displaying defaults
+
+---
+
+## Version 11.1 — NHL + NBA Playoff Brackets
+
+### Added
+- Full **NHL** playoff simulation  
+  - Top-3 per division + 2 wild cards  
+  - Fixed bracket, best-of-7 series (2-2-1-1-1) through Stanley Cup
+- Full **NBA** playoff simulation  
+  - Play-In tournament (7–10)  
+  - Fixed 1–8 bracket, best-of-7 series through NBA Finals
+- Multi-sport dispatch in `simulate_with_playoffs.py`
+- Playoff outlook table + championship probability chart for all three sports
+
+### Changed
+- Season Simulation tab generalized for sport-specific round names and labels
+
+---
+
+## Version 11.0 — NFL Playoff Simulation
+
+### Added
+- Full **NFL** playoff-bracket simulation  
+  - 4 division winners + 3 wild cards per conference  
+  - Wild Card → Divisional → Conference → Super Bowl with reseeding  
+  - Single-elimination games driven by final regular-season Elo + home advantage
+- `elo_lab/playoffs/nfl/` package (models, seeding, simulation, adapter, workflow hook)
+- Playoff outlook probabilities in the Season Simulation tab (NFL)
+
+---
+
 ## Version 10 — Log5 Baseline, Residual Diagnostics & Continuous Elevation Edge
 
 ### Added
@@ -194,11 +243,3 @@ All notable changes to MultiSport Elo Lab are documented in this file.
 - Refactored all workflows to use engine API exclusively
 - Eliminated duplicated Elo logic across workflows
 - Replaced procedural adjustment logic with declarative pipeline
-
-### Removed
-- Legacy adjustment pipeline (`adjustments/pipeline.py`)
-- Legacy core adjustment logic (`adjustments/core.py`)
-
-### Notes
-- Game outcomes may be provided either through `context["actual"]` or inferred from `home_score` and `away_score`.
-- All game execution is routed through the canonical `run_game()` engine API.

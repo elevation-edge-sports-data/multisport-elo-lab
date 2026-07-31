@@ -2,23 +2,28 @@
 
 A modular, configuration-driven Elo rating and simulation platform for **NHL**, **NBA**, and **NFL**.
 
-Supports historical backtesting, Monte Carlo regular-season simulation, parameter optimization, and interactive model evaluation through a Streamlit dashboard.
+Supports historical backtesting, Monte Carlo regular-season + full playoff-bracket simulation, parameter optimization, and interactive model evaluation through a Streamlit dashboard.
 
 **Live dashboard**: [https://multisport-elo-lab.streamlit.app/](https://multisport-elo-lab.streamlit.app/)
 
-**Current version: 10**
+**Current version: 11.2**
 
 ---
 
-## Highlights (Version 10)
+## Highlights (Version 11)
 
 - Full multi-sport support with consistent ordering: **NHL · NBA · NFL**
+- **Full playoff-bracket simulation** for all three sports
+  - NFL: Wild Card → Divisional → Conference → Super Bowl (reseeding)
+  - NHL: Fixed bracket, best-of-7 series through Stanley Cup
+  - NBA: Play-In tournament + fixed 1–8 bracket, best-of-7 series
+- Instant default simulations — results appear immediately when you switch sports
 - Multi-season aware initial ratings (playoffs or regular-season source, record or Elo basis, optional regression-to-mean)
 - Continuous **Elevation Edge** (Elo points per 1,000 ft of altitude difference)
 - Sport-specific home advantage labels (Home-Ice / Home-Court / Home-Field)
 - Log5 baseline + residual diagnostics
 - Parameter optimization with interactive grid-search landscape
-- Regular-season achievement probabilities (Make Playoffs, 1st in Division/Conference/League, etc.)
+- Regular-season achievement probabilities + full playoff outlook probabilities
 - Calibration diagnostics (Brier decomposition, ECE, reliability diagrams, baseline comparisons)
 
 ---
@@ -29,7 +34,7 @@ Supports historical backtesting, Monte Carlo regular-season simulation, paramete
    Sport, season, adjustments, advanced initial-Elo controls, and optimized parameters from the last run.
 
 2. **Season Simulation**  
-   Monte Carlo regular-season simulations with expected wins/points, distributions, uncertainty ranges, and achievement probabilities.
+   Monte Carlo regular-season + playoff simulations with expected wins/points, distributions, uncertainty ranges, achievement probabilities, and full playoff outlook (reach each round / win championship).
 
 3. **Elo Ratings**  
    Post-game Elo ratings with conference/division filtering and team colors.
@@ -62,7 +67,8 @@ elo_lab/
 ├── adjustments/     # Stateless transformations
 ├── configuration/   # Model and sport configurations
 ├── evaluation/      # Metrics and diagnostics
-└── workflows/       # Backtesting, simulation, optimization
+├── playoffs/        # Sport-specific playoff brackets (nfl / nhl / nba)
+└── workflows/       # Backtesting, simulation, optimization, default-sim generation
 
 app/
 ├── dashboard.py     # Streamlit entry point
@@ -75,13 +81,13 @@ app/
 
 ## Supported Sports
 
-| Sport | Status          | Notes                                              |
-|-------|-----------------|----------------------------------------------------|
-| NHL   | Fully supported | Points system + OT handling, Home-Ice Advantage    |
-| NBA   | Fully supported | Home-Court Advantage, multi-season data            |
-| NFL   | Fully supported | Wins-based outcomes, Home-Field Advantage, proper playoff-qualification logic |
+| Sport | Status          | Notes                                                                 |
+|-------|-----------------|-----------------------------------------------------------------------|
+| NHL   | Fully supported | Points system + OT handling, Home-Ice Advantage, Stanley Cup bracket  |
+| NBA   | Fully supported | Home-Court Advantage, Play-In + 1–8 bracket                           |
+| NFL   | Fully supported | Wins-based outcomes, Home-Field Advantage, reseeding playoff bracket  |
 
-All sports share the same engine and dashboard. Sport-specific logic (scoring rules, home-advantage labels, achievement columns, team colors, venue elevations) is driven by configuration and metadata.
+All sports share the same engine and dashboard. Sport-specific logic (scoring rules, home-advantage labels, achievement columns, playoff format, team colors, venue elevations) is driven by configuration and metadata.
 
 ---
 
@@ -96,6 +102,20 @@ All sports share the same engine and dashboard. Sport-specific logic (scoring ru
 - Rating source: previous-season playoffs or regular-season standings
 - Rating basis: record or existing Elo
 - Optional regression-to-mean with adjustable strength
+
+### Playoff Simulation
+- NFL, NHL, and NBA each have a dedicated package under `elo_lab/playoffs/`
+- Monte Carlo seasons feed final standings + Elo into the appropriate bracket
+- Dashboard surfaces probability of reaching each round and winning the championship
+
+### Instant Default Simulations
+Switching sports in the sidebar immediately loads a precomputed default run so you see results without waiting. Override anytime with **Run Simulation**.
+
+Generate or refresh the defaults:
+
+```bash
+python -m elo_lab.workflows.generate_default_sims
+```
 
 ### Parameter Optimization
 Users can selectively optimize any subset of enabled adjustments. The system runs a grid search and surfaces the best combination via an interactive heatmap (Grid Search Landscape) plus a top-10 table.
@@ -116,6 +136,10 @@ Users can selectively optimize any subset of enabled adjustments. The system run
 git clone https://github.com/elevation-edge-sports-data/multisport-elo-lab.git
 cd multisport-elo-lab
 pip install -r requirements.txt
+
+# optional – generate instant-default simulation files
+python -m elo_lab.workflows.generate_default_sims
+
 streamlit run app/dashboard.py
 ```
 
@@ -131,6 +155,9 @@ streamlit run app/dashboard.py
 | 8.0–8.2 | Multi-sport (NHL) + achievement probabilities + calibration + NFL playoff-logic fix |
 | 9       | Multiseason support + full NBA integration + advanced initial-Elo controls |
 | 10      | Continuous Elevation Edge + Log5 baseline + residual diagnostics |
+| 11.0    | NFL playoff-bracket simulation |
+| 11.1    | NHL + NBA playoff-bracket simulation + multi-sport dispatch |
+| 11.2    | Instant default simulations on sport change + generator workflow |
 
 See [CHANGELOG.md](CHANGELOG.md) for the complete history.
 
@@ -139,8 +166,8 @@ See [CHANGELOG.md](CHANGELOG.md) for the complete history.
 ## Notes
 
 - This project is under active development.
-- Season Simulation currently covers the **regular season only** (including probabilities of making the playoffs and finishing 1st in division/conference/league). Full playoff-bracket / series simulation is not yet implemented.
 - Elevation data uses real stadium/arena elevations.
+- Precomputed default simulations live in `data/precomputed/` (gitignored; regenerate with the command above).
 
 ---
 

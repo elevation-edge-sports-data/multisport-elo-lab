@@ -6,7 +6,7 @@ Supports historical backtesting, Monte Carlo regular-season + full playoff-brack
 
 **Live dashboard**: [https://multisport-elo-lab.streamlit.app/](https://multisport-elo-lab.streamlit.app/)
 
-**Current version: 11.2**
+**Current version: 11.3**
 
 ---
 
@@ -18,6 +18,7 @@ Supports historical backtesting, Monte Carlo regular-season + full playoff-brack
   - NHL: Fixed bracket, best-of-7 series through Stanley Cup
   - NBA: Play-In tournament + fixed 1–8 bracket, best-of-7 series
 - Instant default simulations — results appear immediately when you switch sports
+- **One-click full results export** — download Config, Simulation Summary, Achievement/Playoff probabilities, Elo Ratings, and Evaluation metrics as a multi-sheet Excel file
 - Multi-season aware initial ratings (playoffs or regular-season source, record or Elo basis, optional regression-to-mean)
 - Continuous **Elevation Edge** (Elo points per 1,000 ft of altitude difference)
 - Sport-specific home advantage labels (Home-Ice / Home-Court / Home-Field)
@@ -73,7 +74,7 @@ elo_lab/
 app/
 ├── dashboard.py     # Streamlit entry point
 ├── metadata/        # Teams, venues, elevation data (NHL / NBA / NFL)
-├── services/        # Simulation, evaluation, Elo evolution, etc.
+├── services/        # Simulation, evaluation, Elo evolution, export, etc.
 └── tabs/            # Individual dashboard tab implementations
 ```
 
@@ -117,6 +118,15 @@ Generate or refresh the defaults:
 python -m elo_lab.workflows.generate_default_sims
 ```
 
+### Full Results Export
+A global **Download Full Results (.xlsx)** button appears as soon as simulation results exist (defaults or custom runs). One click produces a multi-sheet Excel workbook containing:
+
+- Config (model parameters + run metadata)
+- Simulation Summary
+- Achievement + Playoff probabilities
+- Elo Ratings
+- Evaluation metrics (when available)
+
 ### Parameter Optimization
 Users can selectively optimize any subset of enabled adjustments. The system runs a grid search and surfaces the best combination via an interactive heatmap (Grid Search Landscape) plus a top-10 table.
 
@@ -158,6 +168,7 @@ streamlit run app/dashboard.py
 | 11.0    | NFL playoff-bracket simulation |
 | 11.1    | NHL + NBA playoff-bracket simulation + multi-sport dispatch |
 | 11.2    | Instant default simulations on sport change + generator workflow |
+| 11.3    | One-click full results export (multi-sheet Excel) |
 
 See [CHANGELOG.md](CHANGELOG.md) for the complete history.
 

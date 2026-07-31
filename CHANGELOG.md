@@ -2,6 +2,28 @@
 
 All notable changes to MultiSport Elo Lab are documented in this file.
 
+## Version 11.3 — Full Results Export
+
+### Added
+- **One-click full results export** (multi-sheet Excel)
+  - Global **Download Full Results (.xlsx)** button appears as soon as simulation results exist (defaults or custom runs)
+  - Single file contains:
+    - Config (model parameters + run metadata)
+    - Simulation Summary
+    - Achievement + Playoff probabilities
+    - Elo Ratings
+    - Evaluation metrics (when available)
+- New `app/services/export_service.py`
+  - Builds the workbook from current `st.session_state`
+  - Gracefully omits sheets that have no data
+
+### Changed
+- Dashboard caption and version string updated to Version 11.3
+
+### Improved
+- Export button is placed after default results are loaded, so it appears on first visit
+- Export failures are caught and shown as a warning — they never break the rest of the dashboard
+
 ## Version 11.2 — Instant Default Simulations
 
 ### Added

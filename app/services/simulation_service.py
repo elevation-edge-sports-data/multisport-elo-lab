@@ -3,8 +3,12 @@ import tempfile
 import os
 from pathlib import Path
 
+# ---------------------------------------------------------------------------
+# UPDATED IMPORT – use the playoff wrapper instead of the original
+# ---------------------------------------------------------------------------
+from elo_lab.workflows.simulate_with_playoffs import simulate_many_seasons
+
 from elo_lab.workflows.simulate_season import (
-    simulate_many_seasons,
     simulate_elo_evolution,
     summarize_simulations,
     win_distributions,
@@ -102,7 +106,6 @@ def _resolve_schedule_path(sport: str, season=None) -> tuple:
         return combined, None
 
     return combined, None
-
 
 
 def calculate_achievement_probabilities(sim_results: pd.DataFrame, sport: str) -> pd.DataFrame:
@@ -213,7 +216,8 @@ def run_simulation(config, n_sims, initial_ratings=None, sport="NFL", season=Non
     schedule_path, tmp_path = _resolve_schedule_path(sport, season)
 
     try:
-        sim_results = simulate_many_seasons(
+        # ----- UPDATED CALL – unpack the tuple from the wrapper -----
+        sim_results, playoff_probs = simulate_many_seasons(
             n_sims=n_sims,
             schedule_path=schedule_path,
             config=config,
@@ -251,6 +255,7 @@ def run_simulation(config, n_sims, initial_ratings=None, sport="NFL", season=Non
             "distribution": distributions,
             "elo_evolution": elo_evolution,
             "achievement_probs": achievement_probs,
+            "playoff_probs": playoff_probs,          # NEW
         }
     finally:
         if tmp_path and os.path.exists(tmp_path):

@@ -208,7 +208,7 @@ def simulate_season(
 
     # Guard: only filter by week when the column exists (NBA schedules often lack it)
     if cfg.get("max_week") and "week" in schedule.columns:
-        schedule = schedule[schedule["week"] <= cfg["max_week"]]
+        schedule = schedule[pd.to_numeric(schedule["week"], errors="coerce") <= cfg["max_week"]]
 
     sort_cols = []
     if "season" in schedule.columns:

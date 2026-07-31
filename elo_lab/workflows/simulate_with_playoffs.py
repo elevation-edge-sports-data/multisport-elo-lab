@@ -1,7 +1,8 @@
 """
 elo_lab/workflows/simulate_with_playoffs.py
 
-Drop-in wrapper that runs the existing season simulation and then the NFL playoffs.
+Drop-in wrapper that runs the existing season simulation and then the
+sport-specific playoffs (NFL / NHL / NBA).
 Keeps the original simulate_season.py completely untouched.
 """
 
@@ -16,7 +17,44 @@ from elo_lab.workflows.simulate_season import (
     simulate_many_seasons as _original_simulate_many_seasons,
     simulate_season,
 )
-from elo_lab.playoffs.nfl import run_playoffs_after_season
+
+
+# ---------------------------------------------------------------------------
+# Round names per sport (used for probability counters)
+# ---------------------------------------------------------------------------
+PLAYOFF_ROUNDS = {
+    "NFL": ["Wild Card", "Divisional", "Conference", "Super Bowl", "Champion"],
+    "NHL": [
+        "First Round",
+        "Second Round",
+        "Conference Finals",
+        "Stanley Cup Final",
+        "Champion",
+    ],
+    "NBA": [
+        "Play-In",
+        "First Round",
+        "Conference Semifinals",
+        "Conference Finals",
+        "NBA Finals",
+        "Champion",
+    ],
+}
+
+
+def _get_playoff_runner(sport: str):
+    """Return the correct run_playoffs_after_season for the given sport."""
+    sport = sport.upper()
+    if sport == "NFL":
+        from elo_lab.playoffs.nfl import run_playoffs_after_season
+        return run_playoffs_after_season
+    if sport == "NHL":
+        from elo_lab.playoffs.nhl import run_playoffs_after_season
+        return run_playoffs_after_season
+    if sport == "NBA":
+        from elo_lab.playoffs.nba import run_playoffs_after_season
+        return run_playoffs_after_season
+    return None
 
 
 def simulate_many_seasons(
@@ -29,7 +67,7 @@ def simulate_many_seasons(
 ) -> Tuple[pd.DataFrame, Dict[str, Dict[str, float]]]:
     """
     Same interface as the original simulate_many_seasons, but also returns
-    playoff probabilities when sport == "NFL".
+    playoff probabilities when a playoff module exists for the sport.
 
     Returns
     -------
@@ -38,16 +76,14 @@ def simulate_many_seasons(
     playoff_probs : dict
         {
           team: {
-            "Wild Card": p,
-            "Divisional": p,
-            "Conference": p,
-            "Super Bowl": p,
+            "<round_name>": p,
+            ...
             "Champion": p,
           }
         }
-        Empty dict for non-NFL sports.
+        Empty dict for unsupported sports.
     """
-    # 1. Run the original regular-season Monte Carlo (unchanged)
+    # 1. Regular-season Monte Carlo (unchanged)
     results_df = _original_simulate_many_seasons(
         n_sims=n_sims,
         schedule_path=schedule_path,
@@ -58,18 +94,15 @@ def simulate_many_seasons(
     )
 
     playoff_probs: Dict[str, Dict[str, float]] = {}
+    run_playoffs = _get_playoff_runner(sport)
 
-    if sport != "NFL":
+    if run_playoffs is None:
         return results_df, playoff_probs
 
-    # 2. Run full season + playoff simulations to obtain proper probabilities.
-    #    We re-simulate a capped number of full seasons so we still have
-    #    access to the complete standings + Elo (the thin results_df alone
-    #    is not enough for seeding).
+    # 2. Re-simulate a capped number of full seasons so we have complete
+    #    standings + Elo for seeding / bracket construction.
     counters: Dict[str, Dict[str, int]] = defaultdict(lambda: defaultdict(int))
-    rounds = ["Wild Card", "Divisional", "Conference", "Super Bowl", "Champion"]
-
-    # Cap for responsiveness; raise this number if you want tighter estimates
+    rounds = PLAYOFF_ROUNDS.get(sport.upper(), [])
     n_playoff_sims = min(n_sims, 300)
 
     for i in range(n_playoff_sims):
@@ -81,7 +114,7 @@ def simulate_many_seasons(
             sport=sport,
         )
 
-        result = run_playoffs_after_season(
+        result = run_playoffs(
             standings_df=standings,
             team_elo=team_elo,
             home_advantage=55.0,  # later: pull from sport config
@@ -91,7 +124,6 @@ def simulate_many_seasons(
             for rnd in rounds:
                 if reached.get(rnd, False):
                     counters[team][rnd] += 1
-        # Note: Champion is already marked inside team_reached; do not double-count.
 
     playoff_probs = {
         team: {rnd: counters[team][rnd] / n_playoff_sims for rnd in rounds}

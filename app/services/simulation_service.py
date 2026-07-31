@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 
 # ---------------------------------------------------------------------------
-# UPDATED IMPORT – use the playoff wrapper instead of the original
+# Use the multi-sport playoff wrapper
 # ---------------------------------------------------------------------------
 from elo_lab.workflows.simulate_with_playoffs import simulate_many_seasons
 
@@ -173,7 +173,7 @@ def calculate_achievement_probabilities(sim_results: pd.DataFrame, sport: str) -
             sim_data["first_in_league"] = sim_data["team"] == first_league
 
         else:
-            # NFL / NBA placeholder – top 7 by wins
+            # NFL / NBA – top 7 by wins (placeholder until richer logic is needed)
             sim_data = sim_data.sort_values("wins", ascending=False)
             n = min(7, len(sim_data))
             sim_data["make_playoffs"] = False
@@ -216,7 +216,7 @@ def run_simulation(config, n_sims, initial_ratings=None, sport="NFL", season=Non
     schedule_path, tmp_path = _resolve_schedule_path(sport, season)
 
     try:
-        # ----- UPDATED CALL – unpack the tuple from the wrapper -----
+        # Multi-sport playoff wrapper returns (results_df, playoff_probs)
         sim_results, playoff_probs = simulate_many_seasons(
             n_sims=n_sims,
             schedule_path=schedule_path,
@@ -246,20 +246,18 @@ def run_simulation(config, n_sims, initial_ratings=None, sport="NFL", season=Non
 
         achievement_probs = calculate_achievement_probabilities(sim_results, sport)
 
-        if not achievement_probs.empty:
-            summary = summary.merge(achievement_probs, on="team", how="left")
-
         return {
-            "raw": sim_results,
             "summary": summary,
             "distribution": distributions,
             "elo_evolution": elo_evolution,
             "achievement_probs": achievement_probs,
-            "playoff_probs": playoff_probs,          # NEW
+            "playoff_probs": playoff_probs,          # <-- always present
+            "raw_sim_results": sim_results,
         }
+
     finally:
         if tmp_path and os.path.exists(tmp_path):
             try:
                 os.unlink(tmp_path)
-            except Exception:
+            except OSError:
                 pass

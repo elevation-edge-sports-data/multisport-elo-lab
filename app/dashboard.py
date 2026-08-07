@@ -1,7 +1,7 @@
 """
 MultiSport Elo Lab – Streamlit dashboard
 
-Version 11.3 with:
+Version 11.4 with:
   - NHL / NFL / NBA support + full playoff-bracket simulation
   - Multiseason-aware initial Elo (rating_source, rating_basis, apply_regression)
   - Continuous Elevation Edge (Elo pts per 1000 ft)
@@ -9,6 +9,8 @@ Version 11.3 with:
   - Log5 baseline + residual diagnostics
   - Precomputed default simulations loaded instantly on sport change
   - Global one-click full results export (multi-sheet Excel)
+  - Team logos in Elo Ratings, Trajectory, and Simulation views
+    (sport-specific assets under app/assets/logos/{nhl,nfl,nba}/)
   - Tabs: Configuration, Season Simulation, Elo Ratings, Elo Trajectory, Model Evaluation
 """
 
@@ -55,7 +57,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("MultiSport Elo Lab")
-st.caption("Interactive sports modeling analytics platform | Version 11.3")
+st.caption("Interactive sports modeling analytics platform | Version 11.4")
 
 
 # ---------------------------------------------------------------------------
@@ -321,24 +323,26 @@ if st.sidebar.button("Run Simulation", type="primary"):
 
 
 # ---------------------------------------------------------------------------
-# Global Export – placed AFTER defaults have been loaded / simulation has run
+# Global Export – top-right placement after defaults / simulation
 # ---------------------------------------------------------------------------
 if st.session_state.get("simulation_results") is not None:
     try:
         export_bytes = build_full_export(st.session_state)
         filename = make_export_filename(st.session_state)
 
-        st.download_button(
-            label="Download Full Results (.xlsx)",
-            data=export_bytes,
-            file_name=filename,
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            help=(
-                "Downloads Config, Simulation Summary, Achievement/Playoff probabilities, "
-                "Elo Ratings, and Evaluation metrics in one Excel file."
-            ),
-            type="primary",
-        )
+        _left, _right = st.columns([3, 1])
+        with _right:
+            st.download_button(
+                label="Download Full Results (.xlsx)",
+                data=export_bytes,
+                file_name=filename,
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                help=(
+                    "Downloads Config, Simulation Summary, Achievement/Playoff probabilities, "
+                    "Elo Ratings, and Evaluation metrics in one Excel file."
+                ),
+                type="primary",
+            )
     except Exception as e:
         # Never let export problems break the rest of the dashboard
         st.warning(f"Export temporarily unavailable: {e}")

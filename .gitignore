@@ -1,110 +1,50 @@
-# ---------------------------------------------------------------------------
 # Python
-# ---------------------------------------------------------------------------
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
 *.egg-info/
-.installed.cfg
+.eggs/
+dist/
+build/
 *.egg
-MANIFEST
 
-# ---------------------------------------------------------------------------
 # Virtual environments
-# ---------------------------------------------------------------------------
-venv/
 .venv/
+venv/
 env/
-ENV/
-env.bak/
-venv.bak/
 
-# ---------------------------------------------------------------------------
 # IDE / editors
-# ---------------------------------------------------------------------------
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
-.project
-.pydevproject
-.settings/
 
-# ---------------------------------------------------------------------------
-# OS junk
-# ---------------------------------------------------------------------------
+# OS
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
 desktop.ini
 
-# ---------------------------------------------------------------------------
-# Jupyter
-# ---------------------------------------------------------------------------
-.ipynb_checkpoints/
-*.ipynb_checkpoints
-
-# ---------------------------------------------------------------------------
-# Testing / coverage
-# ---------------------------------------------------------------------------
-.pytest_cache/
-.coverage
-.coverage.*
-htmlcov/
-.tox/
-.nox/
-coverage.xml
-*.cover
-.hypothesis/
-.cache/
-
-# ---------------------------------------------------------------------------
 # Streamlit
-# ---------------------------------------------------------------------------
 .streamlit/secrets.toml
 
-# ---------------------------------------------------------------------------
-# Project-specific: generated / large artifacts
-# ---------------------------------------------------------------------------
-# Precomputed default simulations (regenerate with:
-#   python -m elo_lab.workflows.generate_default_sims)
-data/precomputed/
-*.pkl
+# Environment / secrets
+.env
+.env.*
+!.env.example
 
-# Local experiment outputs (keep intentional baselines under outputs/
-# if you want them tracked; otherwise ignore the whole folder)
-# outputs/
-# Uncomment the line above if you prefer never to commit anything in outputs/
-
-# Temporary files created by simulation_service schedule resolution
+# Logs and temp
+*.log
 *.tmp
 tmp/
 temp/
 
-# ---------------------------------------------------------------------------
-# Misc
-# ---------------------------------------------------------------------------
-*.log
-*.sqlite3
-.env
-.env.*
-!.env.example
+# Precomputed defaults are tracked (required for zero-wait on Streamlit Cloud).
+# Ignore other pickle files elsewhere in the repo.
+*.pkl
+!data/precomputed/
+!data/precomputed/*_default.pkl
+
+# Optional: uncomment to ignore all local experiment outputs
+# outputs/

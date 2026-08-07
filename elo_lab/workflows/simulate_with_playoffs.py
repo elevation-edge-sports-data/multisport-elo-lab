@@ -64,7 +64,7 @@ def simulate_many_seasons(
     seed: int = 42,
     initial_ratings: Optional[dict] = None,
     sport: str = "NFL",
-) -> Tuple[pd.DataFrame, Dict[str, Dict[str, float]]]:
+) -> Tuple[pd.DataFrame, Dict[str, Dict[str, float]], pd.DataFrame]:
     """
     Same interface as the original simulate_many_seasons, but also returns
     playoff probabilities when a playoff module exists for the sport.
@@ -72,7 +72,7 @@ def simulate_many_seasons(
     Returns
     -------
     results_df : pd.DataFrame
-        Identical to the original thin results (sim_id, team, wins, points).
+        Regular-season results (sim_id, team, wins, points).
     playoff_probs : dict
         {
           team: {
@@ -82,22 +82,26 @@ def simulate_many_seasons(
           }
         }
         Empty dict for unsupported sports.
+    elo_evolution : pd.DataFrame
+        Aggregated Elo trajectories from the same regular-season sims
+        (team, games_played, mean_elo, p05_elo, p95_elo).
     """
-    # 1. Regular-season Monte Carlo (unchanged)
-    results_df = _original_simulate_many_seasons(
+    # 1. Regular-season Monte Carlo — standings + Elo from the SAME outcomes
+    results_df, elo_evolution = _original_simulate_many_seasons(
         n_sims=n_sims,
         schedule_path=schedule_path,
         config=config,
         seed=seed,
         initial_ratings=initial_ratings,
         sport=sport,
+        return_elo_evolution=True,
     )
 
     playoff_probs: Dict[str, Dict[str, float]] = {}
     run_playoffs = _get_playoff_runner(sport)
 
     if run_playoffs is None:
-        return results_df, playoff_probs
+        return results_df, playoff_probs, elo_evolution
 
     # 2. Re-simulate a capped number of full seasons so we have complete
     #    standings + Elo for seeding / bracket construction.
@@ -130,4 +134,4 @@ def simulate_many_seasons(
         for team in counters
     }
 
-    return results_df, playoff_probs
+    return results_df, playoff_probs, elo_evolution

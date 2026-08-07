@@ -1,3 +1,7 @@
+"""
+Elo Trajectory tab – historical / simulated Elo paths with uncertainty bands + logos.
+"""
+
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -12,11 +16,17 @@ except ImportError:
         from metadata.nba_teams import NBA_TEAMS
     except ImportError:
         NBA_TEAMS = {}
+
     def load_teams(sport):
         return {"NFL": NFL_TEAMS, "NHL": NHL_TEAMS, "NBA": NBA_TEAMS}.get(sport, {})
 
+try:
+    from components.logos import render_logo_strip
+except ImportError:
+    def render_logo_strip(*args, **kwargs):
+        pass
 
-# Default focus groups by sport (pre-selected on Elo Trajectory tab)
+
 DEFAULT_FOCUS = {
     "NBA": ["DEN", "LAL", "SAS", "NYK", "BOS", "CLE"],
     "NHL": ["COL", "VGK", "DAL", "MIN", "CAR", "FLA"],
@@ -68,7 +78,6 @@ def render_elo_evolution_tab(sport="NFL"):
 
     preferred = DEFAULT_FOCUS.get(sport, [])
     default_teams = [t for t in preferred if t in all_teams]
-    # Also match full names if results use them
     try:
         teams_meta = load_teams(sport)
         name_to_abbr = {data.get("name", ""): abbr for abbr, data in teams_meta.items()}
@@ -86,11 +95,16 @@ def render_elo_evolution_tab(sport="NFL"):
         options=all_teams,
         default=default_teams,
         help=f"Default focus: {', '.join(preferred)}",
+        key=f"elo_traj_teams_{sport}",
     )
 
     if not selected_teams:
         st.info("Please select at least one team.")
         return
+
+    # Small logo strip for selected teams only (typically 4–8)
+    st.caption("Selected teams")
+    render_logo_strip(sport, selected_teams, width=36, max_show=12)
 
     filtered = elo_evolution[elo_evolution["team"].isin(selected_teams)]
 

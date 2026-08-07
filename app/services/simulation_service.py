@@ -9,7 +9,6 @@ from pathlib import Path
 from elo_lab.workflows.simulate_with_playoffs import simulate_many_seasons
 
 from elo_lab.workflows.simulate_season import (
-    simulate_elo_evolution,
     summarize_simulations,
     win_distributions,
 )
@@ -216,8 +215,9 @@ def run_simulation(config, n_sims, initial_ratings=None, sport="NFL", season=Non
     schedule_path, tmp_path = _resolve_schedule_path(sport, season)
 
     try:
-        # Multi-sport playoff wrapper returns (results_df, playoff_probs)
-        sim_results, playoff_probs = simulate_many_seasons(
+        # Single Monte Carlo pass: standings + Elo share the same game outcomes.
+        # Playoff wrapper returns (results_df, playoff_probs, elo_evolution).
+        sim_results, playoff_probs, elo_evolution = simulate_many_seasons(
             n_sims=n_sims,
             schedule_path=schedule_path,
             config=config,
@@ -227,23 +227,6 @@ def run_simulation(config, n_sims, initial_ratings=None, sport="NFL", season=Non
 
         summary = summarize_simulations(sim_results)
         distributions = win_distributions(sim_results)
-
-        try:
-            elo_evolution = simulate_elo_evolution(
-                n_sims=n_sims,
-                config=config,
-                initial_ratings=initial_ratings,
-                sport=sport,
-                schedule_path=schedule_path,
-            )
-        except TypeError:
-            elo_evolution = simulate_elo_evolution(
-                n_sims=n_sims,
-                config=config,
-                initial_ratings=initial_ratings,
-                sport=sport,
-            )
-
         achievement_probs = calculate_achievement_probabilities(sim_results, sport)
 
         return {
@@ -251,7 +234,7 @@ def run_simulation(config, n_sims, initial_ratings=None, sport="NFL", season=Non
             "distribution": distributions,
             "elo_evolution": elo_evolution,
             "achievement_probs": achievement_probs,
-            "playoff_probs": playoff_probs,          # <-- always present
+            "playoff_probs": playoff_probs,
             "raw_sim_results": sim_results,
         }
 

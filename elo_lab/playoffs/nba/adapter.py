@@ -55,6 +55,37 @@ NBA_TEAM_META: Dict[str, Tuple[str, str]] = {
 }
 
 
+
+def _name_to_abbr() -> Dict[str, str]:
+    """Map full team name and abbr → canonical abbreviation."""
+    mapping: Dict[str, str] = {}
+    try:
+        from metadata import load_teams
+        for abbr, meta in load_teams("NBA").items():
+            mapping[abbr] = abbr
+            mapping[abbr.upper()] = abbr
+            name = meta.get("name")
+            if name:
+                mapping[name] = abbr
+                mapping[name.lower()] = abbr
+    except Exception:
+        pass
+    for abbr in NBA_TEAM_META:
+        mapping[abbr] = abbr
+        mapping[abbr.upper()] = abbr
+    return mapping
+
+
+def _resolve_team_id(team: str, name_map: Dict[str, str]) -> str:
+    if team in name_map:
+        return name_map[team]
+    if team.upper() in name_map:
+        return name_map[team.upper()]
+    if team.lower() in name_map:
+        return name_map[team.lower()]
+    return team
+
+
 def extract_standings(
     standings_df: pd.DataFrame,
     team_elo: Optional[Mapping[str, float]] = None,
@@ -77,7 +108,8 @@ def extract_standings(
     result: List[TeamStanding] = []
 
     for _, row in standings_df.iterrows():
-        team = str(row["team"])
+        raw_team = str(row["team"])
+        team = _resolve_team_id(raw_team, _name_to_abbr())
         wins = float(row.get("wins", 0.0))
         losses = float(row.get("losses", 0.0))
 

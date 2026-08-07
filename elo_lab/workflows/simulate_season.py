@@ -1,5 +1,7 @@
 """
-simulate_season.py – Version 9
+simulate_season.py – Version 10
+
+v10: Per-team games_played; shared Monte Carlo for standings + Elo evolution
 
 Multiseason + NBA support:
   - Guards max_week filter when schedule has no "week" column
@@ -69,9 +71,19 @@ SPORT_CONFIGS = {
 def _build_name_to_abbr(sport: str) -> dict:
     """Map full team name (and abbr) -> abbr using metadata when available."""
     mapping = {}
-    try:
-        from metadata import load_teams
-        teams = load_teams(sport)
+    teams = None
+    for import_path in (
+        "metadata",
+        "app.metadata",
+    ):
+        try:
+            mod = __import__(import_path, fromlist=["load_teams"])
+            teams = mod.load_teams(sport)
+            break
+        except Exception:
+            continue
+
+    if teams:
         for abbr, info in teams.items():
             mapping[abbr.upper()] = abbr
             mapping[abbr] = abbr
@@ -79,10 +91,31 @@ def _build_name_to_abbr(sport: str) -> dict:
             if name:
                 mapping[name] = abbr
                 mapping[name.upper()] = abbr
-                # common short forms
                 mapping[name.replace(" ", "").upper()] = abbr
-    except Exception:
-        pass
+    else:
+        # Last-resort: pull abbrs from playoff meta so schedule still normalizes
+        try:
+            sport_u = sport.upper()
+            if sport_u == "NHL":
+                from elo_lab.playoffs.nhl.adapter import NHL_TEAM_META, NHL_FULL_NAME_TO_ABBR
+                for abbr in NHL_TEAM_META:
+                    mapping[abbr] = abbr
+                    mapping[abbr.upper()] = abbr
+                for name, abbr in NHL_FULL_NAME_TO_ABBR.items():
+                    mapping[name] = abbr
+                    mapping[name.upper()] = abbr
+            elif sport_u == "NFL":
+                from elo_lab.playoffs.nfl.adapter import NFL_TEAM_META
+                for abbr in NFL_TEAM_META:
+                    mapping[abbr] = abbr
+                    mapping[abbr.upper()] = abbr
+            elif sport_u == "NBA":
+                from elo_lab.playoffs.nba.adapter import NBA_TEAM_META
+                for abbr in NBA_TEAM_META:
+                    mapping[abbr] = abbr
+                    mapping[abbr.upper()] = abbr
+        except Exception:
+            pass
     return mapping
 
 
@@ -255,6 +288,7 @@ def simulate_season(
     wins = {team: 0 for team in team_elo}
     points = {team: 0 for team in team_elo}
     losses = {team: 0 for team in team_elo}
+    team_gp = {team: 0 for team in team_elo}  # per-team games played
 
     elo_history = []
     game_number = 0
@@ -306,19 +340,22 @@ def simulate_season(
         team_elo[home] = result["home_elo_post"]
         team_elo[away] = result["away_elo_post"]
 
+        team_gp[home] = team_gp.get(home, 0) + 1
+        team_gp[away] = team_gp.get(away, 0) + 1
+
         elo_history.append({
             "team": home,
             "elo": team_elo[home],
             "week": week,
             "game_number": game_number,
-            "games_played": game_number // 2 + 1,
+            "games_played": team_gp[home],
         })
         elo_history.append({
             "team": away,
             "elo": team_elo[away],
             "week": week,
             "game_number": game_number,
-            "games_played": game_number // 2 + 1,
+            "games_played": team_gp[away],
         })
 
         if cfg.get("outcome_type") == "points":
@@ -347,73 +384,26 @@ def simulate_season(
                 wins[away] += 1
                 losses[home] += 1
 
+    # Only teams that appear in the schedule (avoids double-counting when
+    # initial_ratings keys use abbreviations and the schedule uses full names).
+    standing_teams = list(schedule_teams)
     standings = pd.DataFrame({
-        "team": list(team_elo.keys()),
-        "wins": [wins.get(t, 0) for t in team_elo],
-        "losses": [losses.get(t, 0) for t in team_elo],
-        "points": [points.get(t, wins.get(t, 0)) for t in team_elo],
-        "elo": [team_elo[t] for t in team_elo],
+        "team": standing_teams,
+        "wins": [wins.get(t, 0) for t in standing_teams],
+        "losses": [losses.get(t, 0) for t in standing_teams],
+        "points": [points.get(t, wins.get(t, 0)) for t in standing_teams],
+        "elo": [team_elo.get(t, 1500.0) for t in standing_teams],
     })
 
     return standings, team_elo, pd.DataFrame(elo_history)
 
 
-def simulate_many_seasons(
-    n_sims=500,
-    schedule_path=None,
-    config=None,
-    seed=42,
-    initial_ratings=None,
-    sport="NFL",
-):
-    cfg = SPORT_CONFIGS.get(sport, SPORT_CONFIGS["NFL"])
-    if schedule_path is None:
-        schedule_path = cfg["schedule_path"]
+def _aggregate_elo_evolution(history_frames):
+    """Aggregate per-sim Elo histories into mean / p05 / p95 by team and games_played."""
+    if not history_frames:
+        return pd.DataFrame(columns=["team", "games_played", "mean_elo", "p05_elo", "p95_elo"])
 
-    results = []
-    for i in range(n_sims):
-        standings, _, _ = simulate_season(
-            schedule_path=schedule_path,
-            config=config,
-            seed=seed + i,
-            initial_ratings=initial_ratings,
-            sport=sport,
-        )
-        for _, row in standings.iterrows():
-            results.append({
-                "sim_id": i,
-                "team": row["team"],
-                "wins": int(row["wins"]),
-                "points": int(row.get("points", row["wins"])),
-            })
-    return pd.DataFrame(results)
-
-
-def simulate_elo_evolution(
-    n_sims=500,
-    schedule_path=None,
-    config=None,
-    seed=42,
-    initial_ratings=None,
-    sport="NFL",
-):
-    cfg = SPORT_CONFIGS.get(sport, SPORT_CONFIGS["NFL"])
-    if schedule_path is None:
-        schedule_path = cfg["schedule_path"]
-
-    history = []
-    for i in range(n_sims):
-        _, _, elo_hist = simulate_season(
-            schedule_path=schedule_path,
-            config=config,
-            seed=seed + i,
-            initial_ratings=initial_ratings,
-            sport=sport,
-        )
-        elo_hist["sim_id"] = i
-        history.append(elo_hist)
-
-    history = pd.concat(history, ignore_index=True)
+    history = pd.concat(history_frames, ignore_index=True)
     group_col = "games_played" if "games_played" in history.columns else "week"
 
     evolution = (
@@ -430,6 +420,89 @@ def simulate_elo_evolution(
         .sort_values(["team", group_col])
     )
     return evolution.rename(columns={group_col: "games_played"})
+
+
+def simulate_many_seasons(
+    n_sims=500,
+    schedule_path=None,
+    config=None,
+    seed=42,
+    initial_ratings=None,
+    sport="NFL",
+    return_elo_evolution=False,
+):
+    """
+    Monte Carlo regular-season simulations.
+
+    Parameters
+    ----------
+    return_elo_evolution : bool
+        If True, also return aggregated Elo trajectories from the *same*
+        simulated game outcomes (so final Elo ranks align with wins/points).
+
+    Returns
+    -------
+    results_df : pd.DataFrame
+        Columns: sim_id, team, wins, points
+    elo_evolution : pd.DataFrame (only if return_elo_evolution=True)
+        Columns: team, games_played, mean_elo, p05_elo, p95_elo
+    """
+    cfg = SPORT_CONFIGS.get(sport, SPORT_CONFIGS["NFL"])
+    if schedule_path is None:
+        schedule_path = cfg["schedule_path"]
+
+    results = []
+    history = []
+    for i in range(n_sims):
+        standings, _, elo_hist = simulate_season(
+            schedule_path=schedule_path,
+            config=config,
+            seed=seed + i,
+            initial_ratings=initial_ratings,
+            sport=sport,
+        )
+        for _, row in standings.iterrows():
+            results.append({
+                "sim_id": i,
+                "team": row["team"],
+                "wins": int(row["wins"]),
+                "points": int(row.get("points", row["wins"])),
+            })
+        if return_elo_evolution:
+            elo_hist = elo_hist.copy()
+            elo_hist["sim_id"] = i
+            history.append(elo_hist)
+
+    results_df = pd.DataFrame(results)
+    if return_elo_evolution:
+        return results_df, _aggregate_elo_evolution(history)
+    return results_df
+
+
+def simulate_elo_evolution(
+    n_sims=500,
+    schedule_path=None,
+    config=None,
+    seed=42,
+    initial_ratings=None,
+    sport="NFL",
+):
+    """
+    Elo trajectories from the same Monte Carlo path as simulate_many_seasons.
+
+    Prefer calling simulate_many_seasons(..., return_elo_evolution=True) when
+    you also need standings, so wins and Elo share outcomes.
+    """
+    _, evolution = simulate_many_seasons(
+        n_sims=n_sims,
+        schedule_path=schedule_path,
+        config=config,
+        seed=seed,
+        initial_ratings=initial_ratings,
+        sport=sport,
+        return_elo_evolution=True,
+    )
+    return evolution
 
 
 def summarize_simulations(sim_results):

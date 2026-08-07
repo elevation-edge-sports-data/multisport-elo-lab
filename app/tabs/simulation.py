@@ -14,6 +14,12 @@ except ImportError:
     def load_teams(sport):
         return {"NFL": NFL_TEAMS, "NHL": NHL_TEAMS, "NBA": NBA_TEAMS}.get(sport, {})
 
+try:
+    from components.logos import render_logo_strip
+except ImportError:
+    def render_logo_strip(*args, **kwargs):
+        pass  # graceful no-op if logos component not present
+
 
 def get_team_color_map(sport):
     try:
@@ -137,9 +143,13 @@ def render_simulation_tab(sport="NFL"):
 
         st.dataframe(display_df, use_container_width=True, hide_index=True)
 
-        # Championship probability bar chart
+        # Championship probability bar chart + logo strip of contenders
         if champ_col in playoff_df.columns:
             chart_df = playoff_df.nlargest(12, champ_col)
+            top_contenders = chart_df["team"].tolist()
+            st.caption("Championship contenders")
+            render_logo_strip(sport, top_contenders, width=30, max_show=12)
+
             color_map = get_team_color_map(sport)
             fig = px.bar(
                 chart_df,

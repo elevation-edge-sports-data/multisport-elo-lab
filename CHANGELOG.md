@@ -2,6 +2,37 @@
 
 All notable changes to MultiSport Elo Lab are documented in this file.
 
+## Version 11.5 — Warm-up Elo from recent actual seasons
+
+### Added
+- **Historical warm-up before target-season Monte Carlo**: prior releases started each simulation from a static / ranking-based prior and Monte Carlo'd only the selected season. v11.5 first updates Elo from **actual** regular-season and playoff results in the most recent completed seasons, then Monte Carlo runs only on the target season.
+- Playoff games in the warm-up use a higher K (k×1.75) so deep runs and early exits move ratings more than regular-season games.
+- Stronger inter-season regression toward the mean after each warm-up season.
+- Season dropdown lists only **simulatable** targets (earliest data year is reserved for history, not offered as a simulation target).
+
+### Changed
+- Default simulations and Run Simulation use the warm-up path by default.
+- Season Simulation playoff outlook table ordered by Reach Wild Card (NFL) or Reach First Round (NHL/NBA).
+
+### Notes
+- Rankings on first open should better reflect recent real results than a single-year prior alone; history window and regression strength remain open to tuning in later releases.
+
+---
+
+## Version 11.4 — Team Logos
+
+### Added
+- **Team logos** across the dashboard
+  - Sport-specific assets under `app/assets/logos/{nhl,nfl,nba}/`
+  - Logos in Elo Ratings, Elo Trajectory, and Season Simulation views
+  - Shared logo helpers in `app/components/logos.py` and metadata resolution
+- Logo strip for playoff / championship contenders on the Season Simulation tab
+
+### Changed
+- Logo layout reorganized from a flat folder into per-sport subfolders
+---
+
+
 ## Version 11.3 — Full Results Export
 
 ### Added
@@ -16,9 +47,6 @@ All notable changes to MultiSport Elo Lab are documented in this file.
 - New `app/services/export_service.py`
   - Builds the workbook from current `st.session_state`
   - Gracefully omits sheets that have no data
-
-### Changed
-- Dashboard caption and version string updated to Version 11.3
 
 ### Improved
 - Export button is placed after default results are loaded, so it appears on first visit
@@ -36,7 +64,6 @@ All notable changes to MultiSport Elo Lab are documented in this file.
 - 1000-sim model comparison baseline under `outputs/`
 
 ### Changed
-- Dashboard caption and version string updated to Version 11.2
 - `.gitignore` expanded for precomputed pickles and common artifacts
 
 ### Improved
@@ -58,8 +85,8 @@ All notable changes to MultiSport Elo Lab are documented in this file.
 
 ### Changed
 - Season Simulation tab generalized for sport-specific round names and labels
-
 ---
+
 
 ## Version 11.0 — NFL Playoff Simulation
 
@@ -89,7 +116,6 @@ All notable changes to MultiSport Elo Lab are documented in this file.
 
 ### Changed
 - Elevation Edge moved from discrete bins to continuous altitude differential
-- Dashboard caption and version string updated to Version 10
 - Default elevation value set to 1.0
 
 ### Improved
@@ -265,3 +291,4 @@ All notable changes to MultiSport Elo Lab are documented in this file.
 - Refactored all workflows to use engine API exclusively
 - Eliminated duplicated Elo logic across workflows
 - Replaced procedural adjustment logic with declarative pipeline
+

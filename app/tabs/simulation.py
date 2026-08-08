@@ -47,6 +47,7 @@ PLAYOFF_DISPLAY = {
             "Super Bowl": "Reach Super Bowl",
             "Champion": "Win Super Bowl",
         },
+        "sort_col": "Reach Wild Card",
         "champ_col": "Win Super Bowl",
         "chart_title": "Super Bowl Win Probability (Top 12)",
     },
@@ -66,6 +67,7 @@ PLAYOFF_DISPLAY = {
             "Stanley Cup Final": "Reach Stanley Cup Final",
             "Champion": "Win Stanley Cup",
         },
+        "sort_col": "Reach First Round",
         "champ_col": "Win Stanley Cup",
         "chart_title": "Stanley Cup Win Probability (Top 12)",
     },
@@ -87,6 +89,7 @@ PLAYOFF_DISPLAY = {
             "NBA Finals": "Reach NBA Finals",
             "Champion": "Win NBA Title",
         },
+        "sort_col": "Reach First Round",
         "champ_col": "Win NBA Title",
         "chart_title": "NBA Title Win Probability (Top 12)",
     },
@@ -132,7 +135,10 @@ def render_simulation_tab(sport="NFL"):
         playoff_df = playoff_df.rename(columns=display_cfg["rename"])
 
         champ_col = display_cfg["champ_col"]
-        if champ_col in playoff_df.columns:
+        sort_col = display_cfg.get("sort_col") or champ_col
+        if sort_col in playoff_df.columns:
+            playoff_df = playoff_df.sort_values(sort_col, ascending=False)
+        elif champ_col in playoff_df.columns:
             playoff_df = playoff_df.sort_values(champ_col, ascending=False)
 
         # Display as percentages

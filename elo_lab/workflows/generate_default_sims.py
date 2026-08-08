@@ -56,7 +56,8 @@ except ImportError:
 from app.services.simulation_service import run_simulation
 from app.services.initial_ratings_service import (
     get_available_seasons,
-    get_initial_ratings,
+    get_simulatable_seasons,
+    get_seed_season,
 )
 
 
@@ -99,20 +100,13 @@ def generate_one(sport: str, n_sims: int, out_dir: Path) -> Path:
     schedule_path = _schedule_path(sport)
 
     # Use the most recent available season if possible
-    seasons = get_available_seasons(sport)
+    seasons = get_simulatable_seasons(sport)
     season = seasons[-1] if seasons else None
-    print(f"  Season          : {season or '(all / latest)'}")
-    print(f"  Schedule path   : {schedule_path}")
-
-    initial_ratings = get_initial_ratings(
-        sport=sport,
-        schedule_path=schedule_path,
-        season=season,
-        rating_source="playoffs",
-        rating_basis="record",
-        apply_regression=False,
-    )
-    print(f"  Initial ratings : {len(initial_ratings)} teams")
+    seed = get_seed_season(sport)
+    print(f"  Target season   : {season}")
+    print(f"  History through : before {season} (seed data from {seed})")
+    print(f"  Mode            : warm-up on actual recent seasons → MC target")
+    initial_ratings = {}
 
     t0 = time.perf_counter()
     results = run_simulation(

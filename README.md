@@ -6,11 +6,13 @@ Supports historical backtesting, Monte Carlo regular-season + full playoff-brack
 
 **Live dashboard**: [https://multisport-elo-lab.streamlit.app/](https://multisport-elo-lab.streamlit.app/)
 
-**Current version: 11.3**
+**Current version: 11.5**
 
 ---
 
-## Highlights (Version 11)
+## Highlights (Version 11.5)
+
+- **Warm-up Elo from recent actual seasons**: instead of starting the target-season Monte Carlo from a static/ranking prior alone (prior releases), Elo is first updated from actual regular-season and playoff results in recent completed years (with stronger regression), then only the target season is simulated
 
 - Full multi-sport support with consistent ordering: **NHL · NBA · NFL**
 - **Full playoff-bracket simulation** for all three sports
@@ -169,6 +171,8 @@ streamlit run app/dashboard.py
 | 11.1    | NHL + NBA playoff-bracket simulation + multi-sport dispatch |
 | 11.2    | Instant default simulations on sport change + generator workflow |
 | 11.3    | One-click full results export (multi-sheet Excel) |
+| 11.4    | Team logos in Elo Ratings, Trajectory, and Simulation |
+| 11.5    | Warm-up Elo from recent actual results before target-season MC (replaces prior-only start) |
 
 See [CHANGELOG.md](CHANGELOG.md) for the complete history.
 

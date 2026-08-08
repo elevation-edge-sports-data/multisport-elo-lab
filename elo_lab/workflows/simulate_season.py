@@ -10,26 +10,29 @@ Multiseason + NBA support:
   - Compatible with per-season schedule files under data/{sport}/
 """
 
+from pathlib import Path
+from typing import Optional, List, Dict, Any
+
 import pandas as pd
 import numpy as np
 
-# Try multiple import paths to stay compatible with engine structure
 try:
-    from elo_lab.engine.core import compute_pregame, run_game
+    from elo_lab.engine.game_runner import run_game
+    from elo_lab.engine.pregame import compute_pregame
 except ImportError:
     try:
-        from elo_lab.engine import compute_pregame, run_game
+        from elo_lab.engine import run_game, compute_pregame
     except ImportError:
         def compute_pregame(home_elo, away_elo, context, config):
-            return {"p_home": 0.5 + (home_elo - away_elo) / 2000}
+            diff = home_elo - away_elo
+            return {"p_home": 1.0 / (1.0 + 10 ** (-diff / 400.0))}
 
         def run_game(home_elo, away_elo, context, config):
-            k = config.get("k", 20) if config else 20
+            k = (config or {}).get("k", 20)
             actual = context.get("actual", 0)
-            if actual == 1:
-                return {"home_elo_post": home_elo + k, "away_elo_post": away_elo - k}
-            else:
-                return {"home_elo_post": home_elo - k, "away_elo_post": away_elo + k}
+            p_home = 1.0 / (1.0 + 10 ** (-(home_elo - away_elo) / 400.0))
+            delta = k * (actual - p_home)
+            return {"home_elo_post": home_elo + delta, "away_elo_post": away_elo - delta}
 
 
 # ==================== SPORT CONFIG ====================
@@ -92,30 +95,33 @@ def _build_name_to_abbr(sport: str) -> dict:
                 mapping[name] = abbr
                 mapping[name.upper()] = abbr
                 mapping[name.replace(" ", "").upper()] = abbr
-    else:
-        # Last-resort: pull abbrs from playoff meta so schedule still normalizes
-        try:
-            sport_u = sport.upper()
-            if sport_u == "NHL":
-                from elo_lab.playoffs.nhl.adapter import NHL_TEAM_META, NHL_FULL_NAME_TO_ABBR
-                for abbr in NHL_TEAM_META:
-                    mapping[abbr] = abbr
-                    mapping[abbr.upper()] = abbr
-                for name, abbr in NHL_FULL_NAME_TO_ABBR.items():
-                    mapping[name] = abbr
-                    mapping[name.upper()] = abbr
-            elif sport_u == "NFL":
-                from elo_lab.playoffs.nfl.adapter import NFL_TEAM_META
-                for abbr in NFL_TEAM_META:
-                    mapping[abbr] = abbr
-                    mapping[abbr.upper()] = abbr
-            elif sport_u == "NBA":
-                from elo_lab.playoffs.nba.adapter import NBA_TEAM_META
-                for abbr in NBA_TEAM_META:
-                    mapping[abbr] = abbr
-                    mapping[abbr.upper()] = abbr
-        except Exception:
-            pass
+    # Always layer playoff full-name maps (covers renames e.g. Utah Mammoth)
+    try:
+        sport_u = sport.upper()
+        if sport_u == "NHL":
+            from elo_lab.playoffs.nhl.adapter import NHL_TEAM_META, NHL_FULL_NAME_TO_ABBR
+            for abbr in NHL_TEAM_META:
+                mapping[abbr] = abbr
+                mapping[abbr.upper()] = abbr
+            for name, abbr in NHL_FULL_NAME_TO_ABBR.items():
+                mapping[name] = abbr
+                mapping[name.upper()] = abbr
+            for name in ("Utah Mammoth", "Utah Hockey Club", "Arizona Coyotes", "Phoenix Coyotes"):
+                mapping[name] = "UTA"
+                mapping[name.upper()] = "UTA"
+            mapping["ARI"] = "UTA"
+        elif sport_u == "NFL":
+            from elo_lab.playoffs.nfl.adapter import NFL_TEAM_META
+            for abbr in NFL_TEAM_META:
+                mapping[abbr] = abbr
+                mapping[abbr.upper()] = abbr
+        elif sport_u == "NBA":
+            from elo_lab.playoffs.nba.adapter import NBA_TEAM_META
+            for abbr in NBA_TEAM_META:
+                mapping[abbr] = abbr
+                mapping[abbr.upper()] = abbr
+    except Exception:
+        pass
     return mapping
 
 
@@ -211,36 +217,84 @@ def normalize_schedule(df: pd.DataFrame, sport: str = "NFL") -> pd.DataFrame:
 
 
 
+
+def filter_regular_season(schedule: pd.DataFrame, sport: str = "NFL") -> pd.DataFrame:
+    """Keep regular-season games only (NFL week<=18; NHL/NBA before mid-April)."""
+    if schedule is None or schedule.empty:
+        return schedule
+    df = schedule.copy()
+    sport_u = sport.upper()
+    if sport_u == "NFL" and "week" in df.columns:
+        week_num = pd.to_numeric(df["week"], errors="coerce")
+        return df[week_num.notna() & (week_num <= 18)].copy()
+    if "date" in df.columns:
+        dt = pd.to_datetime(df["date"], errors="coerce")
+        if dt.notna().any():
+            max_year = int(dt.dt.year.max())
+            cutoff = pd.Timestamp(year=max_year, month=4, day=16)
+            return df[dt < cutoff].copy()
+    cfg = SPORT_CONFIGS.get(sport_u, {})
+    if cfg.get("max_week") and "week" in df.columns:
+        return df[pd.to_numeric(df["week"], errors="coerce") <= cfg["max_week"]].copy()
+    return df
+
+
+def is_playoff_row(row, sport: str = "NFL") -> bool:
+    sport_u = sport.upper()
+    if sport_u == "NFL":
+        week = row.get("week") if hasattr(row, "get") else None
+        if week is None or (isinstance(week, float) and pd.isna(week)):
+            return False
+        try:
+            float(week)
+            return False
+        except (TypeError, ValueError):
+            return True
+    try:
+        dt = pd.to_datetime(row.get("date") if hasattr(row, "get") else row["date"], errors="coerce")
+        if pd.notna(dt) and (dt.month > 4 or (dt.month == 4 and dt.day >= 16)):
+            return True
+    except Exception:
+        pass
+    return False
+
+
 def simulate_season(
     schedule_path=None,
     config=None,
     seed=42,
     initial_ratings=None,
     sport="NFL",
+    schedule_df=None,
+    regular_season_only=True,
 ):
+
     """Core season simulation with sport support (NHL points + OT, NFL/NBA wins)."""
     cfg = SPORT_CONFIGS.get(sport, SPORT_CONFIGS["NFL"])
-    if schedule_path is None:
-        schedule_path = cfg["schedule_path"]
 
-    try:
-        schedule = pd.read_csv(schedule_path)
-    except FileNotFoundError:
-        raise FileNotFoundError(
-            f"Schedule file not found: {schedule_path}\n"
-            "→ Prefer per-season files under data/{sport}/ "
-            "(e.g. data/nba/nba_2025.csv). Combined CSVs are legacy."
-        )
+    if schedule_df is not None:
+        schedule = schedule_df.copy()
+        if "home_team" not in schedule.columns or "away_team" not in schedule.columns:
+            schedule = normalize_schedule(schedule, sport=sport)
+    else:
+        if schedule_path is None:
+            schedule_path = cfg["schedule_path"]
+        try:
+            schedule = pd.read_csv(schedule_path)
+        except FileNotFoundError:
+            raise FileNotFoundError(
+                f"Schedule file not found: {schedule_path}\n"
+                "→ Prefer per-season files under data/{sport}/ "
+                "(e.g. data/nba/nba_2025.csv). Combined CSVs are legacy."
+            )
+        schedule = normalize_schedule(schedule, sport=sport)
 
-    schedule = normalize_schedule(schedule, sport=sport)
-
-    # If a multi-season file was passed, keep only the first season present
-    # (caller should already filter via simulation_service when a season is selected)
     if "season" in schedule.columns and schedule["season"].nunique() > 1:
         schedule = schedule[schedule["season"] == schedule["season"].iloc[0]]
 
-    # Guard: only filter by week when the column exists (NBA schedules often lack it)
-    if cfg.get("max_week") and "week" in schedule.columns:
+    if regular_season_only:
+        schedule = filter_regular_season(schedule, sport=sport)
+    elif cfg.get("max_week") and "week" in schedule.columns:
         schedule = schedule[pd.to_numeric(schedule["week"], errors="coerce") <= cfg["max_week"]]
 
     sort_cols = []
@@ -248,6 +302,8 @@ def simulate_season(
         sort_cols.append("season")
     if "week" in schedule.columns:
         sort_cols.append("week")
+    if "date" in schedule.columns and not sort_cols:
+        sort_cols.append("date")
     if sort_cols:
         schedule = schedule.sort_values(sort_cols)
     else:
@@ -518,3 +574,183 @@ def summarize_simulations(sim_results):
 
 def win_distributions(sim_results):
     return sim_results
+
+
+def _load_season_schedule(sport: str, season: str):
+    """Load and normalize one season's schedule."""
+    for c in [
+        Path(f"data/{sport.lower()}/{sport.lower()}_{season}.csv"),
+        Path(f"data/{sport.lower()}/{season}.csv"),
+    ]:
+        if c.exists():
+            try:
+                return normalize_schedule(pd.read_csv(c), sport=sport)
+            except Exception:
+                continue
+    return None
+
+
+def warm_elo_from_actual_history(
+    sport: str,
+    seasons,
+    config=None,
+    initial_ratings=None,
+    inter_season_regression: float = 0.67,
+    mean_elo: float = 1500.0,
+    playoff_k_multiplier: float = 1.75,
+    include_playoffs: bool = True,
+):
+    """
+    Update Elo from actual results (regular season + optional playoffs).
+
+    Prior releases started target-season Monte Carlo from a static/ranking prior
+    only. This warm-up walks real scores first so recent form enters the ratings.
+    """
+    cfg_base = dict(config or {})
+    base_k = float(cfg_base.get("k", 20))
+    ratings = dict(initial_ratings) if initial_ratings else {}
+
+    for s in seasons:
+        df = _load_season_schedule(sport, s)
+        if df is None or df.empty:
+            continue
+        if not include_playoffs:
+            df = filter_regular_season(df, sport=sport)
+        if df.empty:
+            continue
+
+        teams = (
+            pd.concat([df["home_team"], df["away_team"]])
+            .dropna().astype(str).str.strip().unique().tolist()
+        )
+        for team in teams:
+            ratings.setdefault(team, mean_elo)
+
+        for _, game in df.iterrows():
+            home = str(game["home_team"]).strip()
+            away = str(game["away_team"]).strip()
+            hs, as_ = game.get("home_score"), game.get("away_score")
+            if pd.isna(hs) or pd.isna(as_):
+                continue
+            try:
+                hs_f, as_f = float(hs), float(as_)
+            except (TypeError, ValueError):
+                continue
+            if hs_f == as_f:
+                continue
+
+            actual_home_win = 1 if hs_f > as_f else 0
+            playoff = is_playoff_row(game, sport)
+            k = base_k * (playoff_k_multiplier if playoff else 1.0)
+            cfg = dict(cfg_base)
+            cfg["k"] = k
+
+            result = run_game(
+                home_elo=float(ratings[home]),
+                away_elo=float(ratings[away]),
+                context={
+                    "season": s,
+                    "home_team": home,
+                    "away_team": away,
+                    "home_score": hs_f,
+                    "away_score": as_f,
+                    "actual": actual_home_win,
+                    "is_playoff": playoff,
+                },
+                config=cfg,
+            )
+            ratings[home] = float(result["home_elo_post"])
+            ratings[away] = float(result["away_elo_post"])
+
+        if inter_season_regression and inter_season_regression > 0:
+            reg = float(inter_season_regression)
+            ratings = {
+                team: (1.0 - reg) * e + reg * mean_elo
+                for team, e in ratings.items()
+            }
+
+    return ratings
+
+
+def simulate_many_seasons_multiyear(
+    n_sims: int = 250,
+    sport: str = "NHL",
+    target_season: str = None,
+    config=None,
+    seed: int = 42,
+    base_initial_ratings=None,
+    return_elo_evolution: bool = True,
+    hybrid_warmup: bool = True,
+    inter_season_regression: float = 0.67,
+    playoff_k_multiplier: float = 1.75,
+    include_playoffs_in_warmup: bool = True,
+    max_history_seasons: int = 2,
+):
+    """
+    Warm-up Elo on actual recent seasons, then Monte Carlo the target season only.
+
+    Replaces the prior-only start used in published releases through 11.4.
+    """
+    try:
+        from app.services.initial_ratings_service import get_available_seasons
+    except ImportError:
+        from services.initial_ratings_service import get_available_seasons  # type: ignore
+
+    all_seasons = get_available_seasons(sport)
+    if not all_seasons:
+        raise ValueError(f"No seasons available for {sport}")
+    if target_season is None:
+        target_season = all_seasons[-1]
+    if target_season not in all_seasons:
+        raise ValueError(f"target_season {target_season} not in {all_seasons}")
+
+    target_idx = all_seasons.index(target_season)
+    history_all = all_seasons[:target_idx]
+    if max_history_seasons and max_history_seasons > 0:
+        history_seasons = history_all[-max_history_seasons:]
+    else:
+        history_seasons = history_all
+
+    start_ratings = dict(base_initial_ratings) if base_initial_ratings else {}
+
+    warmed = warm_elo_from_actual_history(
+        sport=sport,
+        seasons=history_seasons,
+        config=config,
+        initial_ratings=start_ratings,
+        inter_season_regression=inter_season_regression,
+        playoff_k_multiplier=playoff_k_multiplier,
+        include_playoffs=include_playoffs_in_warmup,
+    )
+
+    target_df = _load_season_schedule(sport, target_season)
+    if target_df is None or target_df.empty:
+        raise FileNotFoundError(f"No schedule for target {target_season}")
+    target_df = filter_regular_season(target_df, sport=sport)
+
+    results, history = [], []
+    for i in range(n_sims):
+        standings, _, elo_hist = simulate_season(
+            schedule_df=target_df,
+            config=config,
+            seed=seed + i,
+            initial_ratings=warmed,
+            sport=sport,
+            regular_season_only=False,
+        )
+        for _, row in standings.iterrows():
+            results.append({
+                "sim_id": i,
+                "team": row["team"],
+                "wins": int(row["wins"]),
+                "points": int(row.get("points", row["wins"])),
+            })
+        if return_elo_evolution and elo_hist is not None and not elo_hist.empty:
+            h = elo_hist.copy()
+            h["sim_id"] = i
+            history.append(h)
+
+    results_df = pd.DataFrame(results)
+    if return_elo_evolution:
+        return results_df, _aggregate_elo_evolution(history)
+    return results_df

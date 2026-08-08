@@ -212,18 +212,53 @@ def calculate_achievement_probabilities(sim_results: pd.DataFrame, sport: str) -
 
 
 def run_simulation(config, n_sims, initial_ratings=None, sport="NFL", season=None):
-    schedule_path, tmp_path = _resolve_schedule_path(sport, season)
-
+    """
+    When season is set: warm Elo on actual recent seasons, then MC the target.
+    When season is None: legacy single-pass path (prior-only style).
+    """
+    tmp_path = None
     try:
-        # Single Monte Carlo pass: standings + Elo share the same game outcomes.
-        # Playoff wrapper returns (results_df, playoff_probs, elo_evolution).
-        sim_results, playoff_probs, elo_evolution = simulate_many_seasons(
-            n_sims=n_sims,
-            schedule_path=schedule_path,
-            config=config,
-            initial_ratings=initial_ratings,
-            sport=sport,
-        )
+        if season is not None:
+            from elo_lab.workflows.simulate_season import simulate_many_seasons_multiyear
+
+            sim_results, elo_evolution = simulate_many_seasons_multiyear(
+                n_sims=n_sims,
+                sport=sport,
+                target_season=str(season),
+                config=config,
+                base_initial_ratings=initial_ratings or {},
+                return_elo_evolution=True,
+                hybrid_warmup=True,
+                inter_season_regression=0.67,
+                playoff_k_multiplier=1.75,
+                include_playoffs_in_warmup=True,
+                max_history_seasons=2,
+            )
+
+            warmed = None
+            if elo_evolution is not None and not elo_evolution.empty:
+                warmed = (
+                    elo_evolution.sort_values("games_played")
+                    .groupby("team")["mean_elo"].last().to_dict()
+                )
+
+            schedule_path, tmp_path = _resolve_schedule_path(sport, season)
+            _, playoff_probs, _ = simulate_many_seasons(
+                n_sims=min(n_sims, 300),
+                schedule_path=schedule_path,
+                config=config,
+                initial_ratings=warmed or initial_ratings or {},
+                sport=sport,
+            )
+        else:
+            schedule_path, tmp_path = _resolve_schedule_path(sport, season)
+            sim_results, playoff_probs, elo_evolution = simulate_many_seasons(
+                n_sims=n_sims,
+                schedule_path=schedule_path,
+                config=config,
+                initial_ratings=initial_ratings,
+                sport=sport,
+            )
 
         summary = summarize_simulations(sim_results)
         distributions = win_distributions(sim_results)

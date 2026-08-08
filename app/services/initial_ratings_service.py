@@ -12,7 +12,7 @@ Always guarantees every team in the schedule has an entry
 
 from __future__ import annotations
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 import pandas as pd
 
 try:
@@ -98,6 +98,41 @@ def get_available_seasons(sport: str) -> List[str]:
     if sport in ("NHL", "NBA"):
         return ["2025-26"]
     return ["2025"]
+
+
+
+def get_simulatable_seasons(sport: str) -> List[str]:
+    """Seasons the user may select as simulation target (excludes earliest seed year)."""
+    all_seasons = get_available_seasons(sport)
+    if len(all_seasons) <= 1:
+        return all_seasons
+    return all_seasons[1:]
+
+
+def get_seed_season(sport: str) -> Optional[str]:
+    all_seasons = get_available_seasons(sport)
+    return all_seasons[0] if all_seasons else None
+
+
+def get_base_initial_ratings(
+    sport: str,
+    *,
+    rating_source: str = "playoffs",
+    rating_basis: str = "record",
+    apply_regression: bool = False,
+    regression_strength: float = 0.25,
+    mean_elo: float = 1500.0,
+) -> Dict[str, float]:
+    """Ranking-based prior from the seed year (warm-up usually starts from {})."""
+    return get_initial_ratings(
+        sport,
+        season=get_seed_season(sport),
+        rating_source=rating_source,
+        rating_basis=rating_basis,
+        apply_regression=apply_regression,
+        regression_strength=regression_strength,
+        mean_elo=mean_elo,
+    )
 
 
 def _get_previous_season(sport: str, current: str) -> Optional[str]:

@@ -1,16 +1,19 @@
 """
 MultiSport Elo Lab – Streamlit dashboard
 
-Version 11.4 with:
-  - NHL / NFL / NBA support + full playoff-bracket simulation
-  - Multiseason-aware initial Elo (rating_source, rating_basis, apply_regression)
+Version 11.5 – Warm-up Elo from recent actual seasons + multi-sport Monte Carlo
+
+  - NHL / NFL / NBA with full playoff-bracket simulation
+  - Warm-up Elo: actual regular-season + playoff results from recent completed
+    seasons (playoff k×1.75, stronger regression toward 1500), then Monte Carlo
+    only the target season (prior releases used a prior-only start)
+  - Simulatable seasons exclude the seed year (history only)
   - Continuous Elevation Edge (Elo pts per 1000 ft)
   - Sport-specific home advantage labels (ice / court / field)
   - Log5 baseline + residual diagnostics
   - Precomputed default simulations loaded instantly on sport change
   - Global one-click full results export (multi-sheet Excel)
   - Team logos in Elo Ratings, Trajectory, and Simulation views
-    (sport-specific assets under app/assets/logos/{nhl,nfl,nba}/)
   - Tabs: Configuration, Season Simulation, Elo Ratings, Elo Trajectory, Model Evaluation
 """
 
@@ -33,6 +36,8 @@ from tabs.evaluation import render_evaluation_tab
 from services.simulation_service import run_simulation
 from services.initial_ratings_service import (
     get_available_seasons,
+    get_simulatable_seasons,
+    get_seed_season,
     get_initial_ratings,
 )
 from services.export_service import build_full_export, make_export_filename
@@ -57,7 +62,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("MultiSport Elo Lab")
-st.caption("Interactive sports modeling analytics platform | Version 11.4")
+st.caption("Warm-up Elo from recent seasons · Monte Carlo target · NHL / NBA / NFL | Version 11.5")
 
 
 # ---------------------------------------------------------------------------
@@ -164,11 +169,17 @@ if (
 
 _home = _HOME_ADV_LABELS.get(sport, _HOME_ADV_LABELS["NFL"])
 
-season_options = get_available_seasons(sport)
+season_options = get_simulatable_seasons(sport)
+seed_year = get_seed_season(sport)
 season = st.sidebar.selectbox(
     "Season",
     season_options,
     index=len(season_options) - 1 if season_options else 0,
+    help=(
+        f"Target season. Elo is warmed on actual results before this year"
+        f" (history from {seed_year})."
+        if seed_year else "Target season."
+    ),
 )
 st.session_state["season"] = season
 
@@ -270,15 +281,7 @@ if st.sidebar.button("Run Simulation", type="primary"):
 
     schedule_path = _schedule_path(sport)
 
-    initial_ratings = get_initial_ratings(
-        sport,
-        schedule_path,
-        season=season,
-        rating_source=rating_source,
-        rating_basis=rating_basis,
-        apply_regression=apply_regression,
-        regression_strength=regression_strength,
-    )
+    initial_ratings = {}  # warm-up starts flat; actual history sets Elo
 
     with st.sidebar.status("Running simulation...", expanded=True) as status:
         pb = st.sidebar.progress(0, text="Starting...")

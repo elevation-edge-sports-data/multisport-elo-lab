@@ -149,28 +149,39 @@ def get_sport_teams(sport: str) -> Dict[str, Dict[str, Any]]:
 # Logo helpers
 # ---------------------------------------------------------------------------
 
-def resolve_team_abbr(sport: str, team_key: str) -> str:
-    """
-    Map a team key (abbreviation OR full name) to the canonical abbreviation.
+_TEAM_ALIASES = {
+    "NHL": {
+        "Utah Mammoth": "UTA",
+        "Utah Hockey Club": "UTA",
+        "Arizona Coyotes": "UTA",
+        "ARI": "UTA",
+        "Phoenix Coyotes": "UTA",
+    },
+    "NBA": {},
+    "NFL": {},
+}
 
-    Simulation results sometimes store full names ("Utah Hockey Club") while
-    metadata and logo files are keyed by abbreviation ("UTA").
-    """
+
+def resolve_team_abbr(sport: str, team_key: str) -> str:
+    """Map abbreviation or full name to canonical metadata key."""
     if not team_key:
         return team_key
+    sport_u = (sport or "").upper()
+    for k, v in _TEAM_ALIASES.get(sport_u, {}).items():
+        if k == team_key or k.upper() == team_key.upper():
+            return v
     teams = load_teams(sport)
     if team_key in teams:
         return team_key
-    # Case-insensitive abbr match
     upper = team_key.upper()
     if upper in teams:
         return upper
-    # Full-name match
     for abbr, meta in teams.items():
         name = meta.get("name") or ""
         if name == team_key or name.lower() == team_key.lower():
             return abbr
-    # Partial: last word match (e.g. "Hockey Club" won't work, but "Utah" edge cases)
+    if sport_u == "NHL" and "utah" in team_key.lower():
+        return "UTA"
     return team_key
 
 

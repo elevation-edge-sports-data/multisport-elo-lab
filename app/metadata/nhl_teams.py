@@ -184,7 +184,7 @@ NHL_TEAMS = {
         "logo": "STL.png"
     },
     "UTA": {
-        "name": "Utah Hockey Club",
+        "name": "Utah Mammoth",
         "conference": "Western",
         "division": "Central",
         "primary_color": "#3A8BCE",

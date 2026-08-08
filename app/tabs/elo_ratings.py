@@ -1,8 +1,9 @@
 """
 Elo Ratings tab – final simulated Elo rankings with team logos.
 
-Logos appear only in the ranked list / top strip (small N), never a full
-alphabetical grid — that was too heavy for Streamlit's full-script rerun model.
+Final rankings prefer summary["mean_elo"] (end-of-season Elo averaged across
+sims from the same standings that produce wins/points). Falls back to
+elo_evolution only if summary has no mean_elo column.
 """
 
 from __future__ import annotations
@@ -56,24 +57,42 @@ def get_team_color_map(sport: str) -> dict:
     return color_map
 
 
-def _latest_elo_frame(elo_evolution: pd.DataFrame) -> pd.DataFrame:
-    """Extract the most recent mean Elo per team, sorted descending."""
-    if "games_played" in elo_evolution.columns:
-        latest = (
-            elo_evolution.sort_values("games_played")
-            .groupby("team")["mean_elo"]
-            .last()
-            .reset_index()
-            .rename(columns={"mean_elo": "elo"})
-        )
+def _latest_elo_from_summary(summary: pd.DataFrame) -> pd.DataFrame | None:
+    """End-of-season mean Elo from the same standings as wins/points."""
+    if summary is None or getattr(summary, "empty", True):
+        return None
+    if "mean_elo" not in summary.columns:
+        return None
+    out = (
+        summary[["team", "mean_elo"]]
+        .rename(columns={"mean_elo": "elo"})
+        .sort_values("elo", ascending=False)
+        .reset_index(drop=True)
+    )
+    return out
+
+
+def _latest_elo_from_evolution(elo_evolution: pd.DataFrame) -> pd.DataFrame | None:
+    """Fallback: last games_played row per team in elo_evolution."""
+    if elo_evolution is None or getattr(elo_evolution, "empty", True):
+        return None
+    if "mean_elo" not in elo_evolution.columns:
+        return None
+    df = elo_evolution.copy()
+    if "games_played" in df.columns:
+        idx = df.groupby("team")["games_played"].idxmax()
+        latest = df.loc[idx, ["team", "mean_elo"]]
     else:
         latest = (
-            elo_evolution.groupby("team")["mean_elo"]
+            df.groupby("team")["mean_elo"]
             .last()
             .reset_index()
-            .rename(columns={"mean_elo": "elo"})
         )
-    return latest.sort_values("elo", ascending=False).reset_index(drop=True)
+    return (
+        latest.rename(columns={"mean_elo": "elo"})
+        .sort_values("elo", ascending=False)
+        .reset_index(drop=True)
+    )
 
 
 def _apply_conference_filter(df: pd.DataFrame, sport: str, conference: str) -> pd.DataFrame:
@@ -93,20 +112,25 @@ def render_elo_ratings_tab(sport: str = "NFL"):
     st.header(f"{sport} Elo Ratings")
 
     results = st.session_state.get("simulation_results")
-    elo_evolution = None
-    if results is not None:
-        elo_evolution = results.get("elo_evolution", pd.DataFrame())
-        if elo_evolution is not None and hasattr(elo_evolution, "empty") and elo_evolution.empty:
-            elo_evolution = None
-
-    if elo_evolution is None:
+    if not results:
         st.info(
             "Run a simulation from the sidebar (or wait for precomputed defaults) "
             "to see ranked Elo with team logos."
         )
         return
 
-    latest_elo = _latest_elo_frame(elo_evolution)
+    summary = results.get("summary", pd.DataFrame())
+    elo_evolution = results.get("elo_evolution", pd.DataFrame())
+
+    latest_elo = _latest_elo_from_summary(summary)
+    source = "end-of-season Elo (same standings as wins/points)"
+    if latest_elo is None:
+        latest_elo = _latest_elo_from_evolution(elo_evolution)
+        source = "elo_evolution trajectory (fallback)"
+
+    if latest_elo is None or latest_elo.empty:
+        st.warning("No Elo rating data available from the last simulation.")
+        return
 
     conferences = ["All"]
     try:
@@ -172,7 +196,4 @@ def render_elo_ratings_tab(sport: str = "NFL"):
     )
     st.plotly_chart(fig, use_container_width=True)
 
-    st.caption(
-        "Simulated final Elo ratings from the current run. "
-        "Logos load from app/assets/logos/{sport}/."
-    )
+    st.caption(f"Source: {source}. Logos from app/assets/logos/{{sport}}/.")

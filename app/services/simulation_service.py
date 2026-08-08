@@ -211,15 +211,41 @@ def calculate_achievement_probabilities(sim_results: pd.DataFrame, sport: str) -
     return prob_df
 
 
-def run_simulation(config, n_sims, initial_ratings=None, sport="NFL", season=None):
+def run_simulation(
+    config,
+    n_sims,
+    initial_ratings=None,
+    sport="NFL",
+    season=None,
+    from_season=None,
+):
     """
     When season is set: warm Elo on actual recent seasons, then MC the target.
     When season is None: legacy single-pass path (prior-only style).
+
+    from_season : optional start of the warm-up window (inclusive).
+                  History runs from from_season through the season before
+                  the target. If None, falls back to the previous default
+                  of max 2 history seasons.
     """
     tmp_path = None
     try:
         if season is not None:
             from elo_lab.workflows.simulate_season import simulate_many_seasons_multiyear
+            from services.initial_ratings_service import get_available_seasons
+
+            # Map explicit from_season → max_history_seasons
+            max_history = 2  # legacy default
+            if from_season is not None:
+                all_seasons = get_available_seasons(sport)
+                if (
+                    from_season in all_seasons
+                    and str(season) in all_seasons
+                ):
+                    from_idx = all_seasons.index(from_season)
+                    target_idx = all_seasons.index(str(season))
+                    # number of seasons in [from_season, target)
+                    max_history = max(1, target_idx - from_idx)
 
             sim_results, elo_evolution = simulate_many_seasons_multiyear(
                 n_sims=n_sims,
@@ -232,7 +258,7 @@ def run_simulation(config, n_sims, initial_ratings=None, sport="NFL", season=Non
                 inter_season_regression=0.67,
                 playoff_k_multiplier=1.75,
                 include_playoffs_in_warmup=True,
-                max_history_seasons=2,
+                max_history_seasons=max_history,
             )
 
             warmed = None

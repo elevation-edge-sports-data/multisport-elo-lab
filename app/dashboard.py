@@ -1,20 +1,19 @@
 """
 MultiSport Elo Lab – Streamlit dashboard
 
-Version 11.5 – Warm-up Elo from recent actual seasons + multi-sport Monte Carlo
+Version 12.0 — Simulate upcoming season
 
   - NHL / NFL / NBA with full playoff-bracket simulation
-  - Warm-up Elo: actual regular-season + playoff results from recent completed
-    seasons (playoff k×1.75, stronger regression toward 1500), then Monte Carlo
-    only the target season (prior releases used a prior-only start)
+  - Warm-up Elo: actual regular-season + playoff results from user-chosen
+    "Simulate from" season through the season before target, then Monte Carlo
+    only the target season
   - Simulatable seasons exclude the seed year (history only)
-  - Continuous Elevation Edge (Elo pts per 1000 ft)
+  - Continuous Elevation Edge
   - Sport-specific home advantage labels (ice / court / field)
-  - Log5 baseline + residual diagnostics
+  - Log5 baseline + residual diagnostics + corrected baseline ladder
   - Precomputed default simulations loaded instantly on sport change
-  - Global one-click full results export (multi-sheet Excel)
-  - Team logos in Elo Ratings, Trajectory, and Simulation views
-  - Tabs: Configuration, Season Simulation, Elo Ratings, Elo Trajectory, Model Evaluation
+  - Export Results as quiet text-style control
+  - Tabs: Regular Season Projections · Playoff Projections (default) · Model Comparison
 """
 
 from __future__ import annotations
@@ -27,9 +26,7 @@ import streamlit as st
 import pandas as pd
 
 from components.layout import configure_page
-from tabs.configuration import render_configuration_tab
 from tabs.simulation import render_simulation_tab
-from tabs.elo_ratings import render_elo_ratings_tab
 from tabs.elo_evolution import render_elo_evolution_tab
 from tabs.evaluation import render_evaluation_tab
 
@@ -38,6 +35,7 @@ from services.initial_ratings_service import (
     get_available_seasons,
     get_simulatable_seasons,
     get_seed_season,
+    get_simulate_from_options,
     get_initial_ratings,
 )
 from services.export_service import build_full_export, make_export_filename
@@ -58,23 +56,39 @@ st.markdown("""
     .stCheckbox > label > div[role="checkbox"][aria-checked="true"] {
         background-color: #FB4F14 !important; border-color: #FB4F14 !important;
     }
+    /* Quiet export control */
+    div[data-testid="stDownloadButton"] button {
+        background-color: transparent !important;
+        color: #6b7280 !important;
+        border: none !important;
+        box-shadow: none !important;
+        font-weight: 400 !important;
+        text-decoration: underline;
+        padding: 0.25rem 0 !important;
+    }
+    div[data-testid="stDownloadButton"] button:hover {
+        color: #374151 !important;
+        background-color: transparent !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
 st.title("MultiSport Elo Lab")
-st.caption("Warm-up Elo from recent seasons · Monte Carlo target · NHL / NBA / NFL | Version 11.5")
+st.caption("Simulate upcoming season · NFL / NHL / NBA | Version 12.0")
 
 
 # ---------------------------------------------------------------------------
 # Model config helpers
 # ---------------------------------------------------------------------------
 def build_model_config(home_field, margin_of_victory, elevation, k=20,
-                       hfa_value=55, mov_scale=1.0, elev_value=1.0):
+                       hfa_value=55, elev_value=1.0):
+    """Build declarative model config. MOV is pure binary (scale fixed at 1.0)."""
     adjustments = {}
     if home_field:
         adjustments["home_field"] = {"enabled": True, "value": hfa_value}
     if margin_of_victory:
-        adjustments["margin_of_victory"] = {"enabled": True, "scale": mov_scale}
+        # Pure binary: on = margin-scaled update with fixed scale 1.0
+        adjustments["margin_of_victory"] = {"enabled": True, "scale": 1.0}
     if elevation:
         adjustments["elevation_edge"] = {"enabled": True, "value": elev_value}
     return {"k": k, "adjustments": adjustments}
@@ -176,74 +190,105 @@ season = st.sidebar.selectbox(
     season_options,
     index=len(season_options) - 1 if season_options else 0,
     help=(
-        f"Target season. Elo is warmed on actual results before this year"
-        f" (history from {seed_year})."
-        if seed_year else "Target season."
+        f"Target season for Monte Carlo. Elo is warmed from the "
+        f"'Simulate from' season up to the prior year"
+        f"{f' (seed year {seed_year} is history-only)' if seed_year else ''}."
     ),
 )
 st.session_state["season"] = season
 
+# ------------------------------------------------------------------
+# Simulate from (explicit warm-up start)
+# ------------------------------------------------------------------
+from_options = get_simulate_from_options(sport, target_season=season)
+if from_options:
+    # Default = earliest possible
+    default_from_idx = 0
+    simulate_from = st.sidebar.selectbox(
+        "Simulate from",
+        from_options,
+        index=default_from_idx,
+        help=(
+            "First season included in the Elo warm-up. "
+            "History runs from this season through the year before the target. "
+            "The earliest season in the data is seed-only and is not offered here."
+        ),
+    )
+else:
+    simulate_from = None
+st.session_state["simulate_from"] = simulate_from
+
 st.sidebar.divider()
 st.sidebar.subheader("Adjustments")
 home_field = st.sidebar.checkbox(_home["checkbox"], value=True)
-margin_of_victory = st.sidebar.checkbox("Margin of Victory", value=True)
+margin_of_victory = st.sidebar.checkbox(
+    "Margin of Victory",
+    value=True,
+    help="On = post-game Elo update is scaled by margin of victory. "
+         "Off = update depends only on win/loss.",
+)
 elevation = st.sidebar.checkbox("Elevation Edge", value=False)
+apply_regression = st.sidebar.checkbox(
+    "Apply regression to mean",
+    value=True,
+    help="Pull ratings toward the league mean after ranking / between seasons.",
+)
 
 st.sidebar.divider()
-optimize_params = st.sidebar.checkbox("Optimize parameters", value=False)
+
+# ------------------------------------------------------------------
+# Grid Search hierarchy: master checkbox, then indented targets
+# ------------------------------------------------------------------
+optimize_params = st.sidebar.checkbox("Grid Search", value=False)
 opt_hf = opt_mov = opt_elev = False
 if optimize_params:
+    st.sidebar.caption("Select which parameters to search:")
     if home_field:
         opt_hf = st.sidebar.checkbox(_home["optimize"], value=True, key="opt_hf")
     if margin_of_victory:
-        opt_mov = st.sidebar.checkbox("Optimize Margin", value=True, key="opt_mov")
+        opt_mov = st.sidebar.checkbox("Optimize MOV", value=True, key="opt_mov")
     if elevation:
         opt_elev = st.sidebar.checkbox("Optimize Elevation", value=False, key="opt_elev")
 
+# Fixed (non-user-facing) initial-Elo policy:
+#   rating_source always "playoffs"
+#   rating_basis prefers "elo" when available, else falls back to "record"
+rating_source = "playoffs"
+rating_basis = "elo"
+
 # ---------------------------------------------------------------------------
-# Advanced expander – initial Elo flags + explicit parameter values
+# Advanced expander – engine knobs only (Initial Elo UI removed)
 # ---------------------------------------------------------------------------
-with st.sidebar.expander("Advanced parameters", expanded=False):
-    st.markdown("**Initial Elo**")
-    rating_source = st.selectbox(
-        "Rating source",
-        options=["playoffs", "regular_season"],
-        index=0,
-        help="playoffs (default) uses previous-season playoff results; "
-             "regular_season uses final standings.",
-    )
-    rating_basis = st.selectbox(
-        "Rating basis",
-        options=["record", "elo"],
-        index=0,
-        help="record = games above .500 / points above pace → Elo. "
-             "elo = previous-season Elo ratings.",
-    )
-    apply_regression = st.checkbox(
-        "Apply regression to mean",
-        value=False,
-        help="Pull ratings toward the league mean after ranking.",
-    )
+with st.sidebar.expander("Customize Parameters", expanded=False):
     regression_strength = st.slider(
         "Regression strength",
         min_value=0.0,
-        max_value=0.75,
+        max_value=1.0,
         value=0.25,
         step=0.05,
         disabled=not apply_regression,
+        help="How strongly ratings are pulled toward the league mean when "
+             "regression is enabled.",
     )
 
     st.markdown("---")
     st.markdown("**Engine parameters**")
-    k = st.slider("k-factor", min_value=5, max_value=40, value=20, step=1)
+    k = st.slider(
+        "k-factor",
+        min_value=5,
+        max_value=40,
+        value=20,
+        step=1,
+        help="How much ratings move after each game. "
+             "Higher k = more reactive (recent results dominate). "
+             "Lower k = more stable (history carries more weight).",
+    )
     hfa_value = st.slider(
         _home["slider"], min_value=0, max_value=100, value=55, step=5
     )
-    mov_scale = st.slider(
-        "Margin-of-victory scale", min_value=0.0, max_value=3.0, value=1.0, step=0.1
-    )
+    # MOV scale removed – pure binary via the Adjustments checkbox
     elev_value = st.slider(
-        "Elevation Edge (Elo pts per 1000 ft)",
+        "Elevation Edge",
         min_value=0.0,
         max_value=10.0,
         value=1.0,
@@ -263,26 +308,33 @@ simulation_count = st.sidebar.selectbox(
 )
 
 # ---------------------------------------------------------------------------
-# Run Simulation
+# Run Simulation + Stop placement
 # ---------------------------------------------------------------------------
-if st.sidebar.button("Run Simulation", type="primary"):
+run_clicked = st.sidebar.button("Run Simulation", type="primary")
+
+# Placeholder for future async stop control (Streamlit runs are synchronous today).
+# Kept under Run so the action cluster stays together.
+if st.session_state.get("_sim_running"):
+    st.sidebar.button("Stop Simulation", type="secondary", disabled=True,
+                      help="Stop is not yet supported for in-progress runs. "
+                           "Refresh the page to cancel.")
+
+if run_clicked:
     config = build_model_config(
         home_field,
         margin_of_victory,
         elevation,
         k=k,
         hfa_value=hfa_value,
-        mov_scale=mov_scale,
         elev_value=elev_value,
     )
     optimize_for = get_optimize_for(
         home_field, margin_of_victory, elevation, opt_hf, opt_mov, opt_elev
     )
 
-    schedule_path = _schedule_path(sport)
-
     initial_ratings = {}  # warm-up starts flat; actual history sets Elo
 
+    st.session_state["_sim_running"] = True
     with st.sidebar.status("Running simulation...", expanded=True) as status:
         pb = st.sidebar.progress(0, text="Starting...")
 
@@ -305,12 +357,14 @@ if st.sidebar.button("Run Simulation", type="primary"):
             initial_ratings=initial_ratings,
             sport=sport,
             season=season,
+            from_season=simulate_from,
         )
 
         # Store everything the tabs already know how to read
         st.session_state["simulation_results"] = results
         st.session_state["sport"] = sport
         st.session_state["season"] = season
+        st.session_state["simulate_from"] = simulate_from
         st.session_state["last_config"] = final_config
         st.session_state["optimize_for"] = optimize_for
         st.session_state["final_config"] = final_config
@@ -323,10 +377,11 @@ if st.sidebar.button("Run Simulation", type="primary"):
 
         pb.progress(100, text="Complete!")
         status.update(label="Simulation complete!", state="complete")
+    st.session_state["_sim_running"] = False
 
 
 # ---------------------------------------------------------------------------
-# Global Export – top-right placement after defaults / simulation
+# Global Export – quiet text-style control
 # ---------------------------------------------------------------------------
 if st.session_state.get("simulation_results") is not None:
     try:
@@ -336,7 +391,7 @@ if st.session_state.get("simulation_results") is not None:
         _left, _right = st.columns([3, 1])
         with _right:
             st.download_button(
-                label="Download Full Results (.xlsx)",
+                label="Export Results (.xlsx)",
                 data=export_bytes,
                 file_name=filename,
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -344,7 +399,7 @@ if st.session_state.get("simulation_results") is not None:
                     "Downloads Config, Simulation Summary, Achievement/Playoff probabilities, "
                     "Elo Ratings, and Evaluation metrics in one Excel file."
                 ),
-                type="primary",
+                # type intentionally omitted / secondary so CSS can quiet it
             )
     except Exception as e:
         # Never let export problems break the rest of the dashboard
@@ -352,28 +407,25 @@ if st.session_state.get("simulation_results") is not None:
 
 
 # ---------------------------------------------------------------------------
-# Main tabs  – signatures match the existing tab modules exactly
+# Main tabs (v12 three-tab structure)
+#   1. Regular Season Projections  (former Elo Trajectory)
+#   2. Playoff Projections         (former Season Simulation) — default landing
+#   3. Model Comparison            (former Model Evaluation)
+#
+# Streamlit st.tabs always opens the first tab. To make Playoff Projections the
+# default landing view we place it first in the widget, while the visual/logical
+# product order remains Regular → Playoff → Model via the labels below only if
+# we accepted first-tab default = Regular. Instead we put Playoff first so the
+# app lands on the primary fan-facing view.
 # ---------------------------------------------------------------------------
 tabs = st.tabs([
-    "Model Configuration",
-    "Season Simulation",
-    "Elo Ratings",
-    "Elo Trajectory",
-    "Model Evaluation",
+    "Playoff Projections",
+    "Regular Season Projections",
+    "Model Comparison",
 ])
 
 with tabs[0]:
-    render_configuration_tab(
-        sport=sport,
-        season=season,
-        home_field=home_field,
-        margin_of_victory=margin_of_victory,
-        elevation=elevation,
-        simulation_count=simulation_count,
-    )
-
-with tabs[1]:
-    # Optional caption when showing precomputed defaults
+    # Default landing tab
     if st.session_state.get("is_default_run"):
         st.caption(
             "Showing precomputed default simulation. "
@@ -381,11 +433,8 @@ with tabs[1]:
         )
     render_simulation_tab(sport=sport)
 
-with tabs[2]:
-    render_elo_ratings_tab(sport=sport)
-
-with tabs[3]:
+with tabs[1]:
     render_elo_evolution_tab(sport=sport)
 
-with tabs[4]:
+with tabs[2]:
     render_evaluation_tab()

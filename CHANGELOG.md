@@ -2,6 +2,50 @@
 
 All notable changes to MultiSport Elo Lab are documented in this file.
 
+## Version 12.0 — Simulate upcoming season
+
+### Added
+- **Simulate upcoming season** for **NFL 2026** and **NHL 2026–27**
+  - Full regular-season slate + playoff bracket Monte Carlo for seasons that have not yet been played
+  - Elo is warmed from actual prior seasons, then the upcoming target season is simulated
+  - **NBA — coming soon** (after official schedule is released)
+- **Simulate from** sidebar control: explicit start season for the Elo warm-up window (default = earliest valid season; seed year excluded)
+- **Three-tab dashboard structure**
+  - **Playoff Projections** (default landing) — former Season Simulation
+  - **Regular Season Projections** — former Elo Trajectory
+  - **Model Comparison** — former Model Evaluation
+- **Expanded baselines** in Model Comparison:
+  - **Always Home** — hard home prediction every game
+  - **Constant Home Rate** — empirical home-win frequency as probability
+  - **Coin Flip (p=0.5)** — uninformed baseline with theoretical accuracy 0.5
+- **Export Results (.xlsx)** control: multi-sheet workbook available whenever simulation results exist
+
+### Changed
+- Dropped **Model Configuration** and **Elo Ratings** tabs
+- **Margin of Victory** is pure binary (on = margin-scaled update; off = win/loss only); continuous scale slider removed
+- **Apply regression to mean** moved into main Adjustments section and defaults to **True**
+- Regression strength range expanded to **0.0–1.0**
+- Initial Elo controls removed from the UI (rating source fixed to playoffs; rating basis prefers Elo with record fallback)
+- "Optimize parameters" renamed **Grid Search**; expander renamed **Customize Parameters**
+- Dashboard caption and version string updated to Version 12.0 — Simulate upcoming season
+
+### Improved
+- **Model configuration panel** hierarchy: Grid Search master checkbox with indented parameter targets only when enabled
+- Baseline comparison caption explains why Always Home and Constant Home Rate can share accuracy while log loss / Brier differ
+- Tooltips updated for clarity:
+  - **k-factor**: plain-English explanation of reactive vs stable ratings
+  - **Margin of Victory**: on = scaled by score differential; off = win/loss only
+  - **Simulate from**: first season included in the warm-up window
+  - **Apply regression to mean**: pull toward league mean after ranking / between seasons
+  - **Regression strength**: how strongly ratings are pulled toward the mean
+  - **Elevation Edge**: formula retained in help text (label no longer repeats units inline)
+
+### Notes
+- Regular Season Projections still shows rating trajectories; standings / win-total trajectory redesign is planned for a follow-up
+- Playoff Projections is placed first in the tab bar so Streamlit opens it as the default landing view
+
+---
+
 ## Version 11.5 — Warm-up Elo from recent actual seasons
 
 ### Added

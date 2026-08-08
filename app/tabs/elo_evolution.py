@@ -60,7 +60,7 @@ def hex_to_rgba(hex_color: str, alpha: float = 0.13) -> str:
 
 
 def render_elo_evolution_tab(sport="NFL"):
-    st.header(f"{sport} Elo Trajectory")
+    st.header(f"{sport} Regular Season Projections")
 
     if "simulation_results" not in st.session_state:
         st.info("Run a simulation from the sidebar to see Elo trajectories.")
@@ -118,7 +118,7 @@ def render_elo_evolution_tab(sport="NFL"):
         y="mean_elo",
         color="team",
         color_discrete_map=color_map,
-        title="Elo Trajectory (Mean)",
+        title="Rating Trajectory (Mean)",
         labels={"mean_elo": "Elo Rating", x_col: "Games Played"},
     )
     fig_elo.update_traces(line=dict(width=2.8))

@@ -16,7 +16,7 @@ from elo_lab.evaluation.diagnostics import (
 
 
 def render_evaluation_tab():
-    st.header("Model Evaluation")
+    st.header("Model Comparison")
 
     # ------------------------------------------------------------------
     # 1. Aggregate metrics
@@ -187,11 +187,12 @@ def render_evaluation_tab():
     st.divider()
 
     # ------------------------------------------------------------------
-    # 3b. Baseline comparisons (home-win-rate + coin-flip)
+    # 3b. Baseline comparisons (honest labels)
     # ------------------------------------------------------------------
     st.markdown("**Baseline Comparison**")
 
     def _constant_metrics(p_const: float, actuals_arr: np.ndarray) -> dict:
+        """Constant-probability predictor. Hard decision uses >= 0.5."""
         p = np.full_like(actuals_arr, fill_value=p_const, dtype=float)
         preds = (p >= 0.5).astype(int)
         acc = float(np.mean(preds == actuals_arr))
@@ -205,11 +206,37 @@ def render_evaluation_tab():
         brier = float(np.mean((p - actuals_arr) ** 2))
         return {"accuracy": acc, "log_loss": ll, "brier": brier}
 
-    home_win_rate = float(np.mean(actuals))
-    coin_flip = 0.5
+    def _always_home_metrics(actuals_arr: np.ndarray) -> dict:
+        """Hard baseline: always predict home. p=1.0 for proper scores."""
+        p = np.ones_like(actuals_arr, dtype=float)
+        preds = np.ones_like(actuals_arr, dtype=int)
+        acc = float(np.mean(preds == actuals_arr))
+        p_clip = np.clip(p, 1e-15, 1 - 1e-15)
+        ll = float(
+            -np.mean(
+                actuals_arr * np.log(p_clip)
+                + (1 - actuals_arr) * np.log(1 - p_clip)
+            )
+        )
+        brier = float(np.mean((p - actuals_arr) ** 2))
+        return {"accuracy": acc, "log_loss": ll, "brier": brier}
 
-    baseline_home = _constant_metrics(home_win_rate, actuals)
-    baseline_coin = _constant_metrics(coin_flip, actuals)
+    home_win_rate = float(np.mean(actuals))
+
+    # Always Home: hard prediction home every game (accuracy = home win rate)
+    baseline_always_home = _always_home_metrics(actuals)
+
+    # Constant Home Rate: probability = empirical home-win frequency.
+    # Hard decision is still always-home when rate >= 0.5 (typical), so
+    # accuracy matches Always Home; log loss / Brier differ because they
+    # use the continuous probability.
+    baseline_home_rate = _constant_metrics(home_win_rate, actuals)
+
+    # True Coin Flip: constant p=0.5. Accuracy reported as theoretical 0.5
+    # (a hard threshold at exactly 0.5 would otherwise always pick home and
+    # produce the same accuracy as Always Home — that was the old bug).
+    baseline_coin = _constant_metrics(0.5, actuals)
+    baseline_coin["accuracy"] = 0.5  # theoretical expected accuracy
 
     model_metrics = {
         "accuracy": float(np.mean((probs >= 0.5).astype(int) == actuals)),
@@ -232,13 +259,19 @@ def render_evaluation_tab():
                 "Brier Score": model_metrics["brier"],
             },
             {
-                "Model": f"Home Win Rate ({home_win_rate:.1%})",
-                "Accuracy": baseline_home["accuracy"],
-                "Log Loss": baseline_home["log_loss"],
-                "Brier Score": baseline_home["brier"],
+                "Model": "Always Home",
+                "Accuracy": baseline_always_home["accuracy"],
+                "Log Loss": baseline_always_home["log_loss"],
+                "Brier Score": baseline_always_home["brier"],
             },
             {
-                "Model": "Coin Flip (0.5)",
+                "Model": f"Constant Home Rate ({home_win_rate:.1%})",
+                "Accuracy": baseline_home_rate["accuracy"],
+                "Log Loss": baseline_home_rate["log_loss"],
+                "Brier Score": baseline_home_rate["brier"],
+            },
+            {
+                "Model": "Coin Flip (p=0.5)",
                 "Accuracy": baseline_coin["accuracy"],
                 "Log Loss": baseline_coin["log_loss"],
                 "Brier Score": baseline_coin["brier"],
@@ -246,9 +279,11 @@ def render_evaluation_tab():
         ]
     )
 
-    baseline_df["Δ Accuracy"] = baseline_df["Accuracy"] - baseline_home["accuracy"]
-    baseline_df["Δ Log Loss"] = baseline_home["log_loss"] - baseline_df["Log Loss"]
-    baseline_df["Δ Brier"] = baseline_home["brier"] - baseline_df["Brier Score"]
+    # Deltas vs Constant Home Rate (the strongest naïve baseline among these)
+    ref = baseline_home_rate
+    baseline_df["Δ Accuracy"] = baseline_df["Accuracy"] - ref["accuracy"]
+    baseline_df["Δ Log Loss"] = ref["log_loss"] - baseline_df["Log Loss"]
+    baseline_df["Δ Brier"] = ref["brier"] - baseline_df["Brier Score"]
 
     display_df = baseline_df.copy()
     for col in ["Accuracy", "Log Loss", "Brier Score"]:
@@ -263,9 +298,16 @@ def render_evaluation_tab():
     )
 
     st.caption(
-        "Δ columns show improvement versus the Home Win Rate baseline "
-        "(positive = better). Home Win Rate uses the historical frequency "
-        "of home wins as a constant probability."
+        "Baselines (correctly defined):\n"
+        "• **Always Home** — hard prediction of home every game "
+        "(accuracy = observed home-win rate).\n"
+        "• **Constant Home Rate** — every game assigned the empirical home-win "
+        "frequency as probability. Hard decisions match Always Home when that "
+        "rate ≥ 0.5; log loss / Brier use the continuous probability.\n"
+        "• **Coin Flip (p=0.5)** — uninformed constant 0.5. Accuracy shown is "
+        "the theoretical 0.5 (a hard ≥ 0.5 threshold on exactly 0.5 would "
+        "incorrectly look like Always Home).\n\n"
+        "Δ columns are versus Constant Home Rate (positive = better)."
     )
 
     # ------------------------------------------------------------------

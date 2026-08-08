@@ -97,7 +97,7 @@ PLAYOFF_DISPLAY = {
 
 
 def render_simulation_tab(sport="NFL"):
-    st.header(f"{sport} Season Simulation Results")
+    st.header(f"{sport} Playoff Projections")
 
     if "simulation_results" not in st.session_state:
         st.info("Run a simulation from the sidebar to see results.")

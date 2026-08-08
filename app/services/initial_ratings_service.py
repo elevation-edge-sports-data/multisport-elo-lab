@@ -114,6 +114,34 @@ def get_seed_season(sport: str) -> Optional[str]:
     return all_seasons[0] if all_seasons else None
 
 
+def get_simulate_from_options(
+    sport: str,
+    target_season: Optional[str] = None,
+) -> List[str]:
+    """
+    Seasons the user may choose as the start of the Elo warm-up window.
+
+    The earliest season in the data is seed/history-only and is never offered.
+    When target_season is given, only seasons strictly before the target are
+    returned (warm-up cannot include the Monte Carlo target itself).
+
+    Default selection in the UI should be the first element (earliest valid).
+    """
+    all_seasons = get_available_seasons(sport)
+    if len(all_seasons) <= 1:
+        return []
+
+    # Exclude pure seed year
+    candidates = all_seasons[1:]
+
+    if target_season is not None and target_season in all_seasons:
+        target_idx = all_seasons.index(target_season)
+        # Only seasons before the target
+        candidates = [s for s in candidates if all_seasons.index(s) < target_idx]
+
+    return candidates
+
+
 def get_base_initial_ratings(
     sport: str,
     *,

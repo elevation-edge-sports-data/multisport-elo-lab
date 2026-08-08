@@ -6,47 +6,39 @@ Supports historical backtesting, Monte Carlo regular-season + full playoff-brack
 
 **Live dashboard**: [https://multisport-elo-lab.streamlit.app/](https://multisport-elo-lab.streamlit.app/)
 
-**Current version: 11.5**
+**Current version: 12.0**
 
 ---
 
-## Highlights (Version 11.5)
+## Highlights (Version 12.0 — Simulate upcoming season)
 
-- **Warm-up Elo from recent actual seasons**: instead of starting the target-season Monte Carlo from a static/ranking prior alone (prior releases), Elo is first updated from actual regular-season and playoff results in recent completed years (with stronger regression), then only the target season is simulated
-
+- **Simulate upcoming season** for **NFL 2026** and **NHL 2026–27**
+  - Full regular-season slate + playoff bracket Monte Carlo for seasons not yet played
+  - **NBA — coming soon** (after official schedule is released)
+- **Simulate from** control: choose the start of the history window used before the target season
+- **Three-tab dashboard**: Playoff Projections (default landing), Regular Season Projections, Model Comparison
+- **Model configuration panel** refinements: Grid Search hierarchy, pure binary Margin of Victory, regression to mean on by default, clearer parameter tooltips
+- **Expanded baselines** in Model Comparison: Always Home, Constant Home Rate, Coin Flip (p=0.5), plus Log5
+- **Export Results (.xlsx)**: multi-sheet workbook (Config, Simulation Summary, probabilities, ratings, evaluation metrics)
 - Full multi-sport support with consistent ordering: **NHL · NBA · NFL**
 - **Full playoff-bracket simulation** for all three sports
   - NFL: Wild Card → Divisional → Conference → Super Bowl (reseeding)
   - NHL: Fixed bracket, best-of-7 series through Stanley Cup
   - NBA: Play-In tournament + fixed 1–8 bracket, best-of-7 series
 - Instant default simulations — results appear immediately when you switch sports
-- **One-click full results export** — download Config, Simulation Summary, Achievement/Playoff probabilities, Elo Ratings, and Evaluation metrics as a multi-sheet Excel file
-- Multi-season aware initial ratings (playoffs or regular-season source, record or Elo basis, optional regression-to-mean)
-- Continuous **Elevation Edge** (Elo points per 1,000 ft of altitude difference)
-- Sport-specific home advantage labels (Home-Ice / Home-Court / Home-Field)
-- Log5 baseline + residual diagnostics
-- Parameter optimization with interactive grid-search landscape
-- Regular-season achievement probabilities + full playoff outlook probabilities
-- Calibration diagnostics (Brier decomposition, ECE, reliability diagrams, baseline comparisons)
 
 ---
 
 ## Dashboard Tabs
 
-1. **Model Configuration**  
-   Sport, season, adjustments, advanced initial-Elo controls, and optimized parameters from the last run.
+1. **Playoff Projections** (default landing)  
+   Monte Carlo regular-season + playoff simulations with expected wins/points, distributions, achievement probabilities, and full playoff outlook (reach each round / win championship).
 
-2. **Season Simulation**  
-   Monte Carlo regular-season + playoff simulations with expected wins/points, distributions, uncertainty ranges, achievement probabilities, and full playoff outlook (reach each round / win championship).
+2. **Regular Season Projections**  
+   Historical and simulated rating trajectories with uncertainty bands (standings / win-total trajectory redesign planned).
 
-3. **Elo Ratings**  
-   Post-game Elo ratings with conference/division filtering and team colors.
-
-4. **Elo Trajectory**  
-   Historical Elo paths + simulated trajectories with uncertainty bands.
-
-5. **Model Evaluation**  
-   Accuracy, Log Loss, Brier Score, calibration plots, residual diagnostics, Log5 baseline, and grid-search landscape.
+3. **Model Comparison**  
+   Accuracy, Log Loss, Brier Score, calibration plots, residual diagnostics, expanded baselines (Always Home, Constant Home Rate, Coin Flip), Log5, and grid-search landscape.
 
 ---
 
@@ -98,13 +90,14 @@ All sports share the same engine and dashboard. Sport-specific logic (scoring ru
 
 ### Adjustments
 - **Home Advantage** — configurable Elo boost (sport-specific labeling)
-- **Margin of Victory** — scales the Elo update by score differential
+- **Margin of Victory** — pure binary: on scales the Elo update by score differential; off uses win/loss only
 - **Elevation Edge** — continuous: `elev_value × max(0, home_ft − away_ft) / 1000`
 
-### Advanced Initial Elo Controls
-- Rating source: previous-season playoffs or regular-season standings
-- Rating basis: record or existing Elo
-- Optional regression-to-mean with adjustable strength
+### Initial Elo & Regression
+- Rating source fixed to previous-season playoffs (not user-facing)
+- Rating basis prefers existing Elo, with record-derived fallback when needed
+- Regression to mean defaults on; strength adjustable under Customize Parameters
+- **Simulate from** chooses the first season included in the warm-up window
 
 ### Playoff Simulation
 - NFL, NHL, and NBA each have a dedicated package under `elo_lab/playoffs/`
@@ -173,6 +166,7 @@ streamlit run app/dashboard.py
 | 11.3    | One-click full results export (multi-sheet Excel) |
 | 11.4    | Team logos in Elo Ratings, Trajectory, and Simulation |
 | 11.5    | Warm-up Elo from recent actual results before target-season MC (replaces prior-only start) |
+| 12.0    | Simulate upcoming season (NFL 2026, NHL 2026–27; NBA coming soon), three-tab dashboard |
 
 See [CHANGELOG.md](CHANGELOG.md) for the complete history.
 
@@ -180,6 +174,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the complete history.
 
 ## Notes
 
+- **Simulate upcoming season**: NFL 2026 and NHL 2026–27 schedules are included. **NBA — coming soon** (after official schedule is released).
 - This project is under active development.
 - Elevation data uses real stadium/arena elevations.
 - Precomputed default simulations live in `data/precomputed/` (gitignored; regenerate with the command above).

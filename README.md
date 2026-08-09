@@ -6,11 +6,17 @@ Supports historical backtesting, Monte Carlo regular-season + full playoff-brack
 
 **Live dashboard**: [https://multisport-elo-lab.streamlit.app/](https://multisport-elo-lab.streamlit.app/)
 
-**Current version: 12.2**
+**Current version: 12.3**
 
 ---
 
-## Highlights (Version 12.2)
+## Highlights (Version 12.3)
+
+- **Numerical simulation progress bar**: updates at 10% steps (0% … 100%) with an explicit numeric indicator while simulations run
+- **Faster simulation**: playoffs reuse the primary Monte Carlo standings/Elo (one pass instead of two; redundant re-sim removed)
+- Cleanup of unused tab modules (`configuration.py`, `elo_ratings.py`)
+
+### From Version 12.2
 
 - **Match sidebar / default-sim settings to the precomputed defaults** (sport-specific k and home advantage, Simulate from, seed)
 - **Playoff Outlook** Team column shows team logos

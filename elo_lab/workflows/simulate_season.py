@@ -644,6 +644,8 @@ def simulate_many_seasons(
     initial_ratings=None,
     sport="NFL",
     return_elo_evolution=False,
+    return_season_results=False,
+    progress_callback=None,
 ):
     """
     Monte Carlo regular-season simulations.
@@ -653,6 +655,13 @@ def simulate_many_seasons(
     return_elo_evolution : bool
         If True, also return aggregated Elo trajectories from the *same*
         simulated game outcomes (so final Elo ranks align with wins/points).
+    return_season_results : bool
+        If True, also return a list of (standings_df, team_elo) for each sim.
+        Used by the playoff path so playoffs can be run on the *same* outcomes
+        without a second full regular-season pass.
+    progress_callback : callable, optional
+        Called as progress_callback(fraction: float) with fraction in [0, 1]
+        approximately every 10% of sims (or more frequently for small n_sims).
 
     Returns
     -------
@@ -660,6 +669,8 @@ def simulate_many_seasons(
         Columns: sim_id, team, wins, points
     elo_evolution : pd.DataFrame (only if return_elo_evolution=True)
         Columns: team, games_played, mean_elo, p05_elo, p95_elo
+    season_results : list (only if return_season_results=True)
+        List of (standings_df, team_elo_dict) tuples, one per sim.
     """
     cfg = SPORT_CONFIGS.get(sport, SPORT_CONFIGS["NFL"])
     if schedule_path is None:
@@ -667,8 +678,16 @@ def simulate_many_seasons(
 
     results = []
     history = []
+    season_results = [] if return_season_results else None
+    # Report at 10% increments (and 0 / 100)
+    report_every = max(1, n_sims // 10)
+    if progress_callback is not None:
+        try:
+            progress_callback(0.0)
+        except Exception:
+            pass
     for i in range(n_sims):
-        standings, _, elo_hist = simulate_season(
+        standings, team_elo, elo_hist = simulate_season(
             schedule_path=schedule_path,
             config=config,
             seed=seed + i,
@@ -682,15 +701,26 @@ def simulate_many_seasons(
                 "wins": int(row["wins"]),
                 "points": int(row.get("points", row["wins"])),
             })
+        if return_season_results:
+            # Keep a shallow copy of the final Elo dict; standings is already a new DF
+            season_results.append((standings, dict(team_elo)))
         if return_elo_evolution:
             elo_hist = elo_hist.copy()
             elo_hist["sim_id"] = i
             history.append(elo_hist)
+        if progress_callback is not None and ((i + 1) % report_every == 0 or i + 1 == n_sims):
+            try:
+                progress_callback((i + 1) / n_sims)
+            except Exception:
+                pass
 
     results_df = pd.DataFrame(results)
+    out = [results_df]
     if return_elo_evolution:
-        return results_df, _aggregate_season_evolution(history)
-    return results_df
+        out.append(_aggregate_season_evolution(history))
+    if return_season_results:
+        out.append(season_results)
+    return out[0] if len(out) == 1 else tuple(out)
 
 
 def simulate_elo_evolution(
@@ -845,16 +875,25 @@ def simulate_many_seasons_multiyear(
     seed: int = 42,
     base_initial_ratings=None,
     return_elo_evolution: bool = True,
+    return_season_results: bool = False,
     hybrid_warmup: bool = True,
     inter_season_regression: float = 0.35,
     playoff_k_multiplier: float = 1.75,
     include_playoffs_in_warmup: bool = True,
     max_history_seasons: int = 2,
+    progress_callback=None,
 ):
     """
     Warm-up Elo on actual recent seasons, then Monte Carlo the target season only.
 
     Replaces the prior-only start used in published releases through 11.4.
+
+    return_season_results : bool
+        If True, also return list of (standings_df, team_elo) for each target
+        sim so playoffs can reuse the same outcomes (no second regular-season pass).
+    progress_callback : callable, optional
+        Called as progress_callback(fraction: float) with fraction in [0, 1]
+        approximately every 10% of the Monte Carlo target-season sims.
     """
     try:
         from app.services.initial_ratings_service import get_available_seasons
@@ -894,8 +933,15 @@ def simulate_many_seasons_multiyear(
     target_df = filter_regular_season(target_df, sport=sport)
 
     results, history = [], []
+    season_results = [] if return_season_results else None
+    report_every = max(1, n_sims // 10)
+    if progress_callback is not None:
+        try:
+            progress_callback(0.0)
+        except Exception:
+            pass
     for i in range(n_sims):
-        standings, _, elo_hist = simulate_season(
+        standings, team_elo, elo_hist = simulate_season(
             schedule_df=target_df,
             config=config,
             seed=seed + i,
@@ -910,12 +956,22 @@ def simulate_many_seasons_multiyear(
                 "wins": int(row["wins"]),
                 "points": int(row.get("points", row["wins"])),
             })
+        if return_season_results:
+            season_results.append((standings, dict(team_elo)))
         if return_elo_evolution and elo_hist is not None and not elo_hist.empty:
             h = elo_hist.copy()
             h["sim_id"] = i
             history.append(h)
+        if progress_callback is not None and ((i + 1) % report_every == 0 or i + 1 == n_sims):
+            try:
+                progress_callback((i + 1) / n_sims)
+            except Exception:
+                pass
 
     results_df = pd.DataFrame(results)
+    out = [results_df]
     if return_elo_evolution:
-        return results_df, _aggregate_season_evolution(history)
-    return results_df
+        out.append(_aggregate_season_evolution(history))
+    if return_season_results:
+        out.append(season_results)
+    return out[0] if len(out) == 1 else tuple(out)

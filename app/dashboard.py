@@ -1,7 +1,7 @@
 """
 MultiSport Elo Lab – Streamlit dashboard
 
-Version 12.2 — Match default sim settings to precomputed defaults; seed; logos in Playoff Outlook
+Version 12.3 — Simulation progress at 10% steps; playoff path no longer re-sims regular season; cleanup; MoneyPuck-inspired visuals foundation
 
   - NHL / NFL / NBA with full playoff-bracket simulation
   - Warm-up Elo: actual regular-season + playoff results from user-chosen
@@ -16,6 +16,8 @@ Version 12.2 — Match default sim settings to precomputed defaults; seed; logos
   - Playoff Outlook table includes team logos; Regular Season defaults to Western / AFC
   - Export Results as quiet text-style control
   - Tabs: Regular Season Projections · Playoff Projections (default) · Model Comparison
+  - Monte Carlo progress bar updates at 0% / 10% / … / 100% with numeric indicator
+  - Playoffs reuse primary Monte Carlo standings/Elo (no second full-season pass)
 """
 
 from __future__ import annotations
@@ -77,7 +79,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("MultiSport Elo Lab")
-st.caption("Simulate upcoming season · NFL / NHL / NBA | Version 12.2")
+st.caption("Simulate upcoming season · NFL / NHL / NBA | Version 12.3")
 
 
 # ---------------------------------------------------------------------------
@@ -376,18 +378,27 @@ if run_clicked:
         pb = st.sidebar.progress(0, text="Starting...")
 
         if optimize_for:
-            pb.progress(20, text="Optimizing parameters...")
+            pb.progress(10, text="Optimizing parameters...")
             best_config, _ = optimize_parameters_for_config(
                 base_config=config,
                 optimize_for=optimize_for,
             )
             final_config = best_config
-            pb.progress(50, text="Optimization complete")
+            pb.progress(15, text="Optimization complete")
         else:
             final_config = config
-            pb.progress(50, text="Running simulations...")
 
-        pb.progress(70, text="Running Monte Carlo simulations...")
+        def _mc_progress(frac: float):
+            # 10% steps with explicit numeric indicator
+            pct = int(round(float(frac) * 100))
+            # Snap to nearest 10 for stable labels when callback is dense
+            snapped = (pct // 10) * 10
+            pb.progress(
+                min(max(frac, 0.0), 1.0),
+                text=f"Running Monte Carlo simulations... {snapped}%",
+            )
+
+        pb.progress(0, text="Running Monte Carlo simulations... 0%")
         results = run_simulation(
             config=final_config,
             n_sims=simulation_count,
@@ -396,6 +407,7 @@ if run_clicked:
             season=season,
             from_season=simulate_from,
             seed=int(sim_seed),
+            progress_callback=_mc_progress,
         )
 
         # Store everything the tabs already know how to read
@@ -437,7 +449,7 @@ if run_clicked:
 
         st.session_state["_loaded_sport"] = sport
 
-        pb.progress(100, text="Complete!")
+        pb.progress(1.0, text="Running Monte Carlo simulations... 100%")
         status.update(label="Simulation complete!", state="complete")
     st.session_state["_sim_running"] = False
 

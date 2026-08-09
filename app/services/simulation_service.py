@@ -220,6 +220,7 @@ def run_simulation(
     from_season=None,
     seed: int = 42,
     inter_season_regression: float = 0.35,
+    progress_callback=None,
 ):
     """
     When season is set: warm Elo on actual recent seasons, then MC the target.
@@ -232,6 +233,9 @@ def run_simulation(
     seed : RNG seed for reproducible Monte Carlo draws.
     inter_season_regression : pull toward mean_elo after each warm-up season
                   (0.35 default; previously 0.67 which erased recent form).
+    progress_callback : callable, optional
+        Called as progress_callback(fraction: float) with fraction in [0, 1]
+        during Monte Carlo work (approximately 10% steps).
     """
     tmp_path = None
     try:
@@ -255,7 +259,17 @@ def run_simulation(
                     # number of seasons in [from_season, target)
                     max_history = max(1, target_idx - from_idx)
 
-            sim_results, elo_evolution = simulate_many_seasons_multiyear(
+            # Single target-season Monte Carlo + collect per-sim standings/Elo
+            # so playoffs reuse the exact same outcomes (no second full pass).
+            def _multi_progress(frac):
+                if progress_callback is not None:
+                    try:
+                        # Regular-season phase ≈ 0–85% of reported progress
+                        progress_callback(0.85 * float(frac))
+                    except Exception:
+                        pass
+
+            sim_results, elo_evolution, season_results = simulate_many_seasons_multiyear(
                 n_sims=n_sims,
                 sport=sport,
                 target_season=str(season),
@@ -263,28 +277,23 @@ def run_simulation(
                 seed=int(seed),
                 base_initial_ratings=initial_ratings or {},
                 return_elo_evolution=True,
+                return_season_results=True,
                 hybrid_warmup=True,
                 inter_season_regression=float(inter_season_regression),
                 playoff_k_multiplier=1.75,
                 include_playoffs_in_warmup=True,
                 max_history_seasons=max_history,
+                progress_callback=_multi_progress,
             )
 
-            warmed = None
-            if elo_evolution is not None and not elo_evolution.empty:
-                warmed = (
-                    elo_evolution.sort_values("games_played")
-                    .groupby("team")["mean_elo"].last().to_dict()
-                )
-
-            schedule_path, tmp_path = _resolve_schedule_path(sport, season)
+            # Playoffs from the collected target-season outcomes only
             _, playoff_probs, _ = simulate_many_seasons(
-                n_sims=min(n_sims, 300),
-                schedule_path=schedule_path,
+                n_sims=n_sims,  # ignored when season_results is supplied
                 config=config,
                 seed=int(seed),
-                initial_ratings=warmed or initial_ratings or {},
                 sport=sport,
+                season_results=season_results,
+                progress_callback=progress_callback,
             )
         else:
             schedule_path, tmp_path = _resolve_schedule_path(sport, season)
@@ -295,6 +304,7 @@ def run_simulation(
                 seed=int(seed),
                 initial_ratings=initial_ratings,
                 sport=sport,
+                progress_callback=progress_callback,
             )
 
         summary = summarize_simulations(sim_results)

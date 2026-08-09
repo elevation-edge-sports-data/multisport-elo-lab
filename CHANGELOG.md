@@ -2,6 +2,29 @@
 
 All notable changes to MultiSport Elo Lab are documented in this file.
 
+## Version 12.3 — Numerical simulation progress bar; faster simulation; cleanup
+
+### Added
+- **Numerical progress bar**: while simulations run, the existing progress bar now reports at **10% increments** (0%, 10%, …, 100%) with an explicit numeric indicator next to “Running Monte Carlo simulations…”
+- `progress_callback` support threaded through `simulate_many_seasons`, `simulate_many_seasons_multiyear`, the playoff wrapper, and `run_simulation`
+- `return_season_results` flag on the primary Monte Carlo paths so per-sim `(standings_df, team_elo)` can be collected for playoffs
+
+### Fixed
+- **Faster simulation**: removed the redundant full regular-season loop previously used only to feed playoff seeding.
+  - Primary Monte Carlo now optionally returns the per-sim standings + final Elo.
+  - Playoff probabilities are accumulated from those same outcomes via the existing `accumulate_from_many_seasons` helpers (NFL / NHL / NBA).
+  - Multiyear (target-season) path no longer triggers a second schedule load + full MC just for playoffs.
+  - Typical runs do roughly half the previous Monte Carlo work (one pass instead of two).
+
+### Changed
+- Progress reporting during Run Simulation is continuous across regular-season (~0–85%) and playoff accumulation (~85–100%)
+- Playoff home advantage is taken from the active model config when present
+
+### Removed
+- Unused tab modules that no longer correspond to active dashboard tabs: `app/tabs/configuration.py`, `app/tabs/elo_ratings.py`
+
+---
+
 ## Version 12.2 — Match default sim settings to precomputed defaults; seed; logos in Playoff Outlook
 
 ### Added

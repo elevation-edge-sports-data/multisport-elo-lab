@@ -189,28 +189,130 @@ def normalize_schedule(df: pd.DataFrame, sport: str = "NFL") -> pd.DataFrame:
             out["date"] = df["Date"]
         return out
 
-    # NFL B-R: Winner/tie, Loser/tie, Pts, Pts  (no home/away – use winner as home proxy)
+    # NFL B-R completed: Winner/tie, Loser/tie, optional @ marker, Pts, Pts
     if "Winner/tie" in df.columns and "Loser/tie" in df.columns:
-        pts_cols = [c for c in df.columns if c.lower().startswith("pts")]
-        # columns often: Pts (winner), Pts.1 (loser) after pandas load
+        pts_cols = [c for c in df.columns if str(c).lower().startswith("pts")]
         w_pts = pts_cols[0] if pts_cols else None
         l_pts = pts_cols[1] if len(pts_cols) > 1 else None
+        # Middle column between Winner and Loser is "@" when the winner was away
+        win_idx = list(df.columns).index("Winner/tie")
+        marker_c = None
+        if win_idx + 1 < len(df.columns) and df.columns[win_idx + 1] != "Loser/tie":
+            marker_c = df.columns[win_idx + 1]
+
+        homes, aways, home_scores, away_scores = [], [], [], []
+        for _, row in df.iterrows():
+            w = row["Winner/tie"]
+            l = row["Loser/tie"]
+            if pd.isna(w) or pd.isna(l):
+                continue
+            at_away_win = False
+            if marker_c is not None:
+                at_away_win = str(row[marker_c]).strip() == "@"
+            if at_away_win:
+                home, away = l, w
+            else:
+                home, away = w, l
+            hs = as_ = None
+            if w_pts is not None and l_pts is not None:
+                try:
+                    pw = float(row[w_pts]) if pd.notna(row[w_pts]) else None
+                    pl = float(row[l_pts]) if pd.notna(row[l_pts]) else None
+                except (TypeError, ValueError):
+                    pw = pl = None
+                if pw is not None and pl is not None:
+                    if at_away_win:
+                        hs, as_ = pl, pw
+                    else:
+                        hs, as_ = pw, pl
+            homes.append(to_abbr(home))
+            aways.append(to_abbr(away))
+            home_scores.append(hs)
+            away_scores.append(as_)
+
+        out = pd.DataFrame({
+            "home_team": homes,
+            "away_team": aways,
+            "home_score": home_scores,
+            "away_score": away_scores,
+        })
+        if "Week" in df.columns:
+            # align only if same length – rebuild from kept rows is safer; skip week if mismatch
+            if len(out) == len(df):
+                out["week"] = df["Week"].values
+        if "Date" in df.columns and len(out) == len(df):
+            out["date"] = df["Date"].values
+        return out
+
+    # Upcoming / generic: explicit Away + Home (or Visitor + Home) without results yet
+    away_c = None
+    home_c = None
+    for a_name, h_name in (
+        ("Away", "Home"),
+        ("away", "home"),
+        ("Visitor", "Home"),
+        ("Visitor/Neutral", "Home/Neutral"),
+        ("Away Team", "Home Team"),
+        ("away_team", "home_team"),
+        ("VisTm", "HomeTm"),
+        ("VisTm", "Home"),
+        ("Visitor Team", "Home Team"),
+    ):
+        if a_name in df.columns and h_name in df.columns:
+            away_c, home_c = a_name, h_name
+            break
+    # case-insensitive fallback
+    if away_c is None:
+        lower_map = {c.lower().strip(): c for c in df.columns}
+        if "away" in lower_map and "home" in lower_map:
+            away_c, home_c = lower_map["away"], lower_map["home"]
+        elif "visitor" in lower_map and "home" in lower_map:
+            away_c, home_c = lower_map["visitor"], lower_map["home"]
+        elif "vistm" in lower_map and "hometm" in lower_map:
+            away_c, home_c = lower_map["vistm"], lower_map["hometm"]
+        elif "vistm" in lower_map and "home" in lower_map:
+            away_c, home_c = lower_map["vistm"], lower_map["home"]
+
+    if away_c and home_c:
         out = pd.DataFrame()
-        out["home_team"] = df["Winner/tie"].map(to_abbr)
-        out["away_team"] = df["Loser/tie"].map(to_abbr)
-        if w_pts:
-            out["home_score"] = pd.to_numeric(df[w_pts], errors="coerce")
-        if l_pts:
-            out["away_score"] = pd.to_numeric(df[l_pts], errors="coerce")
+        out["away_team"] = df[away_c].map(to_abbr)
+        out["home_team"] = df[home_c].map(to_abbr)
+        # optional scores if present (including PFR Pts / Pts.1 beside VisTm / HomeTm)
+        pts_cols = [c for c in df.columns if str(c).lower().startswith("pts")]
+        for score_names, dest in (
+            (("home_score", "Home Pts", "Pts Home", "Score.1"), "home_score"),
+            (("away_score", "Away Pts", "Pts Away", "Score"), "away_score"),
+        ):
+            for sn in score_names:
+                if sn in df.columns:
+                    out[dest] = pd.to_numeric(df[sn], errors="coerce")
+                    break
+        # Positional: VisTm, Pts, ..., HomeTm, Pts.1
+        if "away_score" not in out.columns or out["away_score"].isna().all():
+            if len(pts_cols) >= 1:
+                out["away_score"] = pd.to_numeric(df[pts_cols[0]], errors="coerce")
+        if "home_score" not in out.columns or out["home_score"].isna().all():
+            if len(pts_cols) >= 2:
+                out["home_score"] = pd.to_numeric(df[pts_cols[1]], errors="coerce")
+        if "home_score" not in out.columns:
+            out["home_score"] = pd.NA
+        if "away_score" not in out.columns:
+            out["away_score"] = pd.NA
         if "Week" in df.columns:
             out["week"] = df["Week"]
         if "Date" in df.columns:
             out["date"] = df["Date"]
-        return out
+        # drop rows without two teams
+        out = out.dropna(subset=["home_team", "away_team"])
+        out = out[
+            out["home_team"].astype(str).str.len().gt(0)
+            & out["away_team"].astype(str).str.len().gt(0)
+        ]
+        return out.reset_index(drop=True)
 
     raise ValueError(
         f"Unrecognized schedule schema. Columns: {list(df.columns)}. "
-        "Expected home_team/away_team or Basketball-Reference format."
+        "Expected home_team/away_team, Winner/Loser, or Away/Home (upcoming) format."
     )
 
 
@@ -399,21 +501,6 @@ def simulate_season(
         team_gp[home] = team_gp.get(home, 0) + 1
         team_gp[away] = team_gp.get(away, 0) + 1
 
-        elo_history.append({
-            "team": home,
-            "elo": team_elo[home],
-            "week": week,
-            "game_number": game_number,
-            "games_played": team_gp[home],
-        })
-        elo_history.append({
-            "team": away,
-            "elo": team_elo[away],
-            "week": week,
-            "game_number": game_number,
-            "games_played": team_gp[away],
-        })
-
         if cfg.get("outcome_type") == "points":
             # NHL: 2 points for win, 1 for OT loss
             goes_to_ot = rng.random() < cfg.get("ot_rate", 0.0)
@@ -439,6 +526,26 @@ def simulate_season(
             else:
                 wins[away] += 1
                 losses[home] += 1
+
+        # Record after outcome update so cumulative wins/points are current
+        elo_history.append({
+            "team": home,
+            "elo": team_elo[home],
+            "wins": wins[home],
+            "points": points[home],
+            "week": week,
+            "game_number": game_number,
+            "games_played": team_gp[home],
+        })
+        elo_history.append({
+            "team": away,
+            "elo": team_elo[away],
+            "wins": wins[away],
+            "points": points[away],
+            "week": week,
+            "game_number": game_number,
+            "games_played": team_gp[away],
+        })
 
     # Only teams that appear in the schedule (avoids double-counting when
     # initial_ratings keys use abbreviations and the schedule uses full names).
@@ -476,6 +583,57 @@ def _aggregate_elo_evolution(history_frames):
         .sort_values(["team", group_col])
     )
     return evolution.rename(columns={group_col: "games_played"})
+
+
+def _aggregate_win_evolution(history_frames, metric: str = "wins"):
+    """Aggregate per-sim cumulative wins (or points) into mean / p05 / p95 by team and games_played."""
+    cols = ["team", "games_played", f"mean_{metric}", f"p05_{metric}", f"p95_{metric}"]
+    if not history_frames:
+        return pd.DataFrame(columns=cols)
+
+    history = pd.concat(history_frames, ignore_index=True)
+    if metric not in history.columns:
+        return pd.DataFrame(columns=cols)
+
+    group_col = "games_played" if "games_played" in history.columns else "week"
+
+    evolution = (
+        history.groupby(["sim_id", "team", group_col])[metric]
+        .last()
+        .reset_index()
+        .groupby(["team", group_col])[metric]
+        .agg(
+            mean_val="mean",
+            p05_val=lambda x: x.quantile(0.05),
+            p95_val=lambda x: x.quantile(0.95),
+        )
+        .reset_index()
+        .sort_values(["team", group_col])
+    )
+    evolution = evolution.rename(columns={
+        group_col: "games_played",
+        "mean_val": f"mean_{metric}",
+        "p05_val": f"p05_{metric}",
+        "p95_val": f"p95_{metric}",
+    })
+    return evolution
+
+
+
+def _aggregate_season_evolution(history_frames):
+    """Elo + cumulative wins/points evolution in one frame."""
+    elo_df = _aggregate_elo_evolution(history_frames)
+    wins_df = _aggregate_win_evolution(history_frames, metric="wins")
+    points_df = _aggregate_win_evolution(history_frames, metric="points")
+
+    out = elo_df
+    for extra in (wins_df, points_df):
+        if extra is None or extra.empty:
+            continue
+        keys = ["team", "games_played"]
+        cols = [c for c in extra.columns if c not in keys]
+        out = out.merge(extra[keys + cols], on=keys, how="left") if not out.empty else extra
+    return out
 
 
 def simulate_many_seasons(
@@ -531,7 +689,7 @@ def simulate_many_seasons(
 
     results_df = pd.DataFrame(results)
     if return_elo_evolution:
-        return results_df, _aggregate_elo_evolution(history)
+        return results_df, _aggregate_season_evolution(history)
     return results_df
 
 
@@ -578,6 +736,7 @@ def win_distributions(sim_results):
 
 def _load_season_schedule(sport: str, season: str):
     """Load and normalize one season's schedule."""
+    errors = []
     for c in [
         Path(f"data/{sport.lower()}/{sport.lower()}_{season}.csv"),
         Path(f"data/{sport.lower()}/{season}.csv"),
@@ -585,8 +744,14 @@ def _load_season_schedule(sport: str, season: str):
         if c.exists():
             try:
                 return normalize_schedule(pd.read_csv(c), sport=sport)
-            except Exception:
+            except Exception as e:
+                errors.append(f"{c}: {e}")
                 continue
+    if errors:
+        raise FileNotFoundError(
+            f"No usable schedule for {sport} {season}. "
+            f"Tried files but normalize failed: {'; '.join(errors)}"
+        )
     return None
 
 
@@ -752,5 +917,5 @@ def simulate_many_seasons_multiyear(
 
     results_df = pd.DataFrame(results)
     if return_elo_evolution:
-        return results_df, _aggregate_elo_evolution(history)
+        return results_df, _aggregate_season_evolution(history)
     return results_df

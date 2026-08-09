@@ -18,6 +18,21 @@ from elo_lab.evaluation.diagnostics import (
 def render_evaluation_tab():
     st.header("Model Comparison")
 
+    param_eval = st.session_state.get("param_eval")
+    if param_eval and not param_eval.get("error"):
+        st.info(
+            f"**Current parameters scored on {param_eval.get('season')}** "
+            f"({param_eval.get('n_games', 0)} completed games) — "
+            f"Accuracy {param_eval['accuracy']:.3f} · "
+            f"Log loss {param_eval['log_loss']:.3f} · "
+            f"Brier {param_eval['brier']:.3f}. "
+            "These metrics use real outcomes from the last completed season, "
+            "not the upcoming slate."
+        )
+    elif param_eval and param_eval.get("error"):
+        st.caption(f"Parameter eval unavailable: {param_eval['error']}")
+
+
     # ------------------------------------------------------------------
     # 1. Aggregate metrics
     # ------------------------------------------------------------------
@@ -179,10 +194,7 @@ def render_evaluation_tab():
             help="Expected Calibration Error (weighted absolute calibration error). Lower is better.",
         )
 
-    st.caption(
-        "Brier = Reliability − Resolution + Uncertainty.  "
-        "Use Reliability/ECE to judge calibration and Resolution to judge discrimination."
-    )
+    st.caption("Brier = Reliability − Resolution + Uncertainty.")
 
     st.divider()
 

@@ -2,6 +2,39 @@
 
 All notable changes to MultiSport Elo Lab are documented in this file.
 
+## Version 12.1 — Regular season trajectories, param eval, reproducibility
+
+### Added
+- **Regular Season Projections redesign**
+  - Two-chart layout: **Observed** (prior completed season) above **Simulated** (target season)
+  - Metric toggle: wins (NFL/NBA) or points (NHL), or standings rank
+  - Default **Select teams** = top 6 by first-round / wild-card probability (NBA skips play-in when possible)
+  - Multiselect refreshes when simulation results change
+- **Cumulative wins/points** in simulation history so projected trajectories carry uncertainty bands
+- **Historical parameter evaluation** on Run Simulation: one walk of the last completed season with current params → accuracy, log loss, Brier on Model Comparison (explicitly labeled as historical, not the upcoming slate)
+- **Random seed** control in the sidebar (default 42); same seed + settings reproduces Monte Carlo draws
+- **Simulation count** option **25** (100 remains default)
+- Upcoming **NFL schedule** schemas: `VisTm` / `HomeTm`, Away/Home without scores yet
+- Default-sim generator: sport-specific **Simulate from** (NHL 2025, NFL 2024, NBA 2025) and `--seed`
+
+### Changed
+- Sidebar **Adjustments** renamed **Parameters**
+- **Simulate from** defaults: NHL 2025, NFL 2024, NBA 2025 (when available)
+- Precomputed default load stamps season / simulate from / fingerprint so the UI matches the pickle
+- Model Comparison Brier caption is the decomposition equation only (Reliability / Resolution / ECE explained on the metrics themselves)
+- Version string **12.1**
+
+### Fixed
+- `generate_default_sims` import path when run as `python -m elo_lab.workflows.generate_default_sims`
+- NFL 2026 schedule normalize failure (`FileNotFoundError` on target 2026) for upcoming PFR-style columns
+- Regular Season Projections stuck on the same six teams after a new run (Streamlit multiselect key)
+
+### Notes
+- Regenerate precomputed pickles after this release so defaults include win trajectories and from_season alignment:
+  `python -m elo_lab.workflows.generate_default_sims --n-sims 250 --seed 42`
+
+---
+
 ## Version 12.0 — Simulate upcoming season
 
 ### Added

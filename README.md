@@ -6,11 +6,20 @@ Supports historical backtesting, Monte Carlo regular-season + full playoff-brack
 
 **Live dashboard**: [https://multisport-elo-lab.streamlit.app/](https://multisport-elo-lab.streamlit.app/)
 
-**Current version: 12.0**
+**Current version: 12.1**
 
 ---
 
-## Highlights (Version 12.0 — Simulate upcoming season)
+## Highlights (Version 12.1)
+
+- **Regular Season Projections**: observed prior-season path + simulated target path (wins / points / rank)
+- **Historical param eval** on Run: score current parameters on the last completed season (accuracy, log loss, Brier)
+- **Simulation count** option **25** (100 remains default)
+- **Random seed** for reproducible Monte Carlo
+- **Simulate from** defaults: NHL 2025, NFL 2024, NBA 2025
+- Upcoming NFL schedule support (`VisTm` / `HomeTm`)
+
+### From Version 12.0
 
 - **Simulate upcoming season** for **NFL 2026** and **NHL 2026–27**
   - Full regular-season slate + playoff bracket Monte Carlo for seasons not yet played
@@ -167,6 +176,7 @@ streamlit run app/dashboard.py
 | 11.4    | Team logos in Elo Ratings, Trajectory, and Simulation |
 | 11.5    | Warm-up Elo from recent actual results before target-season MC (replaces prior-only start) |
 | 12.0    | Simulate upcoming season (NFL 2026, NHL 2026–27; NBA coming soon), three-tab dashboard |
+| 12.1    | Regular season trajectories, historical param eval, random seed, schedule normalize fixes |
 
 See [CHANGELOG.md](CHANGELOG.md) for the complete history.
 

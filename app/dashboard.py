@@ -1,7 +1,7 @@
 """
 MultiSport Elo Lab – Streamlit dashboard
 
-Version 12.0 — Simulate upcoming season
+Version 12.1 — Regular season trajectories, param eval, reproducibility
 
   - NHL / NFL / NBA with full playoff-bracket simulation
   - Warm-up Elo: actual regular-season + playoff results from user-chosen
@@ -39,6 +39,7 @@ from services.initial_ratings_service import (
     get_initial_ratings,
 )
 from services.export_service import build_full_export, make_export_filename
+from services.evaluation_service import score_config_on_season
 from elo_lab.workflows.optimize_parameters import optimize_parameters_for_config
 
 # Clean metadata API (single source of truth for teams + venues)
@@ -74,7 +75,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("MultiSport Elo Lab")
-st.caption("Simulate upcoming season · NFL / NHL / NBA | Version 12.0")
+st.caption("Simulate upcoming season · NFL / NHL / NBA | Version 12.1")
 
 
 # ---------------------------------------------------------------------------
@@ -174,6 +175,18 @@ if (
         st.session_state["simulation_results"] = defaults
         st.session_state["_loaded_sport"] = sport
         st.session_state["is_default_run"] = True
+        # Align with how defaults were generated
+        _def_from = {"NHL": "2025", "NFL": "2024", "NBA": "2025"}
+        try:
+            _sims = get_simulatable_seasons(sport)
+            if _sims:
+                st.session_state["season"] = _sims[-1]
+            st.session_state["simulate_from"] = _def_from.get(sport)
+            st.session_state["_results_fingerprint"] = (
+                f"{sport}|{st.session_state.get('season')}|{st.session_state.get('simulate_from')}|default"
+            )
+        except Exception:
+            pass
     else:
         # No precomputed file – clear any stale results from another sport
         if _prev_sport != sport:
@@ -201,9 +214,13 @@ st.session_state["season"] = season
 # Simulate from (explicit warm-up start)
 # ------------------------------------------------------------------
 from_options = get_simulate_from_options(sport, target_season=season)
+_DEFAULT_FROM = {"NHL": "2025", "NFL": "2024", "NBA": "2025"}
 if from_options:
-    # Default = earliest possible
-    default_from_idx = 0
+    preferred_from = _DEFAULT_FROM.get(sport)
+    if preferred_from in from_options:
+        default_from_idx = from_options.index(preferred_from)
+    else:
+        default_from_idx = 0
     simulate_from = st.sidebar.selectbox(
         "Simulate from",
         from_options,
@@ -213,13 +230,14 @@ if from_options:
             "History runs from this season through the year before the target. "
             "The earliest season in the data is seed-only and is not offered here."
         ),
+        key=f"simulate_from_{sport}",
     )
 else:
     simulate_from = None
 st.session_state["simulate_from"] = simulate_from
 
 st.sidebar.divider()
-st.sidebar.subheader("Adjustments")
+st.sidebar.subheader("Parameters")
 home_field = st.sidebar.checkbox(_home["checkbox"], value=True)
 margin_of_victory = st.sidebar.checkbox(
     "Margin of Victory",
@@ -299,13 +317,28 @@ with st.sidebar.expander("Customize Parameters", expanded=False):
 
 st.sidebar.divider()
 
-simulation_options = [100, 500, 1000, 5000, 10000]
+simulation_options = [25, 100, 500, 1000, 5000, 10000]
 simulation_count = st.sidebar.selectbox(
     "Simulation Count",
     simulation_options,
-    index=0,
+    index=1,  # default 100
     format_func=lambda x: f"{x:,}",
 )
+_seed_col, _ = st.sidebar.columns([1, 1])
+with _seed_col:
+    _seed_raw = st.text_input(
+        "Random seed",
+        value="42",
+        help="Type an integer seed. Same seed + same settings reproduces the same Monte Carlo results.",
+        key="sim_seed_input",
+    )
+try:
+    sim_seed = int(str(_seed_raw).strip())
+    if sim_seed < 0:
+        sim_seed = 42
+except (TypeError, ValueError):
+    sim_seed = 42
+st.session_state["sim_seed"] = sim_seed
 
 # ---------------------------------------------------------------------------
 # Run Simulation + Stop placement
@@ -358,6 +391,7 @@ if run_clicked:
             sport=sport,
             season=season,
             from_season=simulate_from,
+            seed=int(sim_seed),
         )
 
         # Store everything the tabs already know how to read
@@ -373,6 +407,30 @@ if run_clicked:
         st.session_state["rating_basis"] = rating_basis
         st.session_state["apply_regression"] = apply_regression
         st.session_state["is_default_run"] = False          # custom run overrides defaults
+        st.session_state["_results_fingerprint"] = (
+            f"{sport}|{season}|{simulate_from}|{simulation_count}|{sim_seed}|{hash(str(final_config))}"
+        )
+        st.session_state["sim_seed"] = int(sim_seed)
+
+        # Historical eval: walk last completed season with current params
+        try:
+            from services.initial_ratings_service import get_available_seasons
+            all_seasons = get_available_seasons(sport)
+            eval_season = None
+            if season and all_seasons and str(season) in all_seasons:
+                idx = all_seasons.index(str(season))
+                if idx > 0:
+                    eval_season = all_seasons[idx - 1]
+            elif all_seasons and len(all_seasons) >= 2:
+                eval_season = all_seasons[-2]
+            if eval_season:
+                param_eval = score_config_on_season(sport, eval_season, final_config)
+                st.session_state["param_eval"] = param_eval
+            else:
+                st.session_state.pop("param_eval", None)
+        except Exception as _eval_err:
+            st.session_state["param_eval"] = {"error": str(_eval_err)}
+
         st.session_state["_loaded_sport"] = sport
 
         pb.progress(100, text="Complete!")

@@ -166,3 +166,132 @@ def get_log5_report(
         n_bins=10,
         baselines={"home_win_rate": home_win_rate, "coin_flip": 0.5},
     )
+
+
+# ---------------------------------------------------------------------------
+# Parameter-matched historical evaluation (completed seasons only)
+# ---------------------------------------------------------------------------
+
+def score_config_on_season(
+    sport: str,
+    season: str,
+    config: dict,
+    mean_elo: float = 1500.0,
+) -> dict:
+    """
+    Walk actual games of a completed season once with the given model config.
+
+    Returns accuracy / log_loss / brier plus prediction arrays.
+    Suitable for Model Comparison when the user is projecting an upcoming season.
+    """
+    import numpy as np
+    import pandas as pd
+
+    try:
+        from elo_lab.workflows.simulate_season import (
+            _load_season_schedule,
+            filter_regular_season,
+            is_playoff_row,
+        )
+        from elo_lab.engine import run_game, compute_pregame
+    except ImportError as e:
+        return {"error": f"imports failed: {e}"}
+
+    df = _load_season_schedule(sport, str(season))
+    if df is None or df.empty:
+        return {"error": f"No schedule for {sport} {season}"}
+
+    # Prefer regular season for cleaner scoring; fall back to all rows with scores
+    reg = filter_regular_season(df, sport=sport)
+    if reg is not None and not reg.empty:
+        df = reg
+
+    played = df.dropna(subset=["home_score", "away_score"]).copy()
+    if played.empty:
+        return {"error": f"No completed games with scores for {sport} {season}"}
+
+    ratings = {}
+    probs = []
+    actuals = []
+
+    for _, game in played.iterrows():
+        home = str(game["home_team"]).strip()
+        away = str(game["away_team"]).strip()
+        try:
+            hs, as_ = float(game["home_score"]), float(game["away_score"])
+        except (TypeError, ValueError):
+            continue
+        if hs == as_:
+            continue
+
+        ratings.setdefault(home, mean_elo)
+        ratings.setdefault(away, mean_elo)
+
+        try:
+            pre = compute_pregame(
+                home_elo=float(ratings[home]),
+                away_elo=float(ratings[away]),
+                context={
+                    "season": season,
+                    "home_team": home,
+                    "away_team": away,
+                },
+                config=config,
+            )
+            p_home = float(pre.get("p_home", 0.5))
+        except Exception:
+            # fallback logistic
+            diff = float(ratings[home]) - float(ratings[away])
+            p_home = 1.0 / (1.0 + 10 ** (-diff / 400.0))
+
+        actual = 1.0 if hs > as_ else 0.0
+        probs.append(p_home)
+        actuals.append(actual)
+
+        try:
+            result = run_game(
+                home_elo=float(ratings[home]),
+                away_elo=float(ratings[away]),
+                context={
+                    "season": season,
+                    "home_team": home,
+                    "away_team": away,
+                    "home_score": hs,
+                    "away_score": as_,
+                    "actual": int(actual),
+                },
+                config=config,
+            )
+            ratings[home] = float(result["home_elo_post"])
+            ratings[away] = float(result["away_elo_post"])
+        except Exception:
+            # still update with simple Elo if run_game fails
+            k = float(config.get("k", 20))
+            delta = k * (actual - p_home)
+            ratings[home] = float(ratings[home]) + delta
+            ratings[away] = float(ratings[away]) - delta
+
+    if not probs:
+        return {"error": f"No scorable games for {sport} {season}"}
+
+    probs_a = np.asarray(probs, dtype=float)
+    actuals_a = np.asarray(actuals, dtype=float)
+    preds = (probs_a >= 0.5).astype(int)
+    acc = float(np.mean(preds == actuals_a))
+    p_clip = np.clip(probs_a, 1e-15, 1.0 - 1e-15)
+    log_loss = float(
+        -np.mean(actuals_a * np.log(p_clip) + (1 - actuals_a) * np.log(1 - p_clip))
+    )
+    brier = float(np.mean((probs_a - actuals_a) ** 2))
+
+    return {
+        "sport": sport,
+        "season": str(season),
+        "n_games": int(len(probs_a)),
+        "accuracy": acc,
+        "log_loss": log_loss,
+        "brier": brier,
+        "probs": probs_a,
+        "actuals": actuals_a,
+        "label": f"Current params on {season}",
+    }

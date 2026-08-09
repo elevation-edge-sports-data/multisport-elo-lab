@@ -91,7 +91,7 @@ def _schedule_path(sport: str) -> str:
     return mapping.get(sport, f"data/{sport.lower()}_games.csv")
 
 
-def generate_one(sport: str, n_sims: int, out_dir: Path) -> Path:
+def generate_one(sport: str, n_sims: int, out_dir: Path, rng_seed: int = 42) -> Path:
     print(f"\n{'=' * 60}")
     print(f"  Generating default simulation for {sport}  (n_sims={n_sims})")
     print(f"{'=' * 60}")
@@ -99,12 +99,31 @@ def generate_one(sport: str, n_sims: int, out_dir: Path) -> Path:
     config = default_config()
     schedule_path = _schedule_path(sport)
 
-    # Use the most recent available season if possible
+    # Use the most recent available season as target
     seasons = get_simulatable_seasons(sport)
     season = seasons[-1] if seasons else None
-    seed = get_seed_season(sport)
+    data_seed = get_seed_season(sport)
+
+    # Match dashboard Simulate from defaults
+    DEFAULT_FROM = {"NHL": "2025", "NFL": "2024", "NBA": "2025"}
+    from_options = []
+    try:
+        from app.services.initial_ratings_service import get_simulate_from_options
+        from_options = get_simulate_from_options(sport, target_season=season)
+    except Exception:
+        from_options = []
+    preferred_from = DEFAULT_FROM.get(sport)
+    if preferred_from and preferred_from in from_options:
+        from_season = preferred_from
+    elif from_options:
+        from_season = from_options[0]
+    else:
+        from_season = None
+
     print(f"  Target season   : {season}")
-    print(f"  History through : before {season} (seed data from {seed})")
+    print(f"  Simulate from   : {from_season}")
+    print(f"  History through : before {season} (seed data from {data_seed})")
+    print(f"  RNG seed        : {rng_seed}")
     print(f"  Mode            : warm-up on actual recent seasons → MC target")
     initial_ratings = {}
 
@@ -115,6 +134,8 @@ def generate_one(sport: str, n_sims: int, out_dir: Path) -> Path:
         initial_ratings=initial_ratings,
         sport=sport,
         season=season,
+        from_season=from_season,
+        seed=int(rng_seed),
     )
     elapsed = time.perf_counter() - t0
     print(f"  Finished in {elapsed:.1f}s")
@@ -145,6 +166,12 @@ def main(argv: list[str] | None = None) -> None:
         help="Number of Monte Carlo seasons (default 250 – good balance of speed vs stability)",
     )
     parser.add_argument(
+        "--seed",
+        type=int,
+        default=42,
+        help="RNG seed for reproducible Monte Carlo draws (default 42)",
+    )
+    parser.add_argument(
         "--sports",
         nargs="+",
         default=["NHL", "NBA", "NFL"],
@@ -165,7 +192,7 @@ def main(argv: list[str] | None = None) -> None:
 
     written = []
     for sport in args.sports:
-        path = generate_one(sport, args.n_sims, out_dir)
+        path = generate_one(sport, args.n_sims, out_dir, rng_seed=args.seed)
         written.append(path)
 
     print(f"\nDone. Generated {len(written)} file(s):")

@@ -232,7 +232,10 @@ def run_simulation(
     try:
         if season is not None:
             from elo_lab.workflows.simulate_season import simulate_many_seasons_multiyear
-            from services.initial_ratings_service import get_available_seasons
+            try:
+                from services.initial_ratings_service import get_available_seasons
+            except ImportError:
+                from app.services.initial_ratings_service import get_available_seasons
 
             # Map explicit from_season → max_history_seasons
             max_history = 2  # legacy default

@@ -58,26 +58,47 @@ from app.services.initial_ratings_service import (
     get_available_seasons,
     get_simulatable_seasons,
     get_seed_season,
+    get_initial_ratings,
 )
 
 
 # ---------------------------------------------------------------------------
-# Default model config (mirrors the dashboard defaults)
+# Sport-aware default model config (mirrors the dashboard defaults)
 # ---------------------------------------------------------------------------
-def default_config() -> dict:
+def default_config(sport: str = "NFL") -> dict:
     """
-    Matches the sidebar defaults:
-      - Home advantage ON  (55 Elo points)
-      - Margin of victory ON (scale 1.0)
-      - Elevation Edge OFF
-      - k-factor = 20
+    Sport-specific public defaults chosen for more realistic championship
+    contender rankings on first load:
+
+      NHL  – lower k (more games), smaller home-ice edge
+      NBA  – slightly higher k, standard home-court
+      NFL  – classic k=20 / home=55
+
+    Elevation Edge stays off for the public default.
     """
+    sport = (sport or "NFL").upper()
+    if sport == "NHL":
+        return {
+            "k": 12,
+            "adjustments": {
+                "home_field": {"enabled": True, "value": 35},
+                "margin_of_victory": {"enabled": True, "scale": 1.0},
+            },
+        }
+    if sport == "NBA":
+        return {
+            "k": 22,
+            "adjustments": {
+                "home_field": {"enabled": True, "value": 55},
+                "margin_of_victory": {"enabled": True, "scale": 1.0},
+            },
+        }
+    # NFL (and fallback)
     return {
         "k": 20,
         "adjustments": {
             "home_field": {"enabled": True, "value": 55},
             "margin_of_victory": {"enabled": True, "scale": 1.0},
-            # elevation_edge intentionally omitted (disabled by default)
         },
     }
 
@@ -96,7 +117,7 @@ def generate_one(sport: str, n_sims: int, out_dir: Path, rng_seed: int = 42) -> 
     print(f"  Generating default simulation for {sport}  (n_sims={n_sims})")
     print(f"{'=' * 60}")
 
-    config = default_config()
+    config = default_config(sport)
     schedule_path = _schedule_path(sport)
 
     # Use the most recent available season as target
@@ -104,8 +125,9 @@ def generate_one(sport: str, n_sims: int, out_dir: Path, rng_seed: int = 42) -> 
     season = seasons[-1] if seasons else None
     data_seed = get_seed_season(sport)
 
-    # Match dashboard Simulate from defaults
-    DEFAULT_FROM = {"NHL": "2025", "NFL": "2024", "NBA": "2025"}
+    # Prefer a 2-season warm-up ending just before the target so recent
+    # playoff form carries forward. NBA previously only used 1 season.
+    DEFAULT_FROM = {"NHL": "2025", "NFL": "2024", "NBA": "2024"}
     from_options = []
     try:
         from app.services.initial_ratings_service import get_simulate_from_options
@@ -116,7 +138,8 @@ def generate_one(sport: str, n_sims: int, out_dir: Path, rng_seed: int = 42) -> 
     if preferred_from and preferred_from in from_options:
         from_season = preferred_from
     elif from_options:
-        from_season = from_options[0]
+        # Prefer the earliest option that still gives ~2 seasons when possible
+        from_season = from_options[0] if len(from_options) <= 2 else from_options[-2]
     else:
         from_season = None
 
@@ -124,8 +147,30 @@ def generate_one(sport: str, n_sims: int, out_dir: Path, rng_seed: int = 42) -> 
     print(f"  Simulate from   : {from_season}")
     print(f"  History through : before {season} (seed data from {data_seed})")
     print(f"  RNG seed        : {rng_seed}")
+    print(f"  Config          : k={config['k']}, home={config['adjustments']['home_field']['value']}")
     print(f"  Mode            : warm-up on actual recent seasons → MC target")
+    print(f"  inter_season_reg: 0.35 (milder so recent form survives)")
+
+    # Mild record-based prior from the season before the warm-up window so
+    # the first warm-up season does not start every team at pure 1500.
     initial_ratings = {}
+    if from_season is not None:
+        try:
+            all_seasons = get_available_seasons(sport)
+            if from_season in all_seasons:
+                initial_ratings = get_initial_ratings(
+                    sport,
+                    season=from_season,  # uses previous season internally
+                    rating_source="regular_season",
+                    rating_basis="record",
+                    apply_regression=True,
+                    regression_strength=0.25,
+                )
+                print(f"  Prior ratings   : record prior before {from_season} "
+                      f"({len(initial_ratings)} teams)")
+        except Exception as e:
+            print(f"  Prior ratings   : skipped ({e})")
+            initial_ratings = {}
 
     t0 = time.perf_counter()
     results = run_simulation(
@@ -136,6 +181,7 @@ def generate_one(sport: str, n_sims: int, out_dir: Path, rng_seed: int = 42) -> 
         season=season,
         from_season=from_season,
         seed=int(rng_seed),
+        inter_season_regression=0.35,
     )
     elapsed = time.perf_counter() - t0
     print(f"  Finished in {elapsed:.1f}s")
@@ -145,6 +191,25 @@ def generate_one(sport: str, n_sims: int, out_dir: Path, rng_seed: int = 42) -> 
     playoff = results.get("playoff_probs", {})
     print(f"  Summary rows    : {len(summary) if summary is not None else 0}")
     print(f"  Playoff teams   : {len(playoff)}")
+    if playoff:
+        # Show top 6 by champion probability for quick visual check
+        sample = next(iter(playoff.values()))
+        champ_key = None
+        for k in ("Champion", "Win Super Bowl", "Win Stanley Cup", "Win NBA Title"):
+            if k in sample:
+                champ_key = k
+                break
+        if champ_key is None and sample:
+            champ_key = list(sample.keys())[-1]
+        if champ_key:
+            ranked = sorted(
+                playoff.items(),
+                key=lambda kv: kv[1].get(champ_key, 0),
+                reverse=True,
+            )
+            print(f"  Top 6 by {champ_key}:")
+            for team, probs in ranked[:6]:
+                print(f"    {team:4s}  {probs.get(champ_key, 0):.3f}")
 
     out_path = out_dir / f"{sport}_default.pkl"
     with open(out_path, "wb") as f:

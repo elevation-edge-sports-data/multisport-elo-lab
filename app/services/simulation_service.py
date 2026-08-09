@@ -218,6 +218,8 @@ def run_simulation(
     sport="NFL",
     season=None,
     from_season=None,
+    seed: int = 42,
+    inter_season_regression: float = 0.35,
 ):
     """
     When season is set: warm Elo on actual recent seasons, then MC the target.
@@ -227,6 +229,9 @@ def run_simulation(
                   History runs from from_season through the season before
                   the target. If None, falls back to the previous default
                   of max 2 history seasons.
+    seed : RNG seed for reproducible Monte Carlo draws.
+    inter_season_regression : pull toward mean_elo after each warm-up season
+                  (0.35 default; previously 0.67 which erased recent form).
     """
     tmp_path = None
     try:
@@ -255,10 +260,11 @@ def run_simulation(
                 sport=sport,
                 target_season=str(season),
                 config=config,
+                seed=int(seed),
                 base_initial_ratings=initial_ratings or {},
                 return_elo_evolution=True,
                 hybrid_warmup=True,
-                inter_season_regression=0.67,
+                inter_season_regression=float(inter_season_regression),
                 playoff_k_multiplier=1.75,
                 include_playoffs_in_warmup=True,
                 max_history_seasons=max_history,
@@ -276,6 +282,7 @@ def run_simulation(
                 n_sims=min(n_sims, 300),
                 schedule_path=schedule_path,
                 config=config,
+                seed=int(seed),
                 initial_ratings=warmed or initial_ratings or {},
                 sport=sport,
             )
@@ -285,6 +292,7 @@ def run_simulation(
                 n_sims=n_sims,
                 schedule_path=schedule_path,
                 config=config,
+                seed=int(seed),
                 initial_ratings=initial_ratings,
                 sport=sport,
             )

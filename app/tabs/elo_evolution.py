@@ -38,10 +38,18 @@ except ImportError:
         pass
 
 
+# Fallback focus lists: Western (NHL/NBA) and AFC (NFL)
 DEFAULT_FOCUS = {
-    "NBA": ["DEN", "LAL", "OKC", "NYK", "BOS", "CLE"],
-    "NHL": ["COL", "VGK", "DAL", "MIN", "CAR", "FLA"],
-    "NFL": ["KC", "BUF", "BAL", "PHI", "DET", "SF"],
+    "NBA": ["OKC", "DEN", "MIN", "LAL", "GSW", "LAC"],
+    "NHL": ["COL", "VGK", "DAL", "MIN", "EDM", "WPG"],
+    "NFL": ["BUF", "KC", "BAL", "CIN", "HOU", "LAC"],
+}
+
+# Conference used for default team selection on this tab
+DEFAULT_CONFERENCE = {
+    "NBA": "Western",
+    "NHL": "Western",
+    "NFL": "AFC",
 }
 
 METRIC_LABEL = {
@@ -345,6 +353,19 @@ def _make_trajectory_figure(
 
 
 
+def _conference_team_set(sport: str, conference: str) -> set:
+    """Abbreviations belonging to the given conference."""
+    try:
+        teams = load_teams(sport)
+    except Exception:
+        teams = {}
+    return {
+        abbr
+        for abbr, meta in teams.items()
+        if (meta or {}).get("conference") == conference
+    }
+
+
 def _default_teams_from_playoff_probs(
     sport: str,
     all_teams: List[str],
@@ -353,13 +374,16 @@ def _default_teams_from_playoff_probs(
     n: int = 6,
 ) -> List[str]:
     """
-    Top n teams by probability of reaching the first true playoff round.
+    Top n teams by probability of reaching the first true playoff round,
+    restricted to the sport's focus conference (Western for NHL/NBA, AFC for NFL).
     NHL/NBA: First Round. NFL: Wild Card (or Make Playoffs).
     NBA: ignore Play-In when a First Round column exists.
     """
     playoff = results.get("playoff_probs") or {}
     achievement = results.get("achievement_probs")
     scores = {}
+    conf = DEFAULT_CONFERENCE.get(sport)
+    conf_teams = _conference_team_set(sport, conf) if conf else set()
 
     def _pick_round_value(payload: dict) -> float | None:
         if not isinstance(payload, dict):
@@ -401,7 +425,8 @@ def _default_teams_from_playoff_probs(
     if isinstance(playoff, dict) and playoff:
         for team, payload in playoff.items():
             if team not in all_teams:
-                # try abbr match
+                continue
+            if conf_teams and team not in conf_teams:
                 continue
             val = _pick_round_value(payload)
             if val is not None:
@@ -425,7 +450,7 @@ def _default_teams_from_playoff_probs(
                 if col:
                     for _, row in adf.iterrows():
                         team = str(row[team_col])
-                        if team in all_teams:
+                        if team in all_teams and (not conf_teams or team in conf_teams):
                             try:
                                 scores[team] = float(row[col])
                             except (TypeError, ValueError):
@@ -500,8 +525,8 @@ def render_elo_evolution_tab(sport: str = "NFL"):
         "Select teams",
         options=all_teams,
         default=default_teams,
-        help="Defaults to the top 6 teams by chance of reaching the first playoff round "
-             "(NBA: first round, not play-in). Falls back to a sport focus list if needed.",
+        help="Defaults to the top 6 teams in the focus conference "
+             "(Western for NHL/NBA, AFC for NFL) by first-round / wild-card probability.",
         key=f"reg_season_proj_teams_{sport}_{fp}",
     )
 

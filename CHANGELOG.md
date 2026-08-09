@@ -2,6 +2,31 @@
 
 All notable changes to MultiSport Elo Lab are documented in this file.
 
+## Version 12.2 — Match default sim settings to precomputed defaults; seed; logos in Playoff Outlook
+
+### Added
+- Team logos in the **Playoff Outlook** Team column (logo-only; no abbreviation)
+- Regular Season Projections default team selection scoped to **Western** (NHL/NBA) or **AFC** (NFL)
+- Sport-specific public defaults: NHL k=12 / home-ice 35, NBA k=22 / home-court 55, NFL k=20 / home-field 55
+- Mild record-based prior before warm-up in the default-sim generator
+
+### Changed
+- Match sidebar / default-sim settings to the precomputed defaults
+- Inter-season regression default **0.35**
+- NBA default **Simulate from** set to **2024** (two-season warm-up before target 2026)
+- Precomputed defaults regenerated with the new parameters and seed 42
+- Sidebar k / home-advantage slider defaults follow the sport-specific public config
+- Dashboard caption and module docstring set to **Version 12.2**
+
+### Fixed
+- v12.1 added a Random seed control in the sidebar (and the default-sim generator) and passed `seed=...` into `run_simulation`, but `run_simulation` did not accept a `seed` argument.
+  - Fix: add `seed: int = 42` (and `inter_season_regression`) to `run_simulation`, and pass `seed` through to both `simulate_many_seasons_multiyear` and the playoff-aware `simulate_many_seasons` call.
+
+### Removed
+- **Championship contenders** panel (logo strip above the championship probability chart)
+
+---
+
 ## Version 12.1 — Regular season trajectories, param eval, reproducibility
 
 ### Added

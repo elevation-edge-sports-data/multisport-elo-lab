@@ -15,11 +15,10 @@ except ImportError:
         return {"NFL": NFL_TEAMS, "NHL": NHL_TEAMS, "NBA": NBA_TEAMS}.get(sport, {})
 
 try:
-    from components.logos import render_logo_strip
+    from components.logos import render_logo
 except ImportError:
-    def render_logo_strip(*args, **kwargs):
-        pass  # graceful no-op if logos component not present
-
+    def render_logo(*args, **kwargs):
+        pass
 
 def get_team_color_map(sport):
     try:
@@ -141,21 +140,36 @@ def render_simulation_tab(sport="NFL"):
         elif champ_col in playoff_df.columns:
             playoff_df = playoff_df.sort_values(champ_col, ascending=False)
 
-        # Display as percentages
+        # Percentages for display; Team column is logo-only via st.image
+        # (Streamlit ImageColumn does not reliably serve local logo assets)
         pct_cols = [c for c in playoff_df.columns if c != "team"]
         display_df = playoff_df.copy()
         for c in pct_cols:
             display_df[c] = (display_df[c] * 100).round(1)
 
-        st.dataframe(display_df, use_container_width=True, hide_index=True)
+        # Column weights: logo + one slot per probability column
+        weights = [0.7] + [1.0] * len(pct_cols)
+        header = st.columns(weights)
+        header[0].markdown("**Team**")
+        for i, c in enumerate(pct_cols):
+            header[i + 1].markdown(f"**{c}**")
+        st.markdown(
+            "<hr style='margin:0.2rem 0 0.4rem 0; border:none; border-top:1px solid #333;'>",
+            unsafe_allow_html=True,
+        )
+        for _, row in display_df.iterrows():
+            cols = st.columns(weights)
+            with cols[0]:
+                render_logo(sport, str(row["team"]), width=28, fallback_text=True)
+            for i, c in enumerate(pct_cols):
+                cols[i + 1].markdown(
+                    f"<div style='padding-top:4px;'>{row[c]:.1f}</div>",
+                    unsafe_allow_html=True,
+                )
 
-        # Championship probability bar chart + logo strip of contenders
+        # Championship probability bar chart (top 12)
         if champ_col in playoff_df.columns:
             chart_df = playoff_df.nlargest(12, champ_col)
-            top_contenders = chart_df["team"].tolist()
-            st.caption("Championship contenders")
-            render_logo_strip(sport, top_contenders, width=30, max_show=12)
-
             color_map = get_team_color_map(sport)
             fig = px.bar(
                 chart_df,

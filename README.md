@@ -6,17 +6,24 @@ Supports historical backtesting, Monte Carlo regular-season + full playoff-brack
 
 **Live dashboard**: [https://multisport-elo-lab.streamlit.app/](https://multisport-elo-lab.streamlit.app/)
 
-**Current version: 12.1**
+**Current version: 12.2**
 
 ---
 
-## Highlights (Version 12.1)
+## Highlights (Version 12.2)
+
+- **Match sidebar / default-sim settings to the precomputed defaults** (sport-specific k and home advantage, Simulate from, seed)
+- **Playoff Outlook** Team column shows team logos
+- **Regular Season Projections** defaults to top Western (NHL/NBA) or AFC (NFL) teams by first-round / wild-card probability
+- Sport-specific public defaults, 2-season warm-up, milder inter-season regression, record-based prior
+- `run_simulation` accepts and forwards `seed` for reproducible Monte Carlo runs
+
+### From Version 12.1
 
 - **Regular Season Projections**: observed prior-season path + simulated target path (wins / points / rank)
 - **Historical param eval** on Run: score current parameters on the last completed season (accuracy, log loss, Brier)
 - **Simulation count** option **25** (100 remains default)
 - **Random seed** for reproducible Monte Carlo
-- **Simulate from** defaults: NHL 2025, NFL 2024, NBA 2025
 - Upcoming NFL schedule support (`VisTm` / `HomeTm`)
 
 ### From Version 12.0
@@ -176,6 +183,7 @@ streamlit run app/dashboard.py
 | 11.4    | Team logos in Elo Ratings, Trajectory, and Simulation |
 | 11.5    | Warm-up Elo from recent actual results before target-season MC (replaces prior-only start) |
 | 12.0    | Simulate upcoming season (NFL 2026, NHL 2026–27; NBA coming soon), three-tab dashboard |
+| 12.2    | Match default sim settings to precomputed defaults; seed; logos in Playoff Outlook |
 | 12.1    | Regular season trajectories, historical param eval, random seed, schedule normalize fixes |
 
 See [CHANGELOG.md](CHANGELOG.md) for the complete history.

@@ -1,7 +1,7 @@
 """
 MultiSport Elo Lab – Streamlit dashboard
 
-Version 12.1 — Regular season trajectories, param eval, reproducibility
+Version 12.2 — Match default sim settings to precomputed defaults; seed; logos in Playoff Outlook
 
   - NHL / NFL / NBA with full playoff-bracket simulation
   - Warm-up Elo: actual regular-season + playoff results from user-chosen
@@ -12,6 +12,8 @@ Version 12.1 — Regular season trajectories, param eval, reproducibility
   - Sport-specific home advantage labels (ice / court / field)
   - Log5 baseline + residual diagnostics + corrected baseline ladder
   - Precomputed default simulations loaded instantly on sport change
+  - Sport-specific default parameters and 2-season warm-up aligned with generator
+  - Playoff Outlook table includes team logos; Regular Season defaults to Western / AFC
   - Export Results as quiet text-style control
   - Tabs: Regular Season Projections · Playoff Projections (default) · Model Comparison
 """
@@ -75,7 +77,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("MultiSport Elo Lab")
-st.caption("Simulate upcoming season · NFL / NHL / NBA | Version 12.1")
+st.caption("Simulate upcoming season · NFL / NHL / NBA | Version 12.2")
 
 
 # ---------------------------------------------------------------------------
@@ -176,7 +178,7 @@ if (
         st.session_state["_loaded_sport"] = sport
         st.session_state["is_default_run"] = True
         # Align with how defaults were generated
-        _def_from = {"NHL": "2025", "NFL": "2024", "NBA": "2025"}
+        _def_from = {"NHL": "2025", "NFL": "2024", "NBA": "2024"}
         try:
             _sims = get_simulatable_seasons(sport)
             if _sims:
@@ -214,7 +216,7 @@ st.session_state["season"] = season
 # Simulate from (explicit warm-up start)
 # ------------------------------------------------------------------
 from_options = get_simulate_from_options(sport, target_season=season)
-_DEFAULT_FROM = {"NHL": "2025", "NFL": "2024", "NBA": "2025"}
+_DEFAULT_FROM = {"NHL": "2025", "NFL": "2024", "NBA": "2024"}
 if from_options:
     preferred_from = _DEFAULT_FROM.get(sport)
     if preferred_from in from_options:
@@ -291,18 +293,20 @@ with st.sidebar.expander("Customize Parameters", expanded=False):
 
     st.markdown("---")
     st.markdown("**Engine parameters**")
+    _default_k = {"NHL": 12, "NBA": 22, "NFL": 20}.get(sport, 20)
     k = st.slider(
         "k-factor",
         min_value=5,
         max_value=40,
-        value=20,
+        value=_default_k,
         step=1,
         help="How much ratings move after each game. "
              "Higher k = more reactive (recent results dominate). "
              "Lower k = more stable (history carries more weight).",
     )
+    _default_hfa = {"NHL": 35, "NBA": 55, "NFL": 55}.get(sport, 55)
     hfa_value = st.slider(
-        _home["slider"], min_value=0, max_value=100, value=55, step=5
+        _home["slider"], min_value=0, max_value=100, value=_default_hfa, step=5
     )
     # MOV scale removed – pure binary via the Adjustments checkbox
     elev_value = st.slider(

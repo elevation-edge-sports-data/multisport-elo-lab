@@ -1,7 +1,7 @@
 """
 MultiSport Elo Lab – Streamlit dashboard
 
-Version 12.3 — Simulation progress at 10% steps; playoff path no longer re-sims regular season; cleanup; MoneyPuck-inspired visuals foundation
+Version 13.0 — Playoff odds table, sortable playoff spirals, playoff path bars
 
   - NHL / NFL / NBA with full playoff-bracket simulation
   - Warm-up Elo: actual regular-season + playoff results from user-chosen
@@ -13,11 +13,13 @@ Version 12.3 — Simulation progress at 10% steps; playoff path no longer re-sim
   - Log5 baseline + residual diagnostics + corrected baseline ladder
   - Precomputed default simulations loaded instantly on sport change
   - Sport-specific default parameters and 2-season warm-up aligned with generator
-  - Playoff Outlook table includes team logos; Regular Season defaults to Western / AFC
+  - MoneyPuck-inspired Playoff Odds table (logo + abbr, shaded probabilities, sortable)
+  - Playoff spirals (one per conference; metric dropdown; leader fills radius)
+  - Playoff path bars (Color 1…5 palette)
   - Export Results as quiet text-style control
   - Tabs: Regular Season Projections · Playoff Projections (default) · Model Comparison
-  - Monte Carlo progress bar updates at 0% / 10% / … / 100% with numeric indicator
-  - Playoffs reuse primary Monte Carlo standings/Elo (no second full-season pass)
+  - Numerical Monte Carlo progress bar (0% / 10% / … / 100%)
+  - Faster simulation: playoffs reuse primary Monte Carlo standings/Elo
 """
 
 from __future__ import annotations
@@ -79,7 +81,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("MultiSport Elo Lab")
-st.caption("Simulate upcoming season · NFL / NHL / NBA | Version 12.3")
+st.caption("NHL / NBA / NFL | Version 13.0")
 
 
 # ---------------------------------------------------------------------------

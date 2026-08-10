@@ -1,3 +1,10 @@
+"""
+Playoff Projections tab — MoneyPuck-inspired odds table + playoff spirals,
+plus regular-season summary views.
+"""
+
+from __future__ import annotations
+
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -11,14 +18,25 @@ except ImportError:
         from metadata.nba_teams import NBA_TEAMS
     except ImportError:
         NBA_TEAMS = {}
+
     def load_teams(sport):
         return {"NFL": NFL_TEAMS, "NHL": NHL_TEAMS, "NBA": NBA_TEAMS}.get(sport, {})
 
 try:
-    from components.logos import render_logo
+    from components.moneypuck_viz import (
+        render_playoff_odds_table,
+        render_playoff_spirals,
+        render_playoff_path_bars,
+        PLAYOFF_TABLE_SPEC,
+    )
 except ImportError:
-    def render_logo(*args, **kwargs):
-        pass
+    from app.components.moneypuck_viz import (  # type: ignore
+        render_playoff_odds_table,
+        render_playoff_spirals,
+        render_playoff_path_bars,
+        PLAYOFF_TABLE_SPEC,
+    )
+
 
 def get_team_color_map(sport):
     try:
@@ -31,68 +49,6 @@ def get_team_color_map(sport):
         color_map[abbr] = color
         color_map[data.get("name", abbr)] = color
     return color_map
-
-
-# ---------------------------------------------------------------------------
-# Sport-specific playoff column ordering and friendly labels
-# ---------------------------------------------------------------------------
-PLAYOFF_DISPLAY = {
-    "NFL": {
-        "order": ["team", "Wild Card", "Divisional", "Conference", "Super Bowl", "Champion"],
-        "rename": {
-            "Wild Card": "Reach Wild Card",
-            "Divisional": "Reach Divisional",
-            "Conference": "Reach Conference",
-            "Super Bowl": "Reach Super Bowl",
-            "Champion": "Win Super Bowl",
-        },
-        "sort_col": "Reach Wild Card",
-        "champ_col": "Win Super Bowl",
-        "chart_title": "Super Bowl Win Probability (Top 12)",
-    },
-    "NHL": {
-        "order": [
-            "team",
-            "First Round",
-            "Second Round",
-            "Conference Finals",
-            "Stanley Cup Final",
-            "Champion",
-        ],
-        "rename": {
-            "First Round": "Reach First Round",
-            "Second Round": "Reach Second Round",
-            "Conference Finals": "Reach Conference Finals",
-            "Stanley Cup Final": "Reach Stanley Cup Final",
-            "Champion": "Win Stanley Cup",
-        },
-        "sort_col": "Reach First Round",
-        "champ_col": "Win Stanley Cup",
-        "chart_title": "Stanley Cup Win Probability (Top 12)",
-    },
-    "NBA": {
-        "order": [
-            "team",
-            "Play-In",
-            "First Round",
-            "Conference Semifinals",
-            "Conference Finals",
-            "NBA Finals",
-            "Champion",
-        ],
-        "rename": {
-            "Play-In": "Reach Play-In",
-            "First Round": "Reach First Round",
-            "Conference Semifinals": "Reach Conf. Semifinals",
-            "Conference Finals": "Reach Conference Finals",
-            "NBA Finals": "Reach NBA Finals",
-            "Champion": "Win NBA Title",
-        },
-        "sort_col": "Reach First Round",
-        "champ_col": "Win NBA Title",
-        "chart_title": "NBA Title Win Probability (Top 12)",
-    },
-}
 
 
 def render_simulation_tab(sport="NFL"):
@@ -112,84 +68,47 @@ def render_simulation_tab(sport="NFL"):
         st.warning("No simulation results available yet.")
         return
 
+    sport_u = sport.upper()
+    has_playoff_spec = sport_u in PLAYOFF_TABLE_SPEC
+
     # ------------------------------------------------------------------
-    # Playoff Outlook (NFL / NHL / NBA)
+    # MoneyPuck-style Playoff Odds table
     # ------------------------------------------------------------------
-    display_cfg = PLAYOFF_DISPLAY.get(sport.upper())
-
-    if display_cfg and playoff_probs:
-        st.subheader("Playoff Outlook")
-
-        rows = []
-        for team, probs in playoff_probs.items():
-            row = {"team": team}
-            row.update(probs)
-            rows.append(row)
-        playoff_df = pd.DataFrame(rows)
-
-        # Column order + friendly names
-        col_order = display_cfg["order"]
-        existing = [c for c in col_order if c in playoff_df.columns]
-        playoff_df = playoff_df[existing]
-        playoff_df = playoff_df.rename(columns=display_cfg["rename"])
-
-        champ_col = display_cfg["champ_col"]
-        sort_col = display_cfg.get("sort_col") or champ_col
-        if sort_col in playoff_df.columns:
-            playoff_df = playoff_df.sort_values(sort_col, ascending=False)
-        elif champ_col in playoff_df.columns:
-            playoff_df = playoff_df.sort_values(champ_col, ascending=False)
-
-        # Percentages for display; Team column is logo-only via st.image
-        # (Streamlit ImageColumn does not reliably serve local logo assets)
-        pct_cols = [c for c in playoff_df.columns if c != "team"]
-        display_df = playoff_df.copy()
-        for c in pct_cols:
-            display_df[c] = (display_df[c] * 100).round(1)
-
-        # Column weights: logo + one slot per probability column
-        weights = [0.7] + [1.0] * len(pct_cols)
-        header = st.columns(weights)
-        header[0].markdown("**Team**")
-        for i, c in enumerate(pct_cols):
-            header[i + 1].markdown(f"**{c}**")
-        st.markdown(
-            "<hr style='margin:0.2rem 0 0.4rem 0; border:none; border-top:1px solid #333;'>",
-            unsafe_allow_html=True,
+    if has_playoff_spec and playoff_probs:
+        st.subheader("Playoff Odds")
+        render_playoff_odds_table(
+            sport=sport_u,
+            playoff_probs=playoff_probs,
+            achievement_probs=achievement_probs
+            if isinstance(achievement_probs, pd.DataFrame)
+            else None,
+            summary=summary if isinstance(summary, pd.DataFrame) else None,
         )
-        for _, row in display_df.iterrows():
-            cols = st.columns(weights)
-            with cols[0]:
-                render_logo(sport, str(row["team"]), width=28, fallback_text=True)
-            for i, c in enumerate(pct_cols):
-                cols[i + 1].markdown(
-                    f"<div style='padding-top:4px;'>{row[c]:.1f}</div>",
-                    unsafe_allow_html=True,
-                )
 
-        # Championship probability bar chart (top 12)
-        if champ_col in playoff_df.columns:
-            chart_df = playoff_df.nlargest(12, champ_col)
-            color_map = get_team_color_map(sport)
-            fig = px.bar(
-                chart_df,
-                x="team",
-                y=champ_col,
-                color="team",
-                color_discrete_map=color_map,
-                title=display_cfg["chart_title"],
-                labels={champ_col: "Probability"},
-            )
-            fig.update_layout(xaxis_tickangle=-45, showlegend=False, yaxis_tickformat=".0%")
-            st.plotly_chart(fig, use_container_width=True)
+        # ------------------------------------------------------------------
+        # Playoff spirals (one per conference)
+        # ------------------------------------------------------------------
+        st.subheader("Playoff spirals")
+        render_playoff_spirals(sport_u, playoff_probs)
 
-    elif display_cfg:
+        # ------------------------------------------------------------------
+        # Playoff path bars (Color 1…5 palette)
+        # ------------------------------------------------------------------
+        st.subheader("Playoff path by round")
+        render_playoff_path_bars(sport_u, playoff_probs, top_n=12)
+
+    elif has_playoff_spec:
         st.caption("Playoff probability data not available for this run.")
 
     # ------------------------------------------------------------------
-    # Regular Season Achievement Probabilities
+    # Regular Season Achievement Probabilities (only if no playoff table)
     # ------------------------------------------------------------------
-    if achievement_probs is not None and not achievement_probs.empty:
+    if (
+        achievement_probs is not None
+        and isinstance(achievement_probs, pd.DataFrame)
+        and not achievement_probs.empty
+        and not (has_playoff_spec and playoff_probs)
+    ):
         st.subheader("Regular Season Achievement Probabilities")
         rename_map = {
             "make_playoffs": "Make Playoffs",
@@ -202,13 +121,11 @@ def render_simulation_tab(sport="NFL"):
         if "Make Playoffs" in display_df.columns:
             display_df = display_df.sort_values("Make Playoffs", ascending=False)
         st.dataframe(display_df, use_container_width=True, hide_index=True)
-    else:
-        st.caption("Achievement probability data not available for this run.")
 
     # ------------------------------------------------------------------
     # Team Wins / Points Summary
     # ------------------------------------------------------------------
-    if sport == "NHL":
+    if sport_u == "NHL":
         metric_col = "mean_points" if "mean_points" in summary.columns else "median_wins"
         metric_label = "Points"
     else:
@@ -226,7 +143,7 @@ def render_simulation_tab(sport="NFL"):
     # Distribution box plot
     # ------------------------------------------------------------------
     if distribution is not None and not distribution.empty and "team" in distribution.columns:
-        plot_col = "points" if sport == "NHL" and "points" in distribution.columns else "wins"
+        plot_col = "points" if sport_u == "NHL" and "points" in distribution.columns else "wins"
         if plot_col in distribution.columns:
             color_map = get_team_color_map(sport)
             fig = px.box(
@@ -239,19 +156,3 @@ def render_simulation_tab(sport="NFL"):
             )
             fig.update_layout(xaxis_tickangle=-45, showlegend=False)
             st.plotly_chart(fig, use_container_width=True)
-
-    # ------------------------------------------------------------------
-    # Quick stats
-    # ------------------------------------------------------------------
-    if not summary.empty and metric_col in summary.columns:
-        st.subheader("Quick Stats")
-        col1, col2 = st.columns(2)
-        with col1:
-            top_idx = summary[metric_col].idxmax()
-            st.metric(
-                f"Highest {metric_label}",
-                summary.loc[top_idx, "team"],
-                f"{summary.loc[top_idx, metric_col]:.1f}",
-            )
-        with col2:
-            st.metric(f"Average {metric_label}", f"{summary[metric_col].mean():.1f}")

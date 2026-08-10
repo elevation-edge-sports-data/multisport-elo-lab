@@ -2,6 +2,27 @@
 
 All notable changes to MultiSport Elo Lab are documented in this file.
 
+## Version 13.0 — Playoff odds table, sortable playoff spirals, playoff path bars
+
+### Added
+- **Playoff Odds table** (Playoff Projections tab), styled after MoneyPuck’s predictions table:
+  - Team column shows logo + abbreviation
+  - Round probabilities with blue intensity shading alongside the numeric %
+  - Projected wins / points and regular-season achievement columns when available
+  - **Sortable** via Sort table by / Ascending controls on the main table
+- **Playoff spirals** (one per conference: Eastern/Western or AFC/NFC):
+  - **Radial metric** dropdown selects which round probability sets bar length
+  - Conference leader on the selected metric fills the full radius
+  - Wedge color = team primary; logos on wedges; hover shows the full playoff path
+- **Playoff path bars** with fixed Color 1…5 palette (championship → make playoffs)
+- Attribution captions for the odds table linking to [MoneyPuck](https://moneypuck.com/predictions.htm); numbers from this project’s Elo + Monte Carlo engine
+
+### Changed
+- Playoff Projections tab leads with the odds table, dual-conference spirals, and path bars
+- Removed the single-team Quick Stats block from the Playoff Projections tab
+
+---
+
 ## Version 12.3 — Numerical simulation progress bar; faster simulation; cleanup
 
 ### Added

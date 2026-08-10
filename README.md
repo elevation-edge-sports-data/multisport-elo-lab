@@ -6,11 +6,18 @@ Supports historical backtesting, Monte Carlo regular-season + full playoff-brack
 
 **Live dashboard**: [https://multisport-elo-lab.streamlit.app/](https://multisport-elo-lab.streamlit.app/)
 
-**Current version: 12.3**
+**Current version: 13.0**
 
 ---
 
-## Highlights (Version 12.3)
+## Highlights (Version 13.0)
+
+- **Playoff Odds table** (MoneyPuck-inspired): logo + abbreviation, blue probability shading; sortable main table
+- **Playoff spirals**: one per conference; metric dropdown; leader fills full radius; team colors + logos; full path on hover
+- **Playoff path bars** with Color 1…5 round palette
+
+
+### From Version 12.3
 
 - **Numerical simulation progress bar**: updates at 10% steps (0% … 100%) with an explicit numeric indicator while simulations run
 - **Faster simulation**: playoffs reuse the primary Monte Carlo standings/Elo (one pass instead of two; redundant re-sim removed)

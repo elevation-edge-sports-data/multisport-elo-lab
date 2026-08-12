@@ -121,38 +121,3 @@ def render_simulation_tab(sport="NFL"):
         if "Make Playoffs" in display_df.columns:
             display_df = display_df.sort_values("Make Playoffs", ascending=False)
         st.dataframe(display_df, use_container_width=True, hide_index=True)
-
-    # ------------------------------------------------------------------
-    # Team Wins / Points Summary
-    # ------------------------------------------------------------------
-    if sport_u == "NHL":
-        metric_col = "mean_points" if "mean_points" in summary.columns else "median_wins"
-        metric_label = "Points"
-    else:
-        metric_col = "median_wins" if "median_wins" in summary.columns else "mean_wins"
-        metric_label = "Wins"
-
-    st.subheader(f"Team {metric_label} Summary")
-    if not summary.empty:
-        display_df = summary.copy()
-        if metric_col in display_df.columns:
-            display_df = display_df.sort_values(metric_col, ascending=False)
-        st.dataframe(display_df, use_container_width=True, hide_index=True)
-
-    # ------------------------------------------------------------------
-    # Distribution box plot
-    # ------------------------------------------------------------------
-    if distribution is not None and not distribution.empty and "team" in distribution.columns:
-        plot_col = "points" if sport_u == "NHL" and "points" in distribution.columns else "wins"
-        if plot_col in distribution.columns:
-            color_map = get_team_color_map(sport)
-            fig = px.box(
-                distribution,
-                x="team",
-                y=plot_col,
-                color="team",
-                color_discrete_map=color_map,
-                title=f"Distribution of {metric_label} Across Simulations",
-            )
-            fig.update_layout(xaxis_tickangle=-45, showlegend=False)
-            st.plotly_chart(fig, use_container_width=True)

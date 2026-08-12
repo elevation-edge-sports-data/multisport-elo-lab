@@ -125,23 +125,15 @@ def generate_one(sport: str, n_sims: int, out_dir: Path, rng_seed: int = 42) -> 
     season = seasons[-1] if seasons else None
     data_seed = get_seed_season(sport)
 
-    # Prefer a 2-season warm-up ending just before the target so recent
-    # playoff form carries forward. NBA previously only used 1 season.
-    DEFAULT_FROM = {"NHL": "2025", "NFL": "2024", "NBA": "2024"}
+    # Default warm-up: previous season only (most recent completed year).
+    # This keeps ratings anchored to the latest form and matches the dashboard default.
     from_options = []
     try:
         from app.services.initial_ratings_service import get_simulate_from_options
         from_options = get_simulate_from_options(sport, target_season=season)
     except Exception:
         from_options = []
-    preferred_from = DEFAULT_FROM.get(sport)
-    if preferred_from and preferred_from in from_options:
-        from_season = preferred_from
-    elif from_options:
-        # Prefer the earliest option that still gives ~2 seasons when possible
-        from_season = from_options[0] if len(from_options) <= 2 else from_options[-2]
-    else:
-        from_season = None
+    from_season = from_options[-1] if from_options else None
 
     print(f"  Target season   : {season}")
     print(f"  Simulate from   : {from_season}")

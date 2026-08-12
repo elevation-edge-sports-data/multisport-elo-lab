@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 import pandas as pd
+import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
@@ -494,6 +495,32 @@ def render_elo_evolution_tab(sport: str = "NFL"):
     evolution = results.get("elo_evolution", pd.DataFrame())
     if evolution is None:
         evolution = pd.DataFrame()
+    distribution = results.get("distribution", pd.DataFrame())
+    if distribution is None:
+        distribution = pd.DataFrame()
+
+    # ------------------------------------------------------------------
+    # Distribution of wins / points across simulations (moved from Playoff tab)
+    # ------------------------------------------------------------------
+    if not distribution.empty and "team" in distribution.columns:
+        plot_col = "points" if sport.upper() == "NHL" and "points" in distribution.columns else "wins"
+        if plot_col in distribution.columns:
+            st.subheader(f"Distribution of {metric_label} Across Simulations")
+            fig_dist = px.box(
+                distribution,
+                x="team",
+                y=plot_col,
+                color="team",
+                color_discrete_map=color_map,
+                title=f"Distribution of {metric_label} Across Simulations",
+            )
+            fig_dist.update_layout(
+                xaxis_tickangle=-45,
+                showlegend=False,
+                height=420,
+                margin=dict(l=10, r=10, t=48, b=40),
+            )
+            st.plotly_chart(fig_dist, use_container_width=True)
 
     sim_metric_mean = f"mean_{metric_key}"
     sim_metric_lo = f"p05_{metric_key}"

@@ -453,7 +453,12 @@ def _build_playoff_spiral(
     Each team is a wedge; radius encodes the selected round probability
     (scaled so the conference leader reaches 100% of the chart radius).
     Wedge color = team primary. Hover shows the full playoff path.
+
+    Uses numeric theta so logo angles match bar centers and tick labels
+    exactly. Logos sit a fixed polar gap beyond each bar tip.
     """
+    import math
+
     sport_u = sport.upper()
 
     ranked = sorted(
@@ -485,34 +490,46 @@ def _build_playoff_spiral(
         r_max = 1.0
     r_plot = [r / r_max * 100.0 for r in radii]  # top team → 100 on the spiral axis
 
+    n = len(labels)
+    sector = 360.0 / n
+    # Numeric sector centers — shared by bars, tick labels, and logos
+    thetas = [(i + 0.5) * sector for i in range(n)]
+    widths = [sector * 0.92 for _ in range(n)]  # slight gap between wedges
+
     fig = go.Figure(
         go.Barpolar(
             r=r_plot,
-            theta=labels,
+            theta=thetas,
+            width=widths,
             marker_color=colors,
             marker_line_color="rgba(15,23,42,0.35)",
             marker_line_width=1,
             opacity=0.92,
             hovertext=hover,
             hoverinfo="text",
-            customdata=radii,  # actual % for any future use
+            customdata=radii,
         )
     )
 
-    import math
+    # Polar domain [0.05, 0.95] → outer radius in paper coords = 0.45.
+    # Figure is fixed-square (460×460) so paper↔polar mapping is stable;
+    # logos can sit just beyond each wedge tip.
+    POLAR_DOMAIN = [0.05, 0.95]
+    cx = cy = 0.5
+    polar_r_paper = (POLAR_DOMAIN[1] - POLAR_DOMAIN[0]) / 2.0  # 0.45
+    LOGO_GAP = 0.065  # polar fraction beyond each bar tip
 
-    n = len(labels)
     images = []
     annotations = []
-    cx, cy, scale = 0.5, 0.50, 0.34
     for i, (abbr, r_val) in enumerate(zip(labels, r_plot)):
-        theta_deg = i * (360.0 / n)
-        r_norm = 0.85 * (r_val / 100.0)
+        theta_deg = thetas[i]  # same angle as bar center + tick label
+        bar_frac = r_val / 100.0
+        # Just beyond this team's own outer arc
+        logo_frac = min(0.98, bar_frac + LOGO_GAP)
         rad = math.radians(theta_deg)
-        x = r_norm * math.sin(rad)
-        y = r_norm * math.cos(rad)
-        px = cx + scale * x
-        py = cy + scale * y
+        # 0° at top (rotation=90), increasing clockwise
+        px = cx + polar_r_paper * logo_frac * math.sin(rad)
+        py = cy + polar_r_paper * logo_frac * math.cos(rad)
         uri = _logo_data_uri(sport_u, abbr)
         if uri:
             images.append(
@@ -522,8 +539,8 @@ def _build_playoff_spiral(
                     yref="paper",
                     x=px,
                     y=py,
-                    sizex=0.042,
-                    sizey=0.042,
+                    sizex=0.032,
+                    sizey=0.032,
                     xanchor="center",
                     yanchor="middle",
                     layer="above",
@@ -550,29 +567,40 @@ def _build_playoff_spiral(
             font=dict(size=14),
         ),
         polar=dict(
-            domain=dict(x=[0.06, 0.94], y=[0.06, 0.94]),
+            domain=dict(x=POLAR_DOMAIN, y=POLAR_DOMAIN),
             radialaxis=dict(
                 range=[0, 100],
-                ticksuffix="%",
-                angle=90,
                 tickvals=[0, 25, 50, 75, 100],
-                # Tick labels show relative scale (leader = 100%); hover has true %
-                ticktext=["0", "", "", "", "max"],
-                gridcolor="rgba(148,163,184,0.35)",
+                ticktext=["0", "", "", "", ""],
+                ticks="",
+                showline=False,
+                showticklabels=True,
+                gridcolor="rgba(148,163,184,0.30)",
+                layer="below traces",
             ),
             angularaxis=dict(
                 direction="clockwise",
                 rotation=90,
-                gridcolor="rgba(148,163,184,0.25)",
+                tickmode="array",
+                tickvals=thetas,
+                ticktext=labels,
+                showline=False,
+                gridcolor="rgba(148,163,184,0.20)",
+                layer="below traces",
             ),
-            bgcolor="rgba(248,250,252,1)",
+            bgcolor="rgba(0,0,0,0)",
         ),
         showlegend=False,
-        margin=dict(l=20, r=20, t=48, b=20),
-        height=480,
+        # Fixed square size keeps paper-coordinate logos locked to the polar circle
+        autosize=False,
+        width=460,
+        height=460,
+        margin=dict(l=24, r=24, t=48, b=24),
         paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
         images=images,
         annotations=annotations,
+        dragmode=False,
     )
     return fig
 
@@ -586,6 +614,22 @@ def render_playoff_spirals(
     Dropdown selects which round probability sets the radius (leader fills the circle).
     Hover always shows the full playoff path for that team.
     """
+    # Hide Plotly polar drag handles (angular/radial drag layers). Even with
+    # dragmode=False these can render as a small gray ellipse/arc near center.
+    st.markdown(
+        """
+        <style>
+        .angulardrag, .radialdrag, .radialdrag-inner, .maindrag,
+        .polarsublayer .draglayer, .draglayer .drag {
+            display: none !important;
+            pointer-events: none !important;
+            opacity: 0 !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
     sport_u = sport.upper()
     spec = PLAYOFF_TABLE_SPEC.get(sport_u)
     if not spec or not playoff_probs:
@@ -596,15 +640,16 @@ def render_playoff_spirals(
     # Dropdown options: label → engine key
     options = [(spec["round_labels"][k], k) for k in spec["round_keys"]]
     label_list = [lab for lab, _ in options]
-    # Default to championship (last key is usually Champion)
-    default_lab = spec["champ_label"]
+    # Default to "Make Playoffs" (sort_default) rather than championship
+    default_lab = spec.get("sort_default", "Make Playoffs")
     if default_lab not in label_list:
-        default_lab = label_list[-1]
+        # Prefer the outermost / earliest round label when available
+        default_lab = label_list[0] if label_list else (spec.get("champ_label") or "")
 
     radius_label = st.selectbox(
         "Radial metric (sets bar length)",
         options=label_list,
-        index=label_list.index(default_lab),
+        index=label_list.index(default_lab) if default_lab in label_list else 0,
         key=f"spiral_metric_{sport_u}",
         help="Bars are scaled so the conference leader on this metric fills the full radius. "
         "Hover any wedge for that team’s complete playoff path.",
@@ -626,7 +671,18 @@ def render_playoff_spirals(
                 radius_key=radius_key,
                 radius_label=radius_label,
             )
-            st.plotly_chart(fig, use_container_width=True)
+            # use_container_width=False keeps the fixed square size so the
+            # paper-coordinate logo ring stays circular and aligned.
+            st.plotly_chart(
+                fig,
+                use_container_width=False,
+                config={
+                    "displayModeBar": False,
+                    "scrollZoom": False,
+                    "doubleClick": False,
+                    "responsive": False,
+                },
+            )
 
     st.caption(
         f"Playoff spirals ({' · '.join(conferences)}): "

@@ -1,21 +1,28 @@
 """
 MultiSport Elo Lab – Streamlit dashboard
 
-Version 13.0 — Playoff odds table, sortable playoff spirals, playoff path bars
+Version 13.2 — Add 2027 NBA schedule
 
   - NHL / NFL / NBA with full playoff-bracket simulation
+  - NBA 2026–27 regular-season schedule (upcoming season; blank scores)
   - Warm-up Elo: actual regular-season + playoff results from user-chosen
     "Simulate from" season through the season before target, then Monte Carlo
     only the target season
+  - Default "Simulate from" is the previous season for all sports (latest form)
+  - Sidebar shows the full warm-up window (e.g. 2024–2026), not only the start year
   - Simulatable seasons exclude the seed year (history only)
   - Continuous Elevation Edge
   - Sport-specific home advantage labels (ice / court / field)
   - Log5 baseline + residual diagnostics + corrected baseline ladder
   - Precomputed default simulations loaded instantly on sport change
-  - Sport-specific default parameters and 2-season warm-up aligned with generator
+  - Sport-specific default parameters and warm-up aligned with generator
   - MoneyPuck-inspired Playoff Odds table (logo + abbr, shaded probabilities, sortable)
   - Playoff spirals (one per conference; metric dropdown; leader fills radius)
+      · Default radial metric = Make Playoffs
+      · Fixed-square figures; logos aligned to abbreviation rays, just beyond each wedge
+      · No spin; polar drag layers hidden; “max” tick label removed
   - Playoff path bars (Color 1…5 palette)
+  - Distribution of wins/points box plot on Regular Season Projections tab
   - Export Results as quiet text-style control
   - Tabs: Regular Season Projections · Playoff Projections (default) · Model Comparison
   - Numerical Monte Carlo progress bar (0% / 10% / … / 100%)
@@ -81,7 +88,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("MultiSport Elo Lab")
-st.caption("NHL / NBA / NFL | Version 13.0")
+st.caption("NHL / NBA / NFL | Version 13.2")
 
 
 # ---------------------------------------------------------------------------
@@ -181,13 +188,14 @@ if (
         st.session_state["simulation_results"] = defaults
         st.session_state["_loaded_sport"] = sport
         st.session_state["is_default_run"] = True
-        # Align with how defaults were generated
-        _def_from = {"NHL": "2025", "NFL": "2024", "NBA": "2024"}
+        # Align with defaults: target = latest season; warm-up from previous season
         try:
             _sims = get_simulatable_seasons(sport)
             if _sims:
                 st.session_state["season"] = _sims[-1]
-            st.session_state["simulate_from"] = _def_from.get(sport)
+                _from_opts = get_simulate_from_options(sport, target_season=_sims[-1])
+                # Previous season = last option before the target
+                st.session_state["simulate_from"] = _from_opts[-1] if _from_opts else None
             st.session_state["_results_fingerprint"] = (
                 f"{sport}|{st.session_state.get('season')}|{st.session_state.get('simulate_from')}|default"
             )
@@ -209,8 +217,9 @@ season = st.sidebar.selectbox(
     season_options,
     index=len(season_options) - 1 if season_options else 0,
     help=(
-        f"Target season for Monte Carlo. Elo is warmed from the "
-        f"'Simulate from' season up to the prior year"
+        "Target season for Monte Carlo simulation. Ratings are first warmed "
+        "on actual results from the 'Simulate from' season through the season "
+        f"before this target"
         f"{f' (seed year {seed_year} is history-only)' if seed_year else ''}."
     ),
 )
@@ -220,20 +229,20 @@ st.session_state["season"] = season
 # Simulate from (explicit warm-up start)
 # ------------------------------------------------------------------
 from_options = get_simulate_from_options(sport, target_season=season)
-_DEFAULT_FROM = {"NHL": "2025", "NFL": "2024", "NBA": "2024"}
 if from_options:
-    preferred_from = _DEFAULT_FROM.get(sport)
-    if preferred_from in from_options:
-        default_from_idx = from_options.index(preferred_from)
-    else:
-        default_from_idx = 0
+    # Default = previous season (most recent completed year before the target)
+    default_from_idx = len(from_options) - 1
     simulate_from = st.sidebar.selectbox(
         "Simulate from",
         from_options,
         index=default_from_idx,
         help=(
-            "First season included in the Elo warm-up. "
-            "History runs from this season through the year before the target. "
+            "Start of the Elo warm-up window. Actual results from this season "
+            "through the season before the target are used to build ratings; "
+            "only the target season is then Monte Carlo simulated. "
+            "Default is the previous season (most recent completed year). "
+            "Choose an earlier year to include a longer history window "
+            "(e.g. target 2027 + from 2024 uses 2024–2026). "
             "The earliest season in the data is seed-only and is not offered here."
         ),
         key=f"simulate_from_{sport}",
@@ -241,6 +250,27 @@ if from_options:
 else:
     simulate_from = None
 st.session_state["simulate_from"] = simulate_from
+
+# Clarify the full warm-up window (from … through year before target)
+if simulate_from and season:
+    try:
+        _all = get_available_seasons(sport)
+        _from_i = _all.index(str(simulate_from))
+        _tgt_i = _all.index(str(season))
+        _window = _all[_from_i:_tgt_i]  # exclusive of target
+        if len(_window) == 1:
+            _window_label = _window[0]
+        elif len(_window) >= 2:
+            _window_label = f"{_window[0]}–{_window[-1]}"
+        else:
+            _window_label = None
+        if _window_label:
+            st.sidebar.caption(
+                f"Warm-up window: **{_window_label}** "
+                f"(actual results) → simulate **{season}**"
+            )
+    except Exception:
+        pass
 
 st.sidebar.divider()
 st.sidebar.subheader("Parameters")

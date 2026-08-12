@@ -2,6 +2,39 @@
 
 All notable changes to MultiSport Elo Lab are documented in this file.
 
+## Version 13.2 — Add 2027 NBA schedule
+
+### Added
+- **2027 NBA regular-season schedule** under `data/nba/` (1,200 fixed games; scores blank until played). Source: official NBA by-date PDF extraction.
+- **Raw vs processed NBA data layout**: originals in `data/nba/raw/`; slim pipeline files in `data/nba/`.
+- **Helpers** for future schedule releases:
+  - `data/extract_nba_schedule_from_pdf.py` — parse the official by-date PDF into a raw CSV
+  - `data/process_nba_schedules.py` — slim raw files to the columns used by `normalize_schedule`
+- Sidebar **warm-up window caption** that shows the full history range (e.g. `2024–2026 → simulate 2027`), so “Simulate from” is not mistaken for a single-season basis.
+
+### Changed
+- **Default “Simulate from”** is the **previous season** for all three sports (most recent completed year before the target). Hard-coded year maps removed; the choice tracks available data automatically. Precomputed default generation uses the same rule.
+- Help text on **Season** and **Simulate from** clarifies that warm-up runs from the chosen start year **through the season before the target** (inclusive), then only the target is Monte Carlo simulated.
+
+---
+
+## Version 13.1 — Spiral logo alignment, default radial metric, tab cleanup
+
+### Fixed
+- **Playoff spirals — logo placement**
+  - Angular: numeric sector centers shared by bars, abbreviation ticks, and logos so logos sit on the same ray as each team abbreviation
+  - Radial: each logo sits a fixed polar gap just beyond that team’s own outer arc
+  - Figures are fixed 460×460 squares (`use_container_width=False`) so paper-coordinate logos stay locked to the polar circle (no more elliptical logo ring on resize)
+- **Playoff spirals — no spin**: `dragmode=False` plus restricted Plotly config; polar angular/radial drag-layer DOM nodes hidden via CSS (removes residual gray ellipse/arc near center)
+- **Playoff spirals — “max” tick label** removed from the radial axis
+
+### Changed
+- **Default radial metric** for playoff spirals is **Make Playoffs** (was championship / Win Cup / Win Title)
+- **Distribution of wins/points** box plot moved from the bottom of Playoff Projections to the **top of Regular Season Projections**
+- Playoff Projections no longer shows a Team Wins/Points summary table or horizontal bar chart (distribution lives on the Regular Season tab)
+
+---
+
 ## Version 13.0 — Playoff odds table, sortable playoff spirals, playoff path bars
 
 ### Added
@@ -60,7 +93,6 @@ All notable changes to MultiSport Elo Lab are documented in this file.
 - NBA default **Simulate from** set to **2024** (two-season warm-up before target 2026)
 - Precomputed defaults regenerated with the new parameters and seed 42
 - Sidebar k / home-advantage slider defaults follow the sport-specific public config
-- Dashboard caption and module docstring set to **Version 12.2**
 
 ### Fixed
 - v12.1 added a Random seed control in the sidebar (and the default-sim generator) and passed `seed=...` into `run_simulation`, but `run_simulation` did not accept a `seed` argument.
@@ -129,7 +161,6 @@ All notable changes to MultiSport Elo Lab are documented in this file.
 - Regression strength range expanded to **0.0–1.0**
 - Initial Elo controls removed from the UI (rating source fixed to playoffs; rating basis prefers Elo with record fallback)
 - "Optimize parameters" renamed **Grid Search**; expander renamed **Customize Parameters**
-- Dashboard caption and version string updated to Version 12.0 — Simulate upcoming season
 
 ### Improved
 - **Model configuration panel** hierarchy: Grid Search master checkbox with indented parameter targets only when enabled

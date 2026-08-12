@@ -6,16 +6,27 @@ Supports historical backtesting, Monte Carlo regular-season + full playoff-brack
 
 **Live dashboard**: [https://multisport-elo-lab.streamlit.app/](https://multisport-elo-lab.streamlit.app/)
 
-**Current version: 13.0**
+**Current version: 13.2**
 
 ---
 
-## Highlights (Version 13.0)
+## Highlights (Version 13.2)
+
+- **Add 2027 NBA schedule**: upcoming regular-season slate (schedule-only; scores blank until games are played)
+- Raw vs processed layout under `data/nba/` with extract/process helpers for future releases
+- Sidebar shows the full Elo history window (e.g. 2024–2026 → simulate 2027), not only the start year
+
+### From Version 13.1
+
+- **Playoff spiral polish**: logos aligned to abbreviation rays and placed just beyond each wedge tip; fixed-square figures (no elliptical logo drift on resize); no spin; default radial metric = **Make Playoffs**
+- **Regular Season Projections**: distribution of wins/points box plot at the top of the tab
+- Playoff Projections focuses on odds table, spirals, and path bars (summary table removed)
+
+### From Version 13.0
 
 - **Playoff Odds table** (MoneyPuck-inspired): logo + abbreviation, blue probability shading; sortable main table
 - **Playoff spirals**: one per conference; metric dropdown; leader fills full radius; team colors + logos; full path on hover
 - **Playoff path bars** with Color 1…5 round palette
-
 
 ### From Version 12.3
 
@@ -41,10 +52,9 @@ Supports historical backtesting, Monte Carlo regular-season + full playoff-brack
 
 ### From Version 12.0
 
-- **Simulate upcoming season** for **NFL 2026** and **NHL 2026–27**
+- **Simulate upcoming season** for **NFL 2026**, **NHL 2026–27**, and **NBA 2026–27**
   - Full regular-season slate + playoff bracket Monte Carlo for seasons not yet played
-  - **NBA — coming soon** (after official schedule is released)
-- **Simulate from** control: choose the start of the history window used before the target season
+- **Simulate from** control: choose the start of the history window used before the target season (warm-up runs through the year before the target)
 - **Three-tab dashboard**: Playoff Projections (default landing), Regular Season Projections, Model Comparison
 - **Model configuration panel** refinements: Grid Search hierarchy, pure binary Margin of Victory, regression to mean on by default, clearer parameter tooltips
 - **Expanded baselines** in Model Comparison: Always Home, Constant Home Rate, Coin Flip (p=0.5), plus Log5
@@ -61,10 +71,10 @@ Supports historical backtesting, Monte Carlo regular-season + full playoff-brack
 ## Dashboard Tabs
 
 1. **Playoff Projections** (default landing)  
-   Monte Carlo regular-season + playoff simulations with expected wins/points, distributions, achievement probabilities, and full playoff outlook (reach each round / win championship).
+   MoneyPuck-inspired odds table, dual-conference playoff spirals (default metric: Make Playoffs), and path bars. Full playoff outlook (reach each round / win championship).
 
 2. **Regular Season Projections**  
-   Historical and simulated rating trajectories with uncertainty bands (standings / win-total trajectory redesign planned).
+   Distribution of wins/points across simulations, plus observed prior-season and simulated target-season trajectories (wins / points / standings rank) with uncertainty bands.
 
 3. **Model Comparison**  
    Accuracy, Log Loss, Brier Score, calibration plots, residual diagnostics, expanded baselines (Always Home, Constant Home Rate, Coin Flip), Log5, and grid-search landscape.
@@ -195,7 +205,8 @@ streamlit run app/dashboard.py
 | 11.3    | One-click full results export (multi-sheet Excel) |
 | 11.4    | Team logos in Elo Ratings, Trajectory, and Simulation |
 | 11.5    | Warm-up Elo from recent actual results before target-season MC (replaces prior-only start) |
-| 12.0    | Simulate upcoming season (NFL 2026, NHL 2026–27; NBA coming soon), three-tab dashboard |
+| 12.0    | Simulate upcoming season (NFL 2026, NHL 2026–27), three-tab dashboard |
+| 13.2    | Add 2027 NBA schedule |
 | 12.2    | Match default sim settings to precomputed defaults; seed; logos in Playoff Outlook |
 | 12.1    | Regular season trajectories, historical param eval, random seed, schedule normalize fixes |
 
@@ -205,7 +216,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the complete history.
 
 ## Notes
 
-- **Simulate upcoming season**: NFL 2026 and NHL 2026–27 schedules are included. **NBA — coming soon** (after official schedule is released).
+- **Simulate upcoming season**: NFL 2026, NHL 2026–27, and NBA 2026–27 schedules are included. Upcoming seasons use blank scores; Monte Carlo fills outcomes from warmed Elo.
 - This project is under active development.
 - Elevation data uses real stadium/arena elevations.
 - Precomputed default simulations live in `data/precomputed/` (gitignored; regenerate with the command above).

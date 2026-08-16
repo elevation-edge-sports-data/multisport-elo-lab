@@ -110,14 +110,20 @@ def render_simulation_tab(sport="NFL"):
         and not (has_playoff_spec and playoff_probs)
     ):
         st.subheader("Regular Season Achievement Probabilities")
-        rename_map = {
-            "make_playoffs": "Make Playoffs",
-            "home_ice": "Home Ice (Top 2 in Div)",
-            "first_in_division": "1st in Division",
-            "first_in_conference": "1st in Conference",
-            "first_in_league": "1st in League",
-        }
-        display_df = achievement_probs.rename(columns=rename_map)
+        sport_u = str(sport).upper() if sport else ""
+        if sport_u == "NHL":
+            rename_map = {
+                "make_playoffs": "Make Playoffs",
+                "home_ice": "Home Ice (Top 2 Div)",
+                "first_in_division": "1st in Division",
+                "first_in_conference": "1st in Conference",
+                "first_in_league": "1st in League",
+            }
+        else:
+            # NBA / NFL: hide NHL-oriented RS achievement columns
+            rename_map = {"make_playoffs": "Make Playoffs"}
+        keep_cols = ["team"] + [c for c in rename_map if c in achievement_probs.columns]
+        display_df = achievement_probs[keep_cols].rename(columns=rename_map)
         if "Make Playoffs" in display_df.columns:
             display_df = display_df.sort_values("Make Playoffs", ascending=False)
         st.dataframe(display_df, use_container_width=True, hide_index=True)

@@ -240,7 +240,14 @@ def build_playoff_odds_frame(
     if df.empty:
         return df
 
-    if achievement_probs is not None and not achievement_probs.empty:
+    # Achievement columns are NHL-oriented (division / home ice / etc.).
+    # NBA & NFL already have "Make Playoffs" from the bracket path — do not
+    # merge a second Make Playoffs (RS) column for those sports.
+    if (
+        sport_u == "NHL"
+        and achievement_probs is not None
+        and not achievement_probs.empty
+    ):
         ach = achievement_probs.copy()
         if "team" in ach.columns:
             ach["team"] = ach["team"].map(lambda t: resolve_team_abbr(sport_u, t) or t)
@@ -249,7 +256,7 @@ def build_playoff_odds_frame(
                 "first_in_division": "1st in Division",
                 "first_in_conference": "1st in Conference",
                 "first_in_league": "1st in League",
-                "home_ice": "Home Ice / Court",
+                "home_ice": "Home Ice (Top 2 Div)",
             }
             keep = ["team"] + [c for c in rename if c in ach.columns]
             ach = ach[keep].rename(columns=rename)
@@ -316,7 +323,7 @@ def render_playoff_odds_table(
                 "1st in Division",
                 "1st in Conference",
                 "1st in League",
-                "Home Ice / Court",
+                "Home Ice (Top 2 Div)",
                 "Make Playoffs (RS)",
             )
             if c in df.columns

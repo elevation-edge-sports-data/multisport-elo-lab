@@ -23,6 +23,39 @@ try:
 except ImportError:
     NHL_TEAMS = {}
 
+try:
+    from metadata.nba_teams import NBA_TEAMS
+except ImportError:
+    NBA_TEAMS = {}
+
+try:
+    from metadata.nfl_teams import NFL_TEAMS
+except ImportError:
+    NFL_TEAMS = {}
+
+
+def _team_meta_lookup(teams: dict) -> dict:
+    """Map lowercase abbr and full name → metadata dict."""
+    lookup = {}
+    for abbr, data in (teams or {}).items():
+        lookup[str(abbr).lower().strip()] = data
+        name = data.get("name")
+        if name:
+            lookup[str(name).lower().strip()] = data
+    return lookup
+
+
+def _attach_conference_division(sim_data: pd.DataFrame, teams: dict) -> pd.DataFrame:
+    lookup = _team_meta_lookup(teams)
+
+    def get_meta(team_name):
+        return lookup.get(str(team_name).lower().strip(), {})
+
+    out = sim_data.copy()
+    out["conference"] = out["team"].apply(lambda x: get_meta(x).get("conference"))
+    out["division"] = out["team"].apply(lambda x: get_meta(x).get("division"))
+    return out
+
 
 def _resolve_schedule_path(sport: str, season=None) -> tuple:
     """
@@ -108,80 +141,111 @@ def _resolve_schedule_path(sport: str, season=None) -> tuple:
 
 
 def calculate_achievement_probabilities(sim_results: pd.DataFrame, sport: str) -> pd.DataFrame:
-    if sim_results.empty:
-        return pd.DataFrame(columns=[
-            "team", "make_playoffs", "home_ice",
-            "first_in_division", "first_in_conference", "first_in_league",
-        ])
+    """
+    Regular-season achievement rates across Monte Carlo sims.
 
+    Columns (rates later scaled to 0–100):
+      make_playoffs, home_ice, first_in_division, first_in_conference, first_in_league
+
+    ``home_ice`` is a generic key; UI labels it by sport:
+      NHL — top 2 in division (home-ice style edge)
+      NBA — top 4 in conference (1st-round home court)
+      NFL — top 4 in conference (bye or host Wild Card)
+    """
+    empty = pd.DataFrame(columns=[
+        "team", "make_playoffs", "home_ice",
+        "first_in_division", "first_in_conference", "first_in_league",
+    ])
+    if sim_results.empty:
+        return empty
+
+    sport_u = sport.upper()
     all_results = []
 
     for sim_id in sim_results["sim_id"].unique():
         sim_data = sim_results[sim_results["sim_id"] == sim_id].copy()
 
-        if sport == "NHL":
-            team_lookup = {}
-            for abbr, data in NHL_TEAMS.items():
-                team_lookup[abbr.lower().strip()] = data
-                team_lookup[data["name"].lower().strip()] = data
-
-            def get_meta(team_name):
-                key = str(team_name).lower().strip()
-                return team_lookup.get(key, {})
-
-            sim_data["conference"] = sim_data["team"].apply(
-                lambda x: get_meta(x).get("conference")
-            )
-            sim_data["division"] = sim_data["team"].apply(
-                lambda x: get_meta(x).get("division")
-            )
-
+        if sport_u == "NHL":
+            sim_data = _attach_conference_division(sim_data, NHL_TEAMS)
             matched = sim_data.dropna(subset=["conference", "division"]).copy()
             if matched.empty:
                 continue
-
             matched = matched.sort_values("points", ascending=False)
 
-            qualified = set()
-            home_ice = set()
-            first_div = set()
-            first_conf = set()
-
-            for conf in ["Eastern", "Western"]:
+            qualified, home_adv, first_div, first_conf = set(), set(), set(), set()
+            for conf in ("Eastern", "Western"):
                 conf_teams = matched[matched["conference"] == conf]
                 qualified.update(conf_teams.head(8)["team"].tolist())
-
+                if not conf_teams.empty:
+                    first_conf.add(conf_teams.iloc[0]["team"])
             for _, group in matched.groupby(["conference", "division"]):
-                home_ice.update(group.head(2)["team"].tolist())
+                home_adv.update(group.head(2)["team"].tolist())
+                if not group.empty:
+                    first_div.add(group.iloc[0]["team"])
+            first_league = matched.iloc[0]["team"] if not matched.empty else None
 
+        elif sport_u == "NBA":
+            sim_data = _attach_conference_division(sim_data, NBA_TEAMS)
+            matched = sim_data.dropna(subset=["conference", "division"]).copy()
+            if matched.empty:
+                continue
+            # Rank by wins (points column may be absent)
+            sort_col = "wins" if "wins" in matched.columns else "points"
+            matched = matched.sort_values(sort_col, ascending=False)
+
+            qualified, home_adv, first_div, first_conf = set(), set(), set(), set()
+            for conf in ("Eastern", "Western"):
+                conf_teams = matched[matched["conference"] == conf]
+                # Top 8 per conference make the playoffs (Play-In simplified away)
+                qualified.update(conf_teams.head(8)["team"].tolist())
+                # Seeds 1–4 have home court in the first round
+                home_adv.update(conf_teams.head(4)["team"].tolist())
+                if not conf_teams.empty:
+                    first_conf.add(conf_teams.iloc[0]["team"])
             for _, group in matched.groupby(["conference", "division"]):
                 if not group.empty:
                     first_div.add(group.iloc[0]["team"])
-
-            for conf in ["Eastern", "Western"]:
-                conf_teams = matched[matched["conference"] == conf]
-                if not conf_teams.empty:
-                    first_conf.add(conf_teams.iloc[0]["team"])
-
             first_league = matched.iloc[0]["team"] if not matched.empty else None
 
-            sim_data["make_playoffs"] = sim_data["team"].isin(qualified)
-            sim_data["home_ice"] = sim_data["team"].isin(home_ice)
-            sim_data["first_in_division"] = sim_data["team"].isin(first_div)
-            sim_data["first_in_conference"] = sim_data["team"].isin(first_conf)
-            sim_data["first_in_league"] = sim_data["team"] == first_league
+        elif sport_u == "NFL":
+            sim_data = _attach_conference_division(sim_data, NFL_TEAMS)
+            matched = sim_data.dropna(subset=["conference", "division"]).copy()
+            if matched.empty:
+                continue
+            sort_col = "wins" if "wins" in matched.columns else "points"
+            matched = matched.sort_values(sort_col, ascending=False)
+
+            qualified, home_adv, first_div, first_conf = set(), set(), set(), set()
+            for conf in ("AFC", "NFC"):
+                conf_teams = matched[matched["conference"] == conf]
+                # Division winners
+                winners = []
+                for _, group in conf_teams.groupby("division"):
+                    if not group.empty:
+                        w = group.iloc[0]["team"]
+                        winners.append(w)
+                        first_div.add(w)
+                # Wild cards: best remaining records in conference
+                remaining = conf_teams[~conf_teams["team"].isin(winners)]
+                wild = remaining.head(3)["team"].tolist()
+                qualified.update(winners)
+                qualified.update(wild)
+                # Seeds 1–4 (division winners by record) host or have a bye
+                winners_sorted = conf_teams[conf_teams["team"].isin(winners)]
+                home_adv.update(winners_sorted.head(4)["team"].tolist())
+                if not conf_teams.empty:
+                    first_conf.add(conf_teams.iloc[0]["team"])
+            first_league = matched.iloc[0]["team"] if not matched.empty else None
 
         else:
-            # NFL / NBA – top 7 by wins (placeholder until richer logic is needed)
-            sim_data = sim_data.sort_values("wins", ascending=False)
-            n = min(7, len(sim_data))
-            sim_data["make_playoffs"] = False
-            sim_data.iloc[:n, sim_data.columns.get_loc("make_playoffs")] = True
-            for col in [
-                "home_ice", "first_in_division",
-                "first_in_conference", "first_in_league",
-            ]:
-                sim_data[col] = False
+            # Unknown sport — leave achievements empty for this sim
+            continue
+
+        sim_data["make_playoffs"] = sim_data["team"].isin(qualified)
+        sim_data["home_ice"] = sim_data["team"].isin(home_adv)
+        sim_data["first_in_division"] = sim_data["team"].isin(first_div)
+        sim_data["first_in_conference"] = sim_data["team"].isin(first_conf)
+        sim_data["first_in_league"] = sim_data["team"] == first_league
 
         all_results.append(sim_data[[
             "sim_id", "team", "make_playoffs", "home_ice",
@@ -189,13 +253,9 @@ def calculate_achievement_probabilities(sim_results: pd.DataFrame, sport: str) -
         ]])
 
     if not all_results:
-        return pd.DataFrame(columns=[
-            "team", "make_playoffs", "home_ice",
-            "first_in_division", "first_in_conference", "first_in_league",
-        ])
+        return empty
 
     df = pd.concat(all_results, ignore_index=True)
-
     prob_df = df.groupby("team").agg(
         make_playoffs=("make_playoffs", "mean"),
         home_ice=("home_ice", "mean"),

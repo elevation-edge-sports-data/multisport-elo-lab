@@ -2,6 +2,23 @@
 
 All notable changes to MultiSport Elo Lab are documented in this file.
 
+## Version 14.0 — Lock completed games in target-season Monte Carlo
+
+### Added
+- Target-season games with both scores filled are **locked**: every simulation uses the real winner (and those scores for margin of victory). Remaining blank games are still Monte Carlo sampled.
+- Season lock status derived from the slate: `upcoming` / `in_progress` / `final`.
+- Sidebar lock line:
+  - upcoming: `NFL 2026 · upcoming · 0/272 games locked`
+  - in progress: `NFL 2026 · in progress · 16/272 games locked`
+  - final: `NFL 2026 · 272/272 games locked` (no “final” label)
+
+### Notes
+- A game is locked when both scores are present. Ties count toward the lock fraction and are not resampled; they do not change Elo (the engine only accepts a 0/1 result).
+- Unparsable or missing scores are still sampled.
+- No live score feed in this release; lock state follows whatever is in the season CSV.
+
+---
+
 ## Version 13.2 — Add 2027 NBA schedule
 
 ### Added

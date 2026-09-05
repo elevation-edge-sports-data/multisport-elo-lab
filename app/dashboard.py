@@ -1,7 +1,7 @@
 """
 MultiSport Elo Lab – Streamlit dashboard
 
-Version 13.2 — Add 2027 NBA schedule
+Version 14.0 — Lock completed games in target-season Monte Carlo
 
   - NHL / NFL / NBA with full playoff-bracket simulation
   - NBA 2026–27 regular-season schedule (upcoming season; blank scores)
@@ -54,6 +54,10 @@ from services.initial_ratings_service import (
 from services.export_service import build_full_export, make_export_filename
 from services.evaluation_service import score_config_on_season
 from elo_lab.workflows.optimize_parameters import optimize_parameters_for_config
+from elo_lab.workflows.simulate_season import (
+    describe_target_season_lock,
+    format_lock_line,
+)
 
 # Clean metadata API (single source of truth for teams + venues)
 from metadata import NFL_TEAMS, NHL_TEAMS, NBA_TEAMS, get_sport_teams, load_teams
@@ -88,7 +92,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("MultiSport Elo Lab")
-st.caption("NHL / NBA / NFL | Version 13.2")
+st.caption("NHL / NBA / NFL | Version 14.0")
 
 
 # ---------------------------------------------------------------------------
@@ -271,6 +275,12 @@ if simulate_from and season:
             )
     except Exception:
         pass
+
+try:
+    _lock = describe_target_season_lock(sport, season)
+    st.sidebar.caption(format_lock_line(sport, season, _lock))
+except Exception:
+    pass
 
 st.sidebar.divider()
 st.sidebar.subheader("Parameters")

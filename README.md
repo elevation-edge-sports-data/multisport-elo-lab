@@ -6,11 +6,16 @@ Supports historical backtesting, Monte Carlo regular-season + full playoff-brack
 
 **Live dashboard**: [https://multisport-elo-lab.streamlit.app/](https://multisport-elo-lab.streamlit.app/)
 
-**Current version: 13.2**
+**Current version: 14.0**
 
 ---
 
-## Highlights (Version 13.2)
+## Highlights (Version 14.0)
+
+- **Lock completed games** in the target-season Monte Carlo: scored games stay fixed across sims; blank games are still sampled
+- Sidebar lock line, e.g. `NFL 2026 · upcoming · 0/272 games locked` or `NFL 2026 · in progress · 16/272 games locked`
+
+### From Version 13.2
 
 - **Add 2027 NBA schedule**: upcoming regular-season slate (schedule-only; scores blank until games are played)
 - Raw vs processed layout under `data/nba/` with extract/process helpers for future releases

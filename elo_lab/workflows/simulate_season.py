@@ -2,6 +2,7 @@
 simulate_season.py – Version 10
 
 v10: Per-team games_played; shared Monte Carlo for standings + Elo evolution
+v14.0: Lock games that already have scores; sample only the rest
 
 Multiseason + NBA support:
   - Guards max_week filter when schedule has no "week" column
@@ -341,6 +342,91 @@ def filter_regular_season(schedule: pd.DataFrame, sport: str = "NFL") -> pd.Data
     return df
 
 
+def parse_game_scores(row):
+    """
+    Return (home_score, away_score) when both values are present and numeric.
+
+    Ties are included. Missing or unparsable scores return None.
+    """
+    if row is None:
+        return None
+    try:
+        hs = row["home_score"] if "home_score" in row.index else None
+        as_ = row["away_score"] if "away_score" in row.index else None
+    except Exception:
+        hs = row.get("home_score") if hasattr(row, "get") else None
+        as_ = row.get("away_score") if hasattr(row, "get") else None
+    if hs is None or as_ is None or pd.isna(hs) or pd.isna(as_):
+        return None
+    try:
+        return float(hs), float(as_)
+    except (TypeError, ValueError):
+        return None
+
+
+def parse_locked_scores(row):
+    """
+    Return (home_score, away_score) when the game has a decisive result.
+
+    Used for Elo updates. Ties have scores but no winner; they are still
+    counted as locked by describe_schedule_lock via parse_game_scores.
+    """
+    scores = parse_game_scores(row)
+    if scores is None:
+        return None
+    hs_f, as_f = scores
+    if hs_f == as_f:
+        return None
+    return hs_f, as_f
+
+
+def describe_schedule_lock(schedule: pd.DataFrame) -> dict:
+    """
+    Derive lock counts and status from a canonical schedule.
+
+    Status:
+      upcoming     — no games locked
+      in_progress  — some but not all games locked
+      final        — every game locked
+    """
+    if schedule is None or len(schedule) == 0:
+        return {"n_games": 0, "n_locked": 0, "status": "upcoming"}
+    n_games = int(len(schedule))
+    n_locked = 0
+    for _, row in schedule.iterrows():
+        if parse_game_scores(row) is not None:
+            n_locked += 1
+    if n_locked <= 0:
+        status = "upcoming"
+    elif n_locked >= n_games:
+        status = "final"
+    else:
+        status = "in_progress"
+    return {"n_games": n_games, "n_locked": n_locked, "status": status}
+
+
+def format_lock_line(sport: str, season, lock_info: dict) -> str:
+    """Sidebar caption. 'final' is omitted from the line; upcoming / in progress are not."""
+    n_locked = int(lock_info.get("n_locked", 0))
+    n_games = int(lock_info.get("n_games", 0))
+    status = lock_info.get("status", "upcoming")
+    label = f"{sport} {season}"
+    if status == "upcoming":
+        return f"{label} · upcoming · {n_locked}/{n_games} games locked"
+    if status == "in_progress":
+        return f"{label} · in progress · {n_locked}/{n_games} games locked"
+    return f"{label} · {n_locked}/{n_games} games locked"
+
+
+def describe_target_season_lock(sport: str, season: str) -> dict:
+    """Load the target regular-season schedule and return lock status."""
+    df = _load_season_schedule(sport, season)
+    if df is None or df.empty:
+        return {"n_games": 0, "n_locked": 0, "status": "upcoming"}
+    df = filter_regular_season(df, sport=sport)
+    return describe_schedule_lock(df)
+
+
 def is_playoff_row(row, sport: str = "NFL") -> bool:
     sport_u = sport.upper()
     if sport_u == "NFL":
@@ -371,7 +457,12 @@ def simulate_season(
     regular_season_only=True,
 ):
 
-    """Core season simulation with sport support (NHL points + OT, NFL/NBA wins)."""
+    """
+    Core season simulation with sport support (NHL points + OT, NFL/NBA wins).
+
+    Games with both scores filled are locked (same outcome in every sim).
+    Games with missing, unparsable, or tied scores are Monte Carlo sampled.
+    """
     cfg = SPORT_CONFIGS.get(sport, SPORT_CONFIGS["NFL"])
 
     if schedule_df is not None:
@@ -478,7 +569,40 @@ def simulate_season(
         )
 
         p_home = pregame.get("p_home", 0.5)
-        actual_home_win = int(rng.random() < p_home)
+        recorded = parse_game_scores(game)
+        locked_decisive = parse_locked_scores(game)
+        if recorded is not None:
+            hs_f, as_f = recorded
+            home_score, away_score = hs_f, as_f
+            goes_to_ot = False
+            if hs_f == as_f:
+                # Locked tie: played, no winner, Elo unchanged (engine actual is 0/1).
+                team_gp[home] = team_gp.get(home, 0) + 1
+                team_gp[away] = team_gp.get(away, 0) + 1
+                elo_history.append({
+                    "team": home,
+                    "elo": team_elo[home],
+                    "wins": wins[home],
+                    "points": points[home],
+                    "week": week,
+                    "game_number": game_number,
+                    "games_played": team_gp[home],
+                })
+                elo_history.append({
+                    "team": away,
+                    "elo": team_elo[away],
+                    "wins": wins[away],
+                    "points": points[away],
+                    "week": week,
+                    "game_number": game_number,
+                    "games_played": team_gp[away],
+                })
+                continue
+            actual_home_win = 1 if hs_f > as_f else 0
+        else:
+            actual_home_win = int(rng.random() < p_home)
+            home_score, away_score = float(actual_home_win), float(1 - actual_home_win)
+            goes_to_ot = rng.random() < cfg.get("ot_rate", 0.0)
 
         result = run_game(
             home_elo=team_elo[home],
@@ -488,9 +612,10 @@ def simulate_season(
                 "week": week,
                 "home_team": home,
                 "away_team": away,
-                "home_score": actual_home_win,
-                "away_score": 1 - actual_home_win,
+                "home_score": home_score,
+                "away_score": away_score,
                 "actual": actual_home_win,
+                "locked": locked_decisive is not None,
             },
             config=config,
         )
@@ -502,8 +627,8 @@ def simulate_season(
         team_gp[away] = team_gp.get(away, 0) + 1
 
         if cfg.get("outcome_type") == "points":
-            # NHL: 2 points for win, 1 for OT loss
-            goes_to_ot = rng.random() < cfg.get("ot_rate", 0.0)
+            # NHL: 2 points for win, 1 for OT loss.
+            # Locked games use regulation scoring (OT not recorded on the slate).
             if actual_home_win:
                 wins[home] += 1
                 points[home] += cfg.get("points_per_win", 2)
